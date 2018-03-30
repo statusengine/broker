@@ -3,6 +3,9 @@
 #include <sstream>
 
 #include "chacks.h"
+#include "vendor/json.hpp"
+
+using json = nlohmann::json;
 
 namespace statusengine {
 
@@ -18,7 +21,13 @@ namespace statusengine {
 		LogInfo("This is the c++ version of statusengine event broker");
 
 		RegisterCallback(NEBCALLBACK_HOST_STATUS_DATA, fnptr<int(int, void*)>([this](int event_type, void *data) -> int {
-			this->LogInfo("callback called :)");
+			LogInfo("callback called :)");
+			auto hostStatus = reinterpret_cast<nebstruct_host_status_data*>(data);
+			auto nagHostStatus = reinterpret_cast<host *>(hostStatus->object_ptr);
+			json jso = {
+				{"name", nagHostStatus->name}
+			};
+			LogInfo(jso.dump());
 			return 0;
 		}));
 	}
