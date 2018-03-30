@@ -1,12 +1,13 @@
 #include "nebmodule.h"
 
 #include "chacks.h"
-#include "statusengine.h"
+#include "Statusengine.h"
 
 // This is required by naemon
 extern "C" {
 	NEB_API_VERSION(CURRENT_NEB_API_VERSION);
 }
+
 
 statusengine::Statusengine *se;
 

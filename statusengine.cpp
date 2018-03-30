@@ -1,8 +1,10 @@
-#include "statusengine.h"
+#include "Statusengine.h"
 
 #include <sstream>
+#include <memory>
 
 #include "chacks.h"
+#include "NagiosHost.h"
 #include "vendor/json.hpp"
 
 using json = nlohmann::json;
@@ -24,10 +26,8 @@ namespace statusengine {
 			LogInfo("callback called :)");
 			auto hostStatus = reinterpret_cast<nebstruct_host_status_data*>(data);
 			auto nagHostStatus = reinterpret_cast<host *>(hostStatus->object_ptr);
-			json jso = {
-				{"name", nagHostStatus->name}
-			};
-			LogInfo(jso.dump());
+			auto nagiosHost = std::unique_ptr<NagiosHost>(new NagiosHost(nagHostStatus));
+			LogInfo(nagiosHost->ToString());
 			return 0;
 		}));
 	}
@@ -45,9 +45,8 @@ namespace statusengine {
 	void Statusengine::LogInfo(std::string message) {
 		nm_log(NSLOG_INFO_MESSAGE, "Statusengine - %s", CSTR(message.c_str()));
 	}
-//int callback(int, void *)
+
 	void Statusengine::RegisterCallback(NEBCallbackType type, int callback(int, void *), int priority) {
-//		auto result = neb_register_callback(type, nebhandle, priority, callback->target<int(int, void*)>());
 		auto result = neb_register_callback(type, nebhandle, priority, callback);
 
 		if (result != 0) {

@@ -7,5 +7,3 @@ extern "C" {
 }
 
 #endif // !NEBMODULE_H
-
-
