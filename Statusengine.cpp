@@ -25,6 +25,9 @@ namespace statusengine {
 		ls << "the missing event broker" << eom;
 		ls << "This is the c++ version of statusengine event broker" << eom;
 
+		gearman = new GearmanClient(ls);
+		gearman->SendMessage("testqueue", "testmessage");
+
 		RegisterCallback(NEBCALLBACK_HOST_STATUS_DATA, fnptr<int(int, void*)>([this](int event_type, void *data) -> int {
 			ls << "callback called :)" << eom;
 			auto hostStatus = reinterpret_cast<nebstruct_host_status_data*>(data);
@@ -43,6 +46,10 @@ namespace statusengine {
 
 	std::ostream& Statusengine::Log() {
 		return ls;
+	}
+
+	GearmanClient& Statusengine::Gearman() {
+		return *gearman;
 	}
 
 	void Statusengine::SetModuleInfo(int modinfo, std::string text) {

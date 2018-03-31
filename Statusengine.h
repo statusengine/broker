@@ -6,6 +6,8 @@
 
 #include "nebmodule.h"
 
+#include "GearmanClient.h"
+
 
 namespace statusengine {
 	class Statusengine {
@@ -16,11 +18,13 @@ namespace statusengine {
 		~Statusengine();
 
 		std::ostream& Log();
+		GearmanClient& Gearman();
 	private:
 		void SetModuleInfo(int modinfo, std::string text);
 		void RegisterCallback(NEBCallbackType type, int callback(int, void *), int priority = 0);
 
 		std::ostringstream ls;
+		GearmanClient *gearman;
 	};
 }
 

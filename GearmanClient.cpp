@@ -5,14 +5,14 @@
 
 namespace statusengine {
 
-	GearmanClient::GearmanClient(std::ostream *os) : ls(*os) {
+	GearmanClient::GearmanClient(std::ostream &os) : ls(os) {
 		client = gearman_client_create(nullptr);
-		gearman_return_t ret = gearman_client_add_server(client, "localhost", 0);
-		if (gearman_failed(ret)) {
-			ls << "Gearman Connect Failed" << eoem;
+		gearman_return_t ret = gearman_client_add_server(client, "127.0.0.1", 4730);
+		if (gearman_success(ret)) {
+			ls << "Gearman connect success" << eom;
 		}
 		else {
-			ls << "Gearman connect success" << eom;
+			ls << "Gearman connect failed: " << gearman_client_error(client) << eoem;
 		}
 	}
 
@@ -22,8 +22,8 @@ namespace statusengine {
 
 	void GearmanClient::SendMessage(const std::string queue, const std::string message) const {
 		auto ret = gearman_client_do_background(client, queue.c_str(), nullptr, message.c_str(), message.length(), nullptr);
-		if (ret != GEARMAN_SUCCESS) {
-			ls << "Could not write message to gearman queue" << eoem;
+		if (!gearman_success(ret)) {
+			ls << "Could not write message to gearman queue: " << gearman_client_error(client) << eoem;
 		}
 	}
 }

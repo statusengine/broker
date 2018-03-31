@@ -1,15 +1,16 @@
-#ifndef GEARMAN_CLIENT
-#define GEARMAN_CLIENT
+#ifndef GEARMAN_CLIENT_H
+#define GEARMAN_CLIENT_H
+
+#include <sstream>
 
 #include "libgearman-1.0/gearman.h"
 
-#include "Statusengine.h"
 
 namespace statusengine {
 
 	class GearmanClient {
 	public:
-		GearmanClient(std::ostream *os);
+		GearmanClient(std::ostream &os);
 		~GearmanClient();
 
 		void SendMessage(const std::string queue, const std::string message) const;
@@ -19,4 +20,4 @@ namespace statusengine {
 	};
 }
 
-#endif // !GEARMAN_CLIENT
+#endif // !GEARMAN_CLIENT_H
