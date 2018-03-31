@@ -1,11 +1,9 @@
-#include "NagiosHost.h"
-
-#include <string>
+#include "NagiosService.h"
 
 namespace statusengine {
-
-	NagiosHost::NagiosHost(const host *data) {
-		SetData<>("name", data->name);
+	NagiosService::NagiosService(const service *data) {
+		SetData<>("host_name", data->host_name);
+		SetData<>("description", data->description);
 		SetData<>("plugin_output", data->plugin_output);
 		SetData<>("long_plugin_output", data->long_plugin_output);
 		SetData<>("event_handler", data->event_handler);
@@ -14,7 +12,7 @@ namespace statusengine {
 		SetData<>("check_period", data->check_period);
 		SetData<>("current_state", data->current_state);
 		SetData<>("has_been_checked", data->has_been_checked);
-		SetData<>("should_be_scheduled", 1); // Nagios compatibility
+		SetData<>("should_be_scheduled", 1); // Nagios Compatibility
 		SetData<>("current_attempt", data->current_attempt);
 		SetData<>("max_attempts", data->max_attempts);
 		SetData<>("last_check", data->last_check);
@@ -23,9 +21,10 @@ namespace statusengine {
 		SetData<>("last_state_change", data->last_state_change);
 		SetData<>("last_hard_state_change", data->last_hard_state_change);
 		SetData<>("last_hard_state", data->last_hard_state);
-		SetData<>("last_time_up", data->last_time_up);
-		SetData<>("last_time_down", data->last_time_down);
-		SetData<>("last_time_unreachable", data->last_time_unreachable);
+		SetData<>("last_time_ok", data->last_time_ok);
+		SetData<>("last_time_warning", data->last_time_warning);
+		SetData<>("last_time_critical", data->last_time_critical);
+		SetData<>("last_time_unknown", data->last_time_unknown);
 		SetData<>("state_type", data->state_type);
 		SetData<>("last_notification", data->last_notification);
 		SetData<>("next_notification", data->next_notification);
@@ -49,5 +48,4 @@ namespace statusengine {
 		SetData<>("check_interval", data->check_interval);
 		SetData<>("retry_interval", data->retry_interval);
 	}
-
 }
