@@ -6,25 +6,14 @@
 
 #include "nebmodule.h"
 
+#include "NagiosObject.h"
+
 using json = nlohmann::json;
 
 namespace statusengine {
-	class NagiosHost {
-	private:
-		json jsonData;
-
+	class NagiosHost : public NagiosObject {
 	public:
 		NagiosHost(const host *nagiosHostData);
-		NagiosHost(const json &j);
-
-		void ToJSON(json &j) const;
-
-	private:
-		template<typename T>
-		void SetData(std::string name, T value);
-
-		template<typename T>
-		void SetData(std::string name, T *value);
 	};
 
 }

@@ -49,31 +49,6 @@ namespace statusengine {
 		SetData<>("modified_attributes", data->modified_attributes);
 		SetData<>("check_interval", data->check_interval);
 		SetData<>("retry_interval", data->retry_interval);
-
 	}
 
-	NagiosHost::NagiosHost(const json &j) {
-		jsonData = json(j);
-	}
-
-	template<typename T>
-	void NagiosHost::SetData(std::string name, T value) {
-		jsonData[name] = value;
-	}
-
-	template<typename T>
-	void NagiosHost::SetData(std::string name, T *value) {
-		if (value != nullptr) {
-			if (std::is_same<T, char*>::value) {
-				jsonData[name] = std::string(reinterpret_cast<char*>(value));
-			}
-			else {
-				jsonData[name] = value;
-			}
-		}
-	}
-
-	void NagiosHost::ToJSON(json &j) const {
-		j = json(jsonData);
-	}
 }

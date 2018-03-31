@@ -41,9 +41,7 @@ namespace statusengine {
 			auto hostStatus = reinterpret_cast<nebstruct_host_status_data*>(data);
 			auto nagHostStatus = reinterpret_cast<host *>(hostStatus->object_ptr);
 			auto nagiosHost = std::unique_ptr<NagiosHost>(new NagiosHost(nagHostStatus));
-			json j;
-			nagiosHost->ToJSON(j);
-			LogInfo(j.dump());
+			LogInfo(nagiosHost->GetData().dump());
 			return 0;
 		}));
 	}
