@@ -4,9 +4,9 @@
 #include <memory>
 
 #include "vendor/json.hpp"
-#include "libgearman-1.0/gearman.h"
 
 #include "chacks.h"
+#include "LogStream.h"
 #include "NagiosHost.h"
 
 
@@ -22,42 +22,31 @@ namespace statusengine {
 		SetModuleInfo(NEBMODULE_MODINFO_LICENSE, "GPL v2");
 		SetModuleInfo(NEBMODULE_MODINFO_DESC, "A powerful and flexible event broker");
 
-		LogInfo("the missing event broker");
-		LogInfo("This is the c++ version of statusengine event broker");
-
-		gearman_client_st *client = gearman_client_create(NULL);
-
-		gearman_return_t ret = gearman_client_add_server(client, "localhost", 0);
-		if (gearman_failed(ret)) {
-			LogInfo("Gearman Connect Failed");
-		}
-		else {
-			LogInfo("Gearman connect success");
-		}
-		gearman_client_free(client);
+		ls << "the missing event broker" << eom;
+		ls << "This is the c++ version of statusengine event broker" << eom;
 
 		RegisterCallback(NEBCALLBACK_HOST_STATUS_DATA, fnptr<int(int, void*)>([this](int event_type, void *data) -> int {
-			LogInfo("callback called :)");
+			ls << "callback called :)" << eom;
 			auto hostStatus = reinterpret_cast<nebstruct_host_status_data*>(data);
 			auto nagHostStatus = reinterpret_cast<host *>(hostStatus->object_ptr);
 			auto nagiosHost = std::unique_ptr<NagiosHost>(new NagiosHost(nagHostStatus));
-			LogInfo(nagiosHost->GetData().dump());
+			ls << nagiosHost->GetData().dump() << eom;
 			return 0;
 		}));
 	}
 
 	Statusengine::~Statusengine() {
-		LogInfo("unload");
+		ls << "unload" << eom;
 		neb_deregister_module_callbacks(nebhandle);
-		LogInfo("unload finished");
+		ls << "unload finished" << eom;
+	}
+
+	std::ostream& Statusengine::Log() {
+		return ls;
 	}
 
 	void Statusengine::SetModuleInfo(int modinfo, std::string text) {
-		neb_set_module_info(nebhandle, modinfo, CSTR(text.c_str()));
-	}
-
-	void Statusengine::LogInfo(std::string message) {
-		nm_log(NSLOG_INFO_MESSAGE, "Statusengine - %s", CSTR(message.c_str()));
+		neb_set_module_info(nebhandle, modinfo, const_cast<char*>(text.c_str()));
 	}
 
 	void Statusengine::RegisterCallback(NEBCallbackType type, int callback(int, void *), int priority) {
@@ -67,10 +56,10 @@ namespace statusengine {
 			std::stringstream msg;
 			msg << "Could not register callback, error code: ";
 			msg << result;
-			LogInfo(msg.str());
+			ls << msg.str() <<eom;
 		}
 		else {
-			LogInfo("Register Callback successful");
+			ls << "Register Callback successful" << eom;
 		}
 	}
 }

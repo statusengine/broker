@@ -1,12 +1,6 @@
 #ifndef CHACKS_H
 #define CHACKS_H
 
-// This file contains workarounds to create a better compatibility to c
-
-#define CSTR(strg) const_cast<char *>(strg)
-
-
-
 #include<type_traits>
 #include<utility>
 
