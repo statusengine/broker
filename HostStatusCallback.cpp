@@ -4,10 +4,10 @@
 #include "LogStream.h"
 
 namespace statusengine {
-	HostStatusCallback::HostStatusCallback(Statusengine *se) : NebmoduleCallback(se) {
+	HostStatusCallback::HostStatusCallback(Statusengine *se) : se(se) {
 	}
 
-	void HostStatusCallback::Callback(int event_type, void *data) {
+	void HostStatusCallback::Callback(int event_type, nebstruct_host_status_data *data) {
 		se->Log() << "callback called :)" << eom;
 	}
 }

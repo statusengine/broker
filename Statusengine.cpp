@@ -5,7 +5,6 @@
 
 #include "vendor/json.hpp"
 
-#include "chacks.h"
 #include "LogStream.h"
 #include "NagiosHost.h"
 
@@ -41,7 +40,7 @@ namespace statusengine {
 		cb = new HostStatusCallback(this);
 		RegisterCallback(cb);
 	}
-
+	
 	Statusengine::~Statusengine() {
 		ls << "unload" << eom;
 		neb_deregister_module_callbacks(nebhandle);
@@ -58,13 +57,6 @@ namespace statusengine {
 
 	void Statusengine::SetModuleInfo(int modinfo, std::string text) {
 		neb_set_module_info(nebhandle, modinfo, const_cast<char*>(text.c_str()));
-	}
-
-	void Statusengine::RegisterCallback(NebmoduleCallback *cb) {
-		RegisterCallback(NEBCALLBACK_HOST_STATUS_DATA, fnptr<int(int, void*)>([cb](int event_type, void *data) -> int {
-			cb->Callback(event_type, data);
-			return 0;
-		}));
 	}
 
 	void Statusengine::RegisterCallback(NEBCallbackType type, int callback(int, void *), int priority) {

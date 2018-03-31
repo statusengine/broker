@@ -6,11 +6,16 @@
 #include "NebmoduleCallback.h"
 
 namespace statusengine {
-	class HostStatusCallback : public NebmoduleCallback {
+	class Statusengine;
+
+	class HostStatusCallback : public NebmoduleCallback<nebstruct_host_status_data> {
 	public:
 		HostStatusCallback(Statusengine *se);
 
-		virtual void Callback(int event_type, void *data);
+		virtual void Callback(int event_type, nebstruct_host_status_data *data);
+
+	private:
+		Statusengine *se;
 	};
 }
 

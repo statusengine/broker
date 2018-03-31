@@ -3,18 +3,14 @@
 
 namespace statusengine {
 
-	class Statusengine;
-
+	template<typename T>
 	class NebmoduleCallback {
 	public:
-		NebmoduleCallback(Statusengine *se);
-		virtual void Callback(int event_type, void *data) = 0;
-
-	protected:
-		Statusengine *se;
+		void RawCallback(int event_type, void *data) {
+			Callback(event_type, reinterpret_cast<T*>(data));
+		};
+		virtual void Callback(int event_type, T *data) = 0;
 	};
-
-
 
 }
 
