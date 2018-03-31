@@ -14,7 +14,7 @@ namespace statusengine {
 		Statusengine(nebmodule *handle);
 		~Statusengine();
 
-		void LogInfo(std::string message);
+		void LogInfo(std::string message) const;
 	private:
 		void SetModuleInfo(int modinfo, std::string text);
 		void RegisterCallback(NEBCallbackType type, int callback(int, void *), int priority = 0);
