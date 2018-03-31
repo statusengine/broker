@@ -28,6 +28,7 @@ namespace statusengine {
 		gearman = new GearmanClient(ls);
 		gearman->SendMessage("testqueue", "testmessage");
 
+		/*
 		RegisterCallback(NEBCALLBACK_HOST_STATUS_DATA, fnptr<int(int, void*)>([this](int event_type, void *data) -> int {
 			ls << "callback called :)" << eom;
 			auto hostStatus = reinterpret_cast<nebstruct_host_status_data*>(data);
@@ -35,7 +36,10 @@ namespace statusengine {
 			auto nagiosHost = std::unique_ptr<NagiosHost>(new NagiosHost(nagHostStatus));
 			ls << nagiosHost->GetData().dump() << eom;
 			return 0;
-		}));
+		}));*/
+
+		cb = new HostStatusCallback(this);
+		RegisterCallback(cb);
 	}
 
 	Statusengine::~Statusengine() {
@@ -56,14 +60,18 @@ namespace statusengine {
 		neb_set_module_info(nebhandle, modinfo, const_cast<char*>(text.c_str()));
 	}
 
+	void Statusengine::RegisterCallback(NebmoduleCallback *cb) {
+		RegisterCallback(NEBCALLBACK_HOST_STATUS_DATA, fnptr<int(int, void*)>([cb](int event_type, void *data) -> int {
+			cb->Callback(event_type, data);
+			return 0;
+		}));
+	}
+
 	void Statusengine::RegisterCallback(NEBCallbackType type, int callback(int, void *), int priority) {
 		auto result = neb_register_callback(type, nebhandle, priority, callback);
 
 		if (result != 0) {
-			std::stringstream msg;
-			msg << "Could not register callback, error code: ";
-			msg << result;
-			ls << msg.str() <<eom;
+			ls << "Could not register callback: " << result << eoem;
 		}
 		else {
 			ls << "Register Callback successful" << eom;
