@@ -11,19 +11,22 @@ using json = nlohmann::json;
 namespace statusengine {
 	class NagiosHost {
 	private:
-		host *data;
 		json jsonData;
 
 	public:
-		NagiosHost(host *nagiosHostData);
-		std::string ToString();
+		NagiosHost(const host *nagiosHostData);
+		NagiosHost(const json &j);
+
+		void ToJSON(json &j) const;
 
 	private:
 		template<typename T>
 		void SetData(std::string name, T value);
+
 		template<typename T>
 		void SetData(std::string name, T *value);
 	};
+
 }
 
 #endif // !NAGIOS_HOST_H

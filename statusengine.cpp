@@ -3,9 +3,12 @@
 #include <sstream>
 #include <memory>
 
+#include "vendor/json.hpp"
+#include "libgearman-1.0/gearman.h"
+
 #include "chacks.h"
 #include "NagiosHost.h"
-#include "vendor/json.hpp"
+
 
 using json = nlohmann::json;
 
@@ -22,12 +25,25 @@ namespace statusengine {
 		LogInfo("the missing event broker");
 		LogInfo("This is the c++ version of statusengine event broker");
 
+		gearman_client_st *client = gearman_client_create(NULL);
+
+		gearman_return_t ret = gearman_client_add_server(client, "localhost", 0);
+		if (gearman_failed(ret)) {
+			LogInfo("Gearman Connect Failed");
+		}
+		else {
+			LogInfo("Gearman connect success");
+		}
+		gearman_client_free(client);
+
 		RegisterCallback(NEBCALLBACK_HOST_STATUS_DATA, fnptr<int(int, void*)>([this](int event_type, void *data) -> int {
 			LogInfo("callback called :)");
 			auto hostStatus = reinterpret_cast<nebstruct_host_status_data*>(data);
 			auto nagHostStatus = reinterpret_cast<host *>(hostStatus->object_ptr);
 			auto nagiosHost = std::unique_ptr<NagiosHost>(new NagiosHost(nagHostStatus));
-			LogInfo(nagiosHost->ToString());
+			json j;
+			nagiosHost->ToJSON(j);
+			LogInfo(j.dump());
 			return 0;
 		}));
 	}
