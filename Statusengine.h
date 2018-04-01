@@ -8,6 +8,7 @@
 
 #include "GearmanClient.h"
 #include "NagiosCallbacks/HostStatusCallback.h"
+#include "NagiosCallbacks/HostCheckCallback.h"
 #include "NagiosCallbacks/ServiceStatusCallback.h"
 #include "NagiosCallbacks/ServiceCheckCallback.h"
 
@@ -36,6 +37,7 @@ namespace statusengine {
 		GearmanClient *gearman;
 
 		HostStatusCallback *cbHostStatus;
+		HostCheckCallback *cbHostCheck;
 		ServiceStatusCallback *cbServiceStatus;
 		ServiceCheckCallback *cbServiceCheck;
 	};

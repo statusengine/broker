@@ -19,19 +19,25 @@ namespace statusengine {
 		NagiosObject();
 
 		template<typename T>
-		void SetData(std::string name, T value) {
-			Data[name] = value;
+		void SetData(std::string name, T value, json *other = nullptr) {
+			if (other == nullptr) {
+				other = &Data;
+			}
+			(*other)[name] = value;
 		}
 
 		template<typename T>
-		void SetData(std::string name, T *value) {
+		void SetData(std::string name, T *value, json *other = nullptr) {
+			if (other == nullptr) {
+				other = &Data;
+			}
 			if (value != nullptr) {
 				if (std::is_same<T, char*>::value) {
 					// fancy strings instead of c bullshit
-					Data[name] = std::string(reinterpret_cast<char*>(value));
+					(*other)[name] = std::string(reinterpret_cast<char*>(value));
 				}
 				else {
-					Data[name] = value;
+					(*other)[name] = value;
 				}
 			}
 		}

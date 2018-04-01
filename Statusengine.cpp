@@ -26,10 +26,12 @@ namespace statusengine {
 		gearman = new GearmanClient(ls);
 
 		cbHostStatus = new HostStatusCallback(this);
+		cbHostCheck = new HostCheckCallback(this, true, true);
 		cbServiceStatus = new ServiceStatusCallback(this);
 		cbServiceCheck = new ServiceCheckCallback(this, true, true, true);
 
 		RegisterCallback(cbHostStatus);
+		RegisterCallback(cbHostCheck);
 		RegisterCallback(cbServiceStatus);
 		RegisterCallback(cbServiceCheck);
 	}

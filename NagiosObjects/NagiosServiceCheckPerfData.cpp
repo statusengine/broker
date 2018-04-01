@@ -13,10 +13,10 @@ namespace statusengine {
 
 		json servicecheck;
 
-		servicecheck["host_name"] = serviceCheckData->host_name;
-		servicecheck["service_description"] = serviceCheckData->service_description;
-		servicecheck["perf_data"] = serviceCheckData->perf_data;
-		servicecheck["start_time"] = serviceCheckData->start_time.tv_sec;
+		SetData<>("host_name", serviceCheckData->host_name, &servicecheck);
+		SetData<>("service_description", serviceCheckData->service_description, &servicecheck);
+		SetData<>("perf_data", serviceCheckData->perf_data, &servicecheck);
+		SetData<>("start_time", serviceCheckData->start_time.tv_sec, &servicecheck);
 		SetData<>("servicecheck", servicecheck);
 	}
 }
