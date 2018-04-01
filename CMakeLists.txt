@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(MY_CXX_COMPILE_FEATURES cxx_generic_lambdas cxx_range_for cxx_strong_enums)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 include(FindPkgConfig)
 
@@ -16,8 +17,8 @@ pkg_check_modules(GEARMAND REQUIRED gearmand)
 add_library(statusengine SHARED
 	nebmodule.cpp Statusengine.cpp
 	GearmanClient.cpp LogStream.cpp
-	NagiosObject.cpp NagiosHost.cpp NagiosHostStatusData.cpp
-	HostStatusCallback.cpp
+	NagiosObjects/NagiosObject.cpp NagiosObjects/NagiosHost.cpp NagiosObjects/NagiosHostStatusData.cpp
+	NagiosCallbacks/HostStatusCallback.cpp
 )
 target_include_directories(statusengine PUBLIC ${NAEMON_INCLUDE_DIRS} ${GEARMAND_INCLUDE_DIRS})
 target_link_libraries(statusengine PUBLIC ${GEARMAND_LIBRARIES})

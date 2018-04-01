@@ -1,8 +1,8 @@
 #include "HostStatusCallback.h"
 
 #include "Statusengine.h"
-#include "LogStream.h"
-#include "NagiosHostStatusData.h"
+#include "NagiosObjects/NagiosHostStatusData.h"
+
 
 namespace statusengine {
 	HostStatusCallback::HostStatusCallback(Statusengine *se) : NebmoduleCallback(NEBCALLBACK_HOST_STATUS_DATA, se) {

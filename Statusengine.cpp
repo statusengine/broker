@@ -6,7 +6,6 @@
 #include "vendor/json.hpp"
 
 #include "LogStream.h"
-#include "NagiosHost.h"
 
 
 using json = nlohmann::json;

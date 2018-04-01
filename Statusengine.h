@@ -7,8 +7,7 @@
 #include "nebmodule.h"
 
 #include "GearmanClient.h"
-#include "NebmoduleCallback.h"
-#include "HostStatusCallback.h"
+#include "NagiosCallbacks/HostStatusCallback.h"
 
 
 namespace statusengine {
