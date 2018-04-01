@@ -8,6 +8,7 @@
 
 #include "GearmanClient.h"
 #include "NagiosCallbacks/HostStatusCallback.h"
+#include "NagiosCallbacks/ServiceStatusCallback.h"
 
 
 namespace statusengine {
@@ -31,7 +32,9 @@ namespace statusengine {
 		nebmodule *nebhandle;
 		std::ostringstream ls; // logging
 		GearmanClient *gearman;
-		HostStatusCallback *cb;
+
+		HostStatusCallback *cbHostStatus;
+		ServiceStatusCallback *cbServiceStatus;
 	};
 }
 

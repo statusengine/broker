@@ -1,5 +1,5 @@
 #ifndef NAGIOS_SERVICE_H
-#define NAGIOS_SERVER_H
+#define NAGIOS_SERVICE_H
 
 #include "nebmodule.h"
 

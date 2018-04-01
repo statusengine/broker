@@ -25,8 +25,11 @@ namespace statusengine {
 
 		gearman = new GearmanClient(ls);
 
-		cb = new HostStatusCallback(this);
-		RegisterCallback(cb);
+		cbHostStatus = new HostStatusCallback(this);
+		cbServiceStatus = new ServiceStatusCallback(this);
+
+		RegisterCallback(cbHostStatus);
+		RegisterCallback(cbServiceStatus);
 	}
 	
 	Statusengine::~Statusengine() {
@@ -34,7 +37,8 @@ namespace statusengine {
 		neb_deregister_module_callbacks(nebhandle);
 		ls << "unload finished" << eom;
 		delete gearman;
-		delete cb;
+
+		delete cbHostStatus;
 	}
 
 	std::ostream& Statusengine::Log() {
