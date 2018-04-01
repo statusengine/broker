@@ -14,8 +14,6 @@
 
 namespace statusengine {
 	class Statusengine {
-	private:
-		nebmodule *nebhandle;
 	public:
 		Statusengine(nebmodule *handle);
 		~Statusengine();
@@ -25,16 +23,18 @@ namespace statusengine {
 
 		template<typename T>
 		void RegisterCallback(NebmoduleCallback<T> *cb) {
-			RegisterCallback(NEBCALLBACK_HOST_STATUS_DATA, fnptr<int(int, void*)>([cb](int event_type, void *data) -> int {
+			RegisterCallback(cb->GetCallbackType(), fnptr<int(int, void*)>([cb](int event_type, void *data) -> int {
 				cb->RawCallback(event_type, data);
 				return 0;
-			}));
+			}), cb->GetPriority());
 		};
 	private:
 		void SetModuleInfo(int modinfo, std::string text);
 		void RegisterCallback(NEBCallbackType type, int callback(int, void *), int priority = 0);
+		//void DeregisterCallback(NEBCallbackType type, int callback(int, void *));
 		
-		std::ostringstream ls;
+		nebmodule *nebhandle;
+		std::ostringstream ls; // logging
 		GearmanClient *gearman;
 		HostStatusCallback *cb;
 	};

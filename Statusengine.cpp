@@ -25,17 +25,6 @@ namespace statusengine {
 		ls << "This is the c++ version of statusengine event broker" << eom;
 
 		gearman = new GearmanClient(ls);
-		gearman->SendMessage("testqueue", "testmessage");
-
-		/*
-		RegisterCallback(NEBCALLBACK_HOST_STATUS_DATA, fnptr<int(int, void*)>([this](int event_type, void *data) -> int {
-			ls << "callback called :)" << eom;
-			auto hostStatus = reinterpret_cast<nebstruct_host_status_data*>(data);
-			auto nagHostStatus = reinterpret_cast<host *>(hostStatus->object_ptr);
-			auto nagiosHost = std::unique_ptr<NagiosHost>(new NagiosHost(nagHostStatus));
-			ls << nagiosHost->GetData().dump() << eom;
-			return 0;
-		}));*/
 
 		cb = new HostStatusCallback(this);
 		RegisterCallback(cb);

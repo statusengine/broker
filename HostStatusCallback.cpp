@@ -5,7 +5,7 @@
 #include "NagiosHostStatusData.h"
 
 namespace statusengine {
-	HostStatusCallback::HostStatusCallback(Statusengine *se) : se(se) {
+	HostStatusCallback::HostStatusCallback(Statusengine *se) : NebmoduleCallback(NEBCALLBACK_HOST_STATUS_DATA, se) {
 	}
 
 	void HostStatusCallback::Callback(int event_type, nebstruct_host_status_data *data) {
