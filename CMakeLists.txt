@@ -13,7 +13,12 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(NAEMON REQUIRED naemon)
 pkg_check_modules(GEARMAND REQUIRED gearmand)
 
-add_library(statusengine SHARED nebmodule.cpp NebmoduleCallback.cpp HostStatusCallback.cpp Statusengine.cpp NagiosObject.cpp NagiosHost.cpp GearmanClient.cpp LogStream.cpp)
+add_library(statusengine SHARED
+	nebmodule.cpp Statusengine.cpp
+	GearmanClient.cpp LogStream.cpp
+	NagiosObject.cpp NagiosHost.cpp NagiosHostStatusData.cpp
+	HostStatusCallback.cpp
+)
 target_include_directories(statusengine PUBLIC ${NAEMON_INCLUDE_DIRS} ${GEARMAND_INCLUDE_DIRS})
 target_link_libraries(statusengine PUBLIC ${GEARMAND_LIBRARIES})
 
