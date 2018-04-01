@@ -12,18 +12,20 @@ namespace statusengine {
 	}
 
 	void ServiceCheckCallback::Callback(int event_type, nebstruct_service_check_data *data) {
-		if (servicechecks || ocsp) {
-			auto checkData = NagiosServiceCheckData(data);
-			if (servicechecks) {
-				se->Gearman().SendMessage("statusngin_servicechecks", checkData.GetData().dump());
+		if (data->type == NEBTYPE_SERVICECHECK_PROCESSED) {
+			if (servicechecks || ocsp) {
+				auto checkData = NagiosServiceCheckData(data);
+				if (servicechecks) {
+					se->Gearman().SendMessage("statusngin_servicechecks", checkData.GetData().dump());
+				}
+				if (ocsp) {
+					se->Gearman().SendMessage("statusngin_ocsp", checkData.GetData().dump());
+				}
 			}
-			if (ocsp) {
-				se->Gearman().SendMessage("statusngin_ocsp", checkData.GetData().dump());
+			if (service_perfdata) {
+				auto checkPerfData = NagiosServiceCheckPerfData(data);
+				se->Gearman().SendMessage("statusngin_service_perfdata", checkPerfData.GetData().dump());
 			}
-		}
-		if (service_perfdata) {
-			auto checkPerfData = NagiosServiceCheckPerfData(data);
-			se->Gearman().SendMessage("statusngin_service_perfdata", checkPerfData.GetData().dump());
 		}
 	}
 }
