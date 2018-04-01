@@ -9,6 +9,7 @@
 #include "GearmanClient.h"
 #include "NagiosCallbacks/HostStatusCallback.h"
 #include "NagiosCallbacks/ServiceStatusCallback.h"
+#include "NagiosCallbacks/ServiceCheckCallback.h"
 
 
 namespace statusengine {
@@ -24,6 +25,7 @@ namespace statusengine {
 		void RegisterCallback(NebmoduleCallback<T> *cb) {
 			RegisterCallback(cb->GetCallbackType(), cb->GetCallbackFunction(), cb->GetPriority());
 		};
+
 	private:
 		void SetModuleInfo(int modinfo, std::string text);
 		void RegisterCallback(NEBCallbackType type, int callback(int, void *), int priority = 0);
@@ -35,6 +37,7 @@ namespace statusengine {
 
 		HostStatusCallback *cbHostStatus;
 		ServiceStatusCallback *cbServiceStatus;
+		ServiceCheckCallback *cbServiceCheck;
 	};
 }
 
