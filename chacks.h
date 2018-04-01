@@ -31,6 +31,4 @@ Fn* fnptr(Callable&& c) {
 	return fnptr_<N>(std::forward<Callable>(c), (Fn*)nullptr);
 }
 
-
-
 #endif // !CHACKS_H

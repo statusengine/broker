@@ -34,6 +34,8 @@ namespace statusengine {
 		ls << "unload" << eom;
 		neb_deregister_module_callbacks(nebhandle);
 		ls << "unload finished" << eom;
+		delete gearman;
+		delete cb;
 	}
 
 	std::ostream& Statusengine::Log() {

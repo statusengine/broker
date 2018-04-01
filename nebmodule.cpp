@@ -1,6 +1,5 @@
 #include "nebmodule.h"
 
-#include "chacks.h"
 #include "Statusengine.h"
 
 // This is required by naemon
