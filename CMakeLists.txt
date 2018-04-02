@@ -26,6 +26,26 @@ add_library(statusengine SHARED
 	NagiosCallbacks/ServiceStatusCallback.cpp NagiosCallbacks/ServiceCheckCallback.cpp
 	NagiosCallbacks/StateChangeCallback.cpp NagiosCallbacks/LogDataCallback.cpp NagiosCallbacks/SystemCommandDataCallback.cpp
 	NagiosCallbacks/CommentDataCallback.cpp
+	NagiosCallbacks/ExternalCommandDataCallback.cpp
+	NagiosObjects/NagiosExternalCommandData.cpp
+	NagiosCallbacks/AcknowledgementDataCallback.cpp
+	NagiosObjects/NagiosAcknowledgementData.cpp
+	NagiosCallbacks/FlappingDataCallback.cpp
+	NagiosObjects/NagiosFlappingData.cpp
+	NagiosCallbacks/DowntimeDataCallback.cpp
+	NagiosObjects/NagiosDowntimeData.cpp
+	NagiosCallbacks/NotificationDataCallback.cpp
+	NagiosObjects/NagiosNotificationData.cpp
+	NagiosCallbacks/ProgramStatusDataCallback.cpp
+	NagiosObjects/NagiosProgramStatusData.cpp
+	NagiosCallbacks/ContactStatusDataCallback.cpp
+	NagiosObjects/NagiosContactStatusData.cpp
+	NagiosCallbacks/ContactNotificationDataCallback.cpp
+	NagiosObjects/NagiosContactNotificationData.cpp
+	NagiosCallbacks/ContactNotificationMethodDataCallback.cpp
+	NagiosObjects/NagiosContactNotificationMethodData.cpp
+	NagiosCallbacks/EventHandlerDataCallback.cpp
+	NagiosObjects/NagiosEventHandlerData.cpp
 )
 target_include_directories(statusengine PUBLIC ${NAEMON_INCLUDE_DIRS} ${GEARMAND_INCLUDE_DIRS})
 target_link_libraries(statusengine PUBLIC ${GEARMAND_LIBRARIES})
