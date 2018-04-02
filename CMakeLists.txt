@@ -57,6 +57,8 @@ add_library(statusengine SHARED
 	NagiosObjects/NagiosContactNotificationMethodData.cpp
 	NagiosCallbacks/EventHandlerDataCallback.cpp
 	NagiosObjects/NagiosEventHandlerData.cpp
+	NagiosCallbacks/ProcessDataCallback.cpp
+	NagiosObjects/NagiosProcessData.cpp
 )
 target_include_directories(statusengine PUBLIC ${NAEMON_INCLUDE_DIRS} ${GEARMAND_INCLUDE_DIRS})
 target_link_libraries(statusengine PUBLIC ${GEARMAND_LIBRARIES})

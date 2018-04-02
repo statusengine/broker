@@ -43,6 +43,7 @@ namespace statusengine {
 		cbContactNotificationData = new ContactNotificationDataCallback(this);
 		cbContactNotificationMethodData = new ContactNotificationMethodDataCallback(this);
 		cbEventHandlerData = new EventHandlerDataCallback(this);
+		cbProcessData = new ProcessDataCallback(this, true, true, true);
 
 		RegisterCallback(cbHostStatus);
 		RegisterCallback(cbHostCheck);
@@ -62,6 +63,7 @@ namespace statusengine {
 		RegisterCallback(cbContactNotificationData);
 		RegisterCallback(cbContactNotificationMethodData);
 		RegisterCallback(cbEventHandlerData);
+		RegisterCallback(cbProcessData);
 	}
 	
 	Statusengine::~Statusengine() {
@@ -88,6 +90,7 @@ namespace statusengine {
 		delete cbContactNotificationData;
 		delete cbContactNotificationMethodData;
 		delete cbEventHandlerData;
+		delete cbProcessData;
 	}
 
 	std::ostream& Statusengine::Log() {

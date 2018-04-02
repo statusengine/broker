@@ -25,6 +25,8 @@
 #include "NagiosCallbacks/ContactNotificationDataCallback.h"
 #include "NagiosCallbacks/ContactNotificationMethodDataCallback.h"
 #include "NagiosCallbacks/EventHandlerDataCallback.h"
+#include "NagiosCallbacks/ProcessDataCallback.h"
+
 
 namespace statusengine {
 	class Statusengine {
@@ -67,6 +69,7 @@ namespace statusengine {
 		ContactNotificationDataCallback *cbContactNotificationData;
 		ContactNotificationMethodDataCallback *cbContactNotificationMethodData;
 		EventHandlerDataCallback *cbEventHandlerData;
+		ProcessDataCallback *cbProcessData;
 	};
 }
 
