@@ -29,11 +29,13 @@ namespace statusengine {
 		cbHostCheck = new HostCheckCallback(this, true, true);
 		cbServiceStatus = new ServiceStatusCallback(this);
 		cbServiceCheck = new ServiceCheckCallback(this, true, true, true);
+		cbStateChange = new StateChangeCallback(this);
 
 		RegisterCallback(cbHostStatus);
 		RegisterCallback(cbHostCheck);
 		RegisterCallback(cbServiceStatus);
 		RegisterCallback(cbServiceCheck);
+		RegisterCallback(cbStateChange);
 	}
 	
 	Statusengine::~Statusengine() {

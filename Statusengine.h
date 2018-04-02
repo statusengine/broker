@@ -11,6 +11,7 @@
 #include "NagiosCallbacks/HostCheckCallback.h"
 #include "NagiosCallbacks/ServiceStatusCallback.h"
 #include "NagiosCallbacks/ServiceCheckCallback.h"
+#include "NagiosCallbacks/StateChangeCallback.h"
 
 
 namespace statusengine {
@@ -40,6 +41,7 @@ namespace statusengine {
 		HostCheckCallback *cbHostCheck;
 		ServiceStatusCallback *cbServiceStatus;
 		ServiceCheckCallback *cbServiceCheck;
+		StateChangeCallback *cbStateChange;
 	};
 }
 

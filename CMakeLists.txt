@@ -20,6 +20,7 @@ add_library(statusengine SHARED
 	NagiosObjects/NagiosObject.cpp
 	NagiosObjects/NagiosHost.cpp NagiosObjects/NagiosHostStatusData.cpp NagiosObjects/NagiosHostCheckData.cpp
 	NagiosObjects/NagiosService.cpp NagiosObjects/NagiosServiceStatusData.cpp NagiosObjects/NagiosServiceCheckData.cpp NagiosObjects/NagiosServiceCheckPerfData.cpp
+	NagiosObjects/NagiosStateChangeData.cpp
 	NagiosCallbacks/HostStatusCallback.cpp NagiosCallbacks/HostCheckCallback.cpp
 	NagiosCallbacks/ServiceStatusCallback.cpp NagiosCallbacks/ServiceCheckCallback.cpp
 )
