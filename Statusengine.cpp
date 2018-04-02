@@ -30,12 +30,14 @@ namespace statusengine {
 		cbServiceStatus = new ServiceStatusCallback(this);
 		cbServiceCheck = new ServiceCheckCallback(this, true, true, true);
 		cbStateChange = new StateChangeCallback(this);
+		cbLogData = new LogDataCallback(this);
 
 		RegisterCallback(cbHostStatus);
 		RegisterCallback(cbHostCheck);
 		RegisterCallback(cbServiceStatus);
 		RegisterCallback(cbServiceCheck);
 		RegisterCallback(cbStateChange);
+		RegisterCallback(cbLogData);
 	}
 	
 	Statusengine::~Statusengine() {
@@ -45,8 +47,11 @@ namespace statusengine {
 		delete gearman;
 
 		delete cbHostStatus;
+		delete cbHostCheck;
 		delete cbServiceStatus;
 		delete cbServiceCheck;
+		delete cbStateChange;
+		delete cbLogData;
 	}
 
 	std::ostream& Statusengine::Log() {
