@@ -32,6 +32,7 @@ namespace statusengine {
 		cbStateChange = new StateChangeCallback(this);
 		cbLogData = new LogDataCallback(this);
 		cbSystemCommandData = new SystemCommandDataCallback(this);
+		cbCommentData = new CommentDataCallback(this);
 
 		RegisterCallback(cbHostStatus);
 		RegisterCallback(cbHostCheck);
@@ -55,6 +56,7 @@ namespace statusengine {
 		delete cbStateChange;
 		delete cbLogData;
 		delete cbSystemCommandData;
+		delete cbCommentData;
 	}
 
 	std::ostream& Statusengine::Log() {

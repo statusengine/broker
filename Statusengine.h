@@ -14,6 +14,7 @@
 #include "NagiosCallbacks/StateChangeCallback.h"
 #include "NagiosCallbacks/LogDataCallback.h"
 #include "NagiosCallbacks/SystemCommandDataCallback.h"
+#include "NagiosCallbacks/CommentDataCallback.h"
 
 
 namespace statusengine {
@@ -46,6 +47,7 @@ namespace statusengine {
 		StateChangeCallback *cbStateChange;
 		LogDataCallback *cbLogData;
 		SystemCommandDataCallback *cbSystemCommandData;
+		CommentDataCallback *cbCommentData;
 	};
 }
 
