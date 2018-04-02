@@ -32,12 +32,17 @@ namespace statusengine {
 				other = &Data;
 			}
 			if (value != nullptr) {
-				if (std::is_same<T, char*>::value) {
-					// fancy strings instead of c bullshit
-					(*other)[name] = std::string(reinterpret_cast<char*>(value));
+				if (value == nullptr) {
+					(*other)[name] = nullptr;
 				}
 				else {
-					(*other)[name] = value;
+					if (std::is_same<T, char*>::value) {
+						// fancy strings instead of c bullshit
+						(*other)[name] = std::string(reinterpret_cast<char*>(value));
+					}
+					else {
+						(*other)[name] = value;
+					}
 				}
 			}
 		}
