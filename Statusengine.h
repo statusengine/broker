@@ -15,7 +15,16 @@
 #include "NagiosCallbacks/LogDataCallback.h"
 #include "NagiosCallbacks/SystemCommandDataCallback.h"
 #include "NagiosCallbacks/CommentDataCallback.h"
-
+#include "NagiosCallbacks/ExternalCommandDataCallback.h"
+#include "NagiosCallbacks/AcknowledgementDataCallback.h"
+#include "NagiosCallbacks/FlappingDataCallback.h"
+#include "NagiosCallbacks/DowntimeDataCallback.h"
+#include "NagiosCallbacks/NotificationDataCallback.h"
+#include "NagiosCallbacks/ProgramStatusDataCallback.h"
+#include "NagiosCallbacks/ContactStatusDataCallback.h"
+#include "NagiosCallbacks/ContactNotificationDataCallback.h"
+#include "NagiosCallbacks/ContactNotificationMethodDataCallback.h"
+#include "NagiosCallbacks/EventHandlerDataCallback.h"
 
 namespace statusengine {
 	class Statusengine {
@@ -48,6 +57,16 @@ namespace statusengine {
 		LogDataCallback *cbLogData;
 		SystemCommandDataCallback *cbSystemCommandData;
 		CommentDataCallback *cbCommentData;
+		ExternalCommandDataCallback *cbExternalCommandData;
+		AcknowledgementDataCallback *cbAcknowledgementData;
+		FlappingDataCallback *cbFlappingData;
+		DowntimeDataCallback *cbDowntimeData;
+		NotificationDataCallback *cbNotificationData;
+		ProgramStatusDataCallback *cbProgramStatusData;
+		ContactStatusDataCallback *cbContactStatusData;
+		ContactNotificationDataCallback *cbContactNotificationData;
+		ContactNotificationMethodDataCallback *cbContactNotificationMethodData;
+		EventHandlerDataCallback *cbEventHandlerData;
 	};
 }
 

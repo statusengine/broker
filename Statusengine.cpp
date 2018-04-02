@@ -33,6 +33,16 @@ namespace statusengine {
 		cbLogData = new LogDataCallback(this);
 		cbSystemCommandData = new SystemCommandDataCallback(this);
 		cbCommentData = new CommentDataCallback(this);
+		cbExternalCommandData = new ExternalCommandDataCallback(this);
+		cbAcknowledgementData = new AcknowledgementDataCallback(this);
+		cbFlappingData = new FlappingDataCallback(this);
+		cbDowntimeData = new DowntimeDataCallback(this);
+		cbNotificationData = new NotificationDataCallback(this);
+		cbProgramStatusData = new ProgramStatusDataCallback(this);
+		cbContactStatusData = new ContactStatusDataCallback(this);
+		cbContactNotificationData = new ContactNotificationDataCallback(this);
+		cbContactNotificationMethodData = new ContactNotificationMethodDataCallback(this);
+		cbEventHandlerData = new EventHandlerDataCallback(this);
 
 		RegisterCallback(cbHostStatus);
 		RegisterCallback(cbHostCheck);
@@ -41,6 +51,17 @@ namespace statusengine {
 		RegisterCallback(cbStateChange);
 		RegisterCallback(cbLogData);
 		RegisterCallback(cbSystemCommandData);
+		RegisterCallback(cbCommentData);
+		RegisterCallback(cbExternalCommandData);
+		RegisterCallback(cbAcknowledgementData);
+		RegisterCallback(cbFlappingData);
+		RegisterCallback(cbDowntimeData);
+		RegisterCallback(cbNotificationData);
+		RegisterCallback(cbProgramStatusData);
+		RegisterCallback(cbContactStatusData);
+		RegisterCallback(cbContactNotificationData);
+		RegisterCallback(cbContactNotificationMethodData);
+		RegisterCallback(cbEventHandlerData);
 	}
 	
 	Statusengine::~Statusengine() {
@@ -57,6 +78,16 @@ namespace statusengine {
 		delete cbLogData;
 		delete cbSystemCommandData;
 		delete cbCommentData;
+		delete cbExternalCommandData;
+		delete cbAcknowledgementData;
+		delete cbFlappingData;
+		delete cbDowntimeData;
+		delete cbNotificationData;
+		delete cbProgramStatusData;
+		delete cbContactStatusData;
+		delete cbContactNotificationData;
+		delete cbContactNotificationMethodData;
+		delete cbEventHandlerData;
 	}
 
 	std::ostream& Statusengine::Log() {
