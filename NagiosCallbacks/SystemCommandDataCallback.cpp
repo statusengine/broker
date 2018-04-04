@@ -10,6 +10,6 @@ namespace statusengine {
 
 	void SystemCommandDataCallback::Callback(int event_type, nebstruct_system_command_data *data) {
 		auto statusData = NagiosSystemCommandData(data);
-		se->Gearman().SendMessage("statusngin_systemcommands", statusData.GetData().dump());
+		se->SendMessage("statusngin_systemcommands", statusData.GetData().dump());
 	}
 }

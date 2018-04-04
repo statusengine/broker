@@ -7,6 +7,8 @@
 
 #include "LogStream.h"
 
+#include "Configuration.h"
+
 
 using json = nlohmann::json;
 
@@ -23,47 +25,134 @@ namespace statusengine {
 		ls << "the missing event broker" << eom;
 		ls << "This is the c++ version of statusengine event broker" << eom;
 
-		gearman = new GearmanClient(ls);
+		configuration = R"(
+{
+	"Queues": {
+        "HostStatus": true,
+        "HostCheck": true,
+        "OCHP": true,
+        "ServiceStatus": true,
+        "ServiceCheck": true,
+        "ServicePerfData": true,
+        "OCSP": true,
+        "StateChange": true,
+        "LogData": true,
+        "SystemCommandData": true,
+        "CommentData": true,
+        "ExternalCommandData": true,
+        "AcknowledgementData": true,
+        "FlappingData": true,
+        "DowntimeData": true,
+        "NotificationData": true,
+        "ProgramStatusData": true,
+        "ContactStatusData": true,
+        "ContactNotificationData": true,
+        "ContactNotificationMethodData": true,
+        "EventHandlerData": true,
+        "ProcessData": true
+	},
+	"Gearman": [
+		"127.0.0.1:4730"
+	]
+}
+		)"_json;
 
-		cbHostStatus = new HostStatusCallback(this);
-		cbHostCheck = new HostCheckCallback(this, true, true);
-		cbServiceStatus = new ServiceStatusCallback(this);
-		cbServiceCheck = new ServiceCheckCallback(this, true, true, true);
-		cbStateChange = new StateChangeCallback(this);
-		cbLogData = new LogDataCallback(this);
-		cbSystemCommandData = new SystemCommandDataCallback(this);
-		cbCommentData = new CommentDataCallback(this);
-		cbExternalCommandData = new ExternalCommandDataCallback(this);
-		cbAcknowledgementData = new AcknowledgementDataCallback(this);
-		cbFlappingData = new FlappingDataCallback(this);
-		cbDowntimeData = new DowntimeDataCallback(this);
-		cbNotificationData = new NotificationDataCallback(this);
-		cbProgramStatusData = new ProgramStatusDataCallback(this);
-		cbContactStatusData = new ContactStatusDataCallback(this);
-		cbContactNotificationData = new ContactNotificationDataCallback(this);
-		cbContactNotificationMethodData = new ContactNotificationMethodDataCallback(this);
-		cbEventHandlerData = new EventHandlerDataCallback(this);
-		cbProcessData = new ProcessDataCallback(this, true, true, true);
+		gearmanClients = configuration.GetGearmanClients(this);
 
-		RegisterCallback(cbHostStatus);
-		RegisterCallback(cbHostCheck);
-		RegisterCallback(cbServiceStatus);
-		RegisterCallback(cbServiceCheck);
-		RegisterCallback(cbStateChange);
-		RegisterCallback(cbLogData);
-		RegisterCallback(cbSystemCommandData);
-		RegisterCallback(cbCommentData);
-		RegisterCallback(cbExternalCommandData);
-		RegisterCallback(cbAcknowledgementData);
-		RegisterCallback(cbFlappingData);
-		RegisterCallback(cbDowntimeData);
-		RegisterCallback(cbNotificationData);
-		RegisterCallback(cbProgramStatusData);
-		RegisterCallback(cbContactStatusData);
-		RegisterCallback(cbContactNotificationData);
-		RegisterCallback(cbContactNotificationMethodData);
-		RegisterCallback(cbEventHandlerData);
-		RegisterCallback(cbProcessData);
+		if (configuration.GetQueueHostStatus()) {
+			cbHostStatus = new HostStatusCallback(this);
+			RegisterCallback(cbHostStatus);
+		}
+
+		if (configuration.GetQueueHostCheck() || configuration.GetQueueOCHP()) {
+			cbHostCheck = new HostCheckCallback(this, configuration.GetQueueHostCheck(), configuration.GetQueueOCHP());
+			RegisterCallback(cbHostCheck);
+		}
+
+		if (configuration.GetQueueServiceStatus()) {
+			cbServiceStatus = new ServiceStatusCallback(this);
+			RegisterCallback(cbServiceStatus);
+		}
+
+		if (configuration.GetQueueServiceCheck() || configuration.GetQueueOCSP() || configuration.GetQueueServicePerfData()) {
+			cbServiceCheck = new ServiceCheckCallback(this, configuration.GetQueueServiceCheck(), configuration.GetQueueOCSP(), configuration.GetQueueServicePerfData());
+			RegisterCallback(cbServiceCheck);
+		}
+		
+		if (configuration.GetQueueStateChange()) {
+			cbStateChange = new StateChangeCallback(this);
+			RegisterCallback(cbStateChange);
+		}
+		
+		if (configuration.GetQueueLogData()) {
+			cbLogData = new LogDataCallback(this);
+			RegisterCallback(cbLogData);
+		}
+		
+		if (configuration.GetQueueSystemCommandData()) {
+			cbSystemCommandData = new SystemCommandDataCallback(this);
+			RegisterCallback(cbSystemCommandData);
+		}
+
+		if (configuration.GetQueueCommentData()) {
+			cbCommentData = new CommentDataCallback(this);
+			RegisterCallback(cbCommentData);
+		}
+
+		if (configuration.GetQueueExternalCommandData()) {
+			cbExternalCommandData = new ExternalCommandDataCallback(this);
+			RegisterCallback(cbExternalCommandData);
+		}
+		
+		if (configuration.GetQueueAcknowledgementData()) {
+			cbAcknowledgementData = new AcknowledgementDataCallback(this);
+			RegisterCallback(cbAcknowledgementData);
+		}
+		
+		if (configuration.GetQueueFlappingData()) {
+			cbFlappingData = new FlappingDataCallback(this);
+			RegisterCallback(cbFlappingData);
+		}
+		
+		if (configuration.GetQueueDowntimeData()) {
+			cbDowntimeData = new DowntimeDataCallback(this);
+			RegisterCallback(cbDowntimeData);
+		}
+
+		if (configuration.GetQueueNotificationData()) {
+			cbNotificationData = new NotificationDataCallback(this);
+			RegisterCallback(cbNotificationData);
+		}
+		
+		if (configuration.GetQueueProgramStatusData()) {
+			cbProgramStatusData = new ProgramStatusDataCallback(this);
+			RegisterCallback(cbProgramStatusData);
+		}
+
+		if (configuration.GetQueueContactStatusData()) {
+			cbContactStatusData = new ContactStatusDataCallback(this);
+			RegisterCallback(cbContactStatusData);
+		}
+		
+		if (configuration.GetQueueContactNotificationData()) {
+			cbContactNotificationData = new ContactNotificationDataCallback(this);
+			RegisterCallback(cbContactNotificationData);
+		}
+
+		if (configuration.GetQueueContactNotificationMethodData()) {
+			cbContactNotificationMethodData = new ContactNotificationMethodDataCallback(this);
+			RegisterCallback(cbContactNotificationMethodData);
+		}
+		
+		if (configuration.GetQueueEventHandlerData()) {
+			cbEventHandlerData = new EventHandlerDataCallback(this);
+			RegisterCallback(cbEventHandlerData);
+		}
+		
+		if (configuration.GetQueueRestartData() || configuration.GetQueueProcessData()) {
+			cbProcessData = new ProcessDataCallback(this, configuration.GetQueueRestartData(), configuration.GetQueueProcessData());
+			RegisterCallback(cbProcessData);
+		}
 	}
 	
 	Statusengine::~Statusengine() {
@@ -97,8 +186,10 @@ namespace statusengine {
 		return ls;
 	}
 
-	GearmanClient& Statusengine::Gearman() {
-		return *gearman;
+	void Statusengine::SendMessage(const std::string queue, const std::string message) const {
+		for (auto it = gearmanClients.begin(); it != gearmanClients.end(); ++it) {
+			(*it)->SendMessage(queue, message);
+		}
 	}
 
 	void Statusengine::SetModuleInfo(int modinfo, std::string text) {

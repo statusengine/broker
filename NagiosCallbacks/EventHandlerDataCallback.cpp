@@ -10,6 +10,6 @@ namespace statusengine {
 
 	void EventHandlerDataCallback::Callback(int event_type, nebstruct_event_handler_data *data) {
 		auto myData = NagiosEventHandlerData(data);
-		se->Gearman().SendMessage("statusngin_eventhandler", myData.GetData().dump());
+		se->SendMessage("statusngin_eventhandler", myData.GetData().dump());
 	}
 }

@@ -10,6 +10,6 @@ namespace statusengine {
 
 	void ContactNotificationDataCallback::Callback(int event_type, nebstruct_contact_notification_data *data) {
 		auto myData = NagiosContactNotificationData(data);
-		se->Gearman().SendMessage("statusngin_contactnotificationdata", myData.GetData().dump());
+		se->SendMessage("statusngin_contactnotificationdata", myData.GetData().dump());
 	}
 }

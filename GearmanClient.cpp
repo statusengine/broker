@@ -5,18 +5,19 @@
 
 namespace statusengine {
 
-	GearmanClient::GearmanClient(std::ostream &os) : ls(os) {
+	GearmanClient::GearmanClient(std::ostream &ls, const std::string url) : ls(ls) {
 		client = gearman_client_create(nullptr);
-		gearman_return_t ret = gearman_client_add_server(client, "127.0.0.1", 4730);
+		gearman_return_t ret = gearman_client_add_servers(client, url.c_str());
 		if (gearman_success(ret)) {
-			ls << "Gearman connect success" << eom;
+			ls << "Added gearman server connection" << eom;
 		}
 		else {
-			ls << "Gearman connect failed: " << gearman_client_error(client) << eoem;
+			ls << "Could not add gearman server: " << gearman_client_error(client) << eoem;
 		}
 	}
 
 	GearmanClient::~GearmanClient() {
+		ls << "Destroy gearman client" << eom;
 		gearman_client_free(client);
 	}
 

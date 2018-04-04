@@ -16,15 +16,15 @@ namespace statusengine {
 			if (servicechecks || ocsp) {
 				auto checkData = NagiosServiceCheckData(data);
 				if (servicechecks) {
-					se->Gearman().SendMessage("statusngin_servicechecks", checkData.GetData().dump());
+					se->SendMessage("statusngin_servicechecks", checkData.GetData().dump());
 				}
 				if (ocsp) {
-					se->Gearman().SendMessage("statusngin_ocsp", checkData.GetData().dump());
+					se->SendMessage("statusngin_ocsp", checkData.GetData().dump());
 				}
 			}
 			if (service_perfdata) {
 				auto checkPerfData = NagiosServiceCheckPerfData(data);
-				se->Gearman().SendMessage("statusngin_service_perfdata", checkPerfData.GetData().dump());
+				se->SendMessage("statusngin_service_perfdata", checkPerfData.GetData().dump());
 			}
 		}
 	}

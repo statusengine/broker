@@ -10,6 +10,6 @@ namespace statusengine {
 
 	void ProgramStatusDataCallback::Callback(int event_type, nebstruct_program_status_data *data) {
 		auto myData = NagiosProgramStatusData(data);
-		se->Gearman().SendMessage("statusngin_programmstatus", myData.GetData().dump());
+		se->SendMessage("statusngin_programmstatus", myData.GetData().dump());
 	}
 }

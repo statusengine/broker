@@ -7,6 +7,7 @@
 #include "nebmodule.h"
 
 #include "GearmanClient.h"
+#include "Configuration.h"
 #include "NagiosCallbacks/HostStatusCallback.h"
 #include "NagiosCallbacks/HostCheckCallback.h"
 #include "NagiosCallbacks/ServiceStatusCallback.h"
@@ -35,7 +36,7 @@ namespace statusengine {
 		~Statusengine();
 
 		std::ostream& Log();
-		GearmanClient& Gearman();
+		void SendMessage(const std::string queue, const std::string message) const;
 
 		template<typename T>
 		void RegisterCallback(NebmoduleCallback<T> *cb) {
@@ -49,6 +50,7 @@ namespace statusengine {
 		
 		nebmodule *nebhandle;
 		std::ostringstream ls; // logging
+		Configuration configuration;
 		GearmanClient *gearman;
 
 		HostStatusCallback *cbHostStatus;
@@ -70,6 +72,8 @@ namespace statusengine {
 		ContactNotificationMethodDataCallback *cbContactNotificationMethodData;
 		EventHandlerDataCallback *cbEventHandlerData;
 		ProcessDataCallback *cbProcessData;
+
+		std::list<std::shared_ptr<GearmanClient>> gearmanClients;
 	};
 }
 

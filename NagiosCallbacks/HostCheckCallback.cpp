@@ -14,10 +14,10 @@ namespace statusengine {
 		if (data->type == NEBTYPE_HOSTCHECK_PROCESSED) {
 			auto checkData = NagiosHostCheckData(data);
 			if (hostchecks) {
-				se->Gearman().SendMessage("statusngin_hostchecks", checkData.GetData().dump());
+				se->SendMessage("statusngin_hostchecks", checkData.GetData().dump());
 			}
 			if (ocsp) {
-				se->Gearman().SendMessage("statusngin_ochp", checkData.GetData().dump());
+				se->SendMessage("statusngin_ochp", checkData.GetData().dump());
 			}
 		}
 	}

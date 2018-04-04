@@ -10,6 +10,6 @@ namespace statusengine {
 
 	void HostStatusCallback::Callback(int event_type, nebstruct_host_status_data *data) {
 		auto statusData = NagiosHostStatusData(data);
-		se->Gearman().SendMessage("statusngin_hoststatus", statusData.GetData().dump());
+		se->SendMessage("statusngin_hoststatus", statusData.GetData().dump());
 	}
 }

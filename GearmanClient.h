@@ -10,7 +10,7 @@ namespace statusengine {
 
 	class GearmanClient {
 	public:
-		GearmanClient(std::ostream &os);
+		GearmanClient(std::ostream &ls, const std::string url);
 		~GearmanClient();
 
 		void SendMessage(const std::string queue, const std::string message) const;

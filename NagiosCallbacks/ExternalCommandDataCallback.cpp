@@ -10,6 +10,6 @@ namespace statusengine {
 
 	void ExternalCommandDataCallback::Callback(int event_type, nebstruct_external_command_data *data) {
 		auto myData = NagiosExternalCommandData(data);
-		se->Gearman().SendMessage("statusngin_externalcommands", myData.GetData().dump());
+		se->SendMessage("statusngin_externalcommands", myData.GetData().dump());
 	}
 }
