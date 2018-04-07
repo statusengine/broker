@@ -1,0 +1,35 @@
+image: ubuntu:xenial
+
+build:
+  stage: build
+  # instead of calling g++ directly you can also use some build toolkit like make
+  # install the necessary build tools when needed
+  before_script: 
+    - apt update && apt -y install cmake clang-5.0 build-essential automake gperf help2man libtool libglib2.0-dev libgearman-dev
+    - useradd -d /opt/naemon -m -s /bin/bash --system naemon
+    - >
+      cd /tmp/ &&
+      wget https://github.com/naemon/naemon-core/archive/v1.0.6.tar.gz &&
+      tar xfv v1.0.6.tar.gz && cd naemon-core-1.0.6/ &&
+      ./autogen.sh --prefix=/opt/naemon --with-naemon-user=naemon --with-naemon-group=naemon --with-pluginsdir=/usr/lib/nagios/plugins &&
+      make all -j5 &&
+      make install &&
+      mkdir -p /opt/naemon/var/ /opt/naemon/var/cache/naemon /opt/naemon/var/spool/checkresults /usr/local/lib/pkgconfig &&
+      chown naemon:naemon /opt/naemon/var -R &&
+      ln -s /opt/naemon/var/pkgconfig/naemon.pc /usr/local/lib/pkgconfig/naemon.pc
+
+  script: 
+    - >
+      mkdir build &&
+      cd build &&
+      cmake -DCMAKE_C_COMPILER=/usr/bin/clang-5.0 -DCMAKE_CXX_COMPILER=/usr/bin/clang++-5.0 .. &&
+      make -j5
+  artifacts:
+    paths:
+      - build/libstatusengine.so
+
+# run tests using the binary built before
+#test:
+#  stage: test
+#  script:
+#    - ./runmytests.sh
