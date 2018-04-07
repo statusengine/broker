@@ -8,7 +8,7 @@ build:
     - apt-get update && apt-get -y install cmake clang-5.0 build-essential automake gperf help2man libtool libglib2.0-dev libgearman-dev wget tar
     - useradd -d /opt/naemon -m -s /bin/bash --system naemon
     - >
-      $OLDWD="$(pwd)" &&
+      OLDWD="$(pwd)" &&
       cd /tmp/ &&
       wget https://github.com/naemon/naemon-core/archive/v1.0.6.tar.gz &&
       tar xfv v1.0.6.tar.gz && cd naemon-core-1.0.6/ &&
