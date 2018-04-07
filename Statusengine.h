@@ -32,8 +32,10 @@
 namespace statusengine {
 	class Statusengine {
 	public:
-		Statusengine(nebmodule *handle);
+		Statusengine(nebmodule *handle, std::string configurationPath);
 		~Statusengine();
+
+		int Init();
 
 		std::ostream& Log();
 		void SendMessage(const std::string queue, const std::string message) const;
@@ -50,6 +52,7 @@ namespace statusengine {
 		
 		nebmodule *nebhandle;
 		std::ostringstream ls; // logging
+		std::string configurationPath;
 		Configuration configuration;
 		GearmanClient *gearman;
 

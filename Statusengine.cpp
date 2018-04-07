@@ -2,6 +2,7 @@
 
 #include <sstream>
 #include <memory>
+#include <fstream>
 
 #include "vendor/json.hpp"
 
@@ -14,7 +15,11 @@ using json = nlohmann::json;
 
 namespace statusengine {
 
-	Statusengine::Statusengine(nebmodule *handle) : nebhandle(handle) {
+	Statusengine::Statusengine(nebmodule *handle, std::string configurationPath) :
+		nebhandle(handle), configurationPath(configurationPath) {
+	}
+
+	int Statusengine::Init() {
 		SetModuleInfo(NEBMODULE_MODINFO_TITLE, "Statusengine - the missing event broker");
 		SetModuleInfo(NEBMODULE_MODINFO_AUTHOR, "Johannes Drummer");
 		SetModuleInfo(NEBMODULE_MODINFO_TITLE, "Copyright (c) 2018 - present Johannes Drummer");
@@ -25,37 +30,18 @@ namespace statusengine {
 		ls << "the missing event broker" << eom;
 		ls << "This is the c++ version of statusengine event broker" << eom;
 
-		configuration = R"(
-{
-	"Queues": {
-        "HostStatus": true,
-        "HostCheck": true,
-        "OCHP": true,
-        "ServiceStatus": true,
-        "ServiceCheck": true,
-        "ServicePerfData": true,
-        "OCSP": true,
-        "StateChange": true,
-        "LogData": true,
-        "SystemCommandData": true,
-        "CommentData": true,
-        "ExternalCommandData": true,
-        "AcknowledgementData": true,
-        "FlappingData": true,
-        "DowntimeData": true,
-        "NotificationData": true,
-        "ProgramStatusData": true,
-        "ContactStatusData": true,
-        "ContactNotificationData": true,
-        "ContactNotificationMethodData": true,
-        "EventHandlerData": true,
-        "ProcessData": true
-	},
-	"Gearman": [
-		"127.0.0.1:4730"
-	]
-}
-		)"_json;
+		std::ifstream cfgFile = std::ifstream(configurationPath, std::fstream::in);
+		json j;
+		try {
+			cfgFile >> j;
+		}
+		catch (nlohmann::detail::parse_error &pe) {
+			ls << "Invalid json configuration file" << eoem;
+			return 1;
+		}
+
+		configuration = j;
+		cfgFile.close();
 
 		gearmanClients = configuration.GetGearmanClients(this);
 
@@ -78,17 +64,17 @@ namespace statusengine {
 			cbServiceCheck = new ServiceCheckCallback(this, configuration.GetQueueServiceCheck(), configuration.GetQueueOCSP(), configuration.GetQueueServicePerfData());
 			RegisterCallback(cbServiceCheck);
 		}
-		
+
 		if (configuration.GetQueueStateChange()) {
 			cbStateChange = new StateChangeCallback(this);
 			RegisterCallback(cbStateChange);
 		}
-		
+
 		if (configuration.GetQueueLogData()) {
 			cbLogData = new LogDataCallback(this);
 			RegisterCallback(cbLogData);
 		}
-		
+
 		if (configuration.GetQueueSystemCommandData()) {
 			cbSystemCommandData = new SystemCommandDataCallback(this);
 			RegisterCallback(cbSystemCommandData);
@@ -103,17 +89,17 @@ namespace statusengine {
 			cbExternalCommandData = new ExternalCommandDataCallback(this);
 			RegisterCallback(cbExternalCommandData);
 		}
-		
+
 		if (configuration.GetQueueAcknowledgementData()) {
 			cbAcknowledgementData = new AcknowledgementDataCallback(this);
 			RegisterCallback(cbAcknowledgementData);
 		}
-		
+
 		if (configuration.GetQueueFlappingData()) {
 			cbFlappingData = new FlappingDataCallback(this);
 			RegisterCallback(cbFlappingData);
 		}
-		
+
 		if (configuration.GetQueueDowntimeData()) {
 			cbDowntimeData = new DowntimeDataCallback(this);
 			RegisterCallback(cbDowntimeData);
@@ -123,7 +109,7 @@ namespace statusengine {
 			cbNotificationData = new NotificationDataCallback(this);
 			RegisterCallback(cbNotificationData);
 		}
-		
+
 		if (configuration.GetQueueProgramStatusData()) {
 			cbProgramStatusData = new ProgramStatusDataCallback(this);
 			RegisterCallback(cbProgramStatusData);
@@ -133,7 +119,7 @@ namespace statusengine {
 			cbContactStatusData = new ContactStatusDataCallback(this);
 			RegisterCallback(cbContactStatusData);
 		}
-		
+
 		if (configuration.GetQueueContactNotificationData()) {
 			cbContactNotificationData = new ContactNotificationDataCallback(this);
 			RegisterCallback(cbContactNotificationData);
@@ -143,16 +129,18 @@ namespace statusengine {
 			cbContactNotificationMethodData = new ContactNotificationMethodDataCallback(this);
 			RegisterCallback(cbContactNotificationMethodData);
 		}
-		
+
 		if (configuration.GetQueueEventHandlerData()) {
 			cbEventHandlerData = new EventHandlerDataCallback(this);
 			RegisterCallback(cbEventHandlerData);
 		}
-		
+
 		if (configuration.GetQueueRestartData() || configuration.GetQueueProcessData()) {
 			cbProcessData = new ProcessDataCallback(this, configuration.GetQueueRestartData(), configuration.GetQueueProcessData());
 			RegisterCallback(cbProcessData);
 		}
+
+		return 0;
 	}
 	
 	Statusengine::~Statusengine() {
