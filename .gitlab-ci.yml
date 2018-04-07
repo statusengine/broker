@@ -5,9 +5,10 @@ build:
   # instead of calling g++ directly you can also use some build toolkit like make
   # install the necessary build tools when needed
   before_script: 
-    - apt update && apt -y install cmake clang-5.0 build-essential automake gperf help2man libtool libglib2.0-dev libgearman-dev
+    - apt-get update && apt-get -y install cmake clang-5.0 build-essential automake gperf help2man libtool libglib2.0-dev libgearman-dev wget tar
     - useradd -d /opt/naemon -m -s /bin/bash --system naemon
     - >
+      $OLDWD="$(pwd)" &&
       cd /tmp/ &&
       wget https://github.com/naemon/naemon-core/archive/v1.0.6.tar.gz &&
       tar xfv v1.0.6.tar.gz && cd naemon-core-1.0.6/ &&
@@ -16,7 +17,8 @@ build:
       make install &&
       mkdir -p /opt/naemon/var/ /opt/naemon/var/cache/naemon /opt/naemon/var/spool/checkresults /usr/local/lib/pkgconfig &&
       chown naemon:naemon /opt/naemon/var -R &&
-      ln -s /opt/naemon/var/pkgconfig/naemon.pc /usr/local/lib/pkgconfig/naemon.pc
+      ln -s /opt/naemon/var/pkgconfig/naemon.pc /usr/local/lib/pkgconfig/naemon.pc &&
+      cd "${OLDWD}"
 
   script: 
     - >
