@@ -15,10 +15,12 @@ build:
       ./autogen.sh --prefix=/opt/naemon --with-naemon-user=naemon --with-naemon-group=naemon --with-pluginsdir=/usr/lib/nagios/plugins &&
       make all -j5 &&
       make install &&
-      mkdir -p /opt/naemon/var/ /opt/naemon/var/cache/naemon /opt/naemon/var/spool/checkresults /usr/local/lib/pkgconfig &&
+      mkdir -p /opt/naemon/var/ /opt/naemon/var/cache/naemon /opt/naemon/var/spool/checkresults &&
       chown naemon:naemon /opt/naemon/var -R &&
-      ln -s /opt/naemon/var/pkgconfig/naemon.pc /usr/local/lib/pkgconfig/naemon.pc &&
       cd "${OLDWD}"
+    - mkdir -p /usr/local/lib/pkgconfig
+    - ln -s /opt/naemon/var/pkgconfig/naemon.pc /usr/local/lib/pkgconfig/naemon.pc
+
 
   script: 
     - >
