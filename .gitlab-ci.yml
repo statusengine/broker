@@ -2,12 +2,11 @@ image: ubuntu:xenial
 
 build:
   stage: build
-  # instead of calling g++ directly you can also use some build toolkit like make
-  # install the necessary build tools when needed
   before_script: 
     - apt-get update && apt-get -y install cmake clang-5.0 build-essential automake gperf help2man libtool libglib2.0-dev libgearman-dev wget tar
     - useradd -d /opt/naemon -m -s /bin/bash --system naemon
     - >
+      set -e &&
       OLDWD="$(pwd)" &&
       cd /tmp/ &&
       wget https://github.com/naemon/naemon-core/archive/v1.0.6.tar.gz &&
@@ -17,10 +16,9 @@ build:
       make install &&
       mkdir -p /opt/naemon/var/ /opt/naemon/var/cache/naemon /opt/naemon/var/spool/checkresults &&
       chown naemon:naemon /opt/naemon/var -R &&
+      mkdir -p /usr/local/lib/pkgconfig &&
+      ln -s /opt/naemon/lib/pkgconfig/naemon.pc /usr/local/lib/pkgconfig/naemon.pc &&
       cd "${OLDWD}"
-    - mkdir -p /usr/local/lib/pkgconfig
-    - ln -s /opt/naemon/var/pkgconfig/naemon.pc /usr/local/lib/pkgconfig/naemon.pc
-
 
   script: 
     - >
