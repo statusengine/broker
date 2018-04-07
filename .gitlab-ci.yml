@@ -2,7 +2,7 @@ build:trusty:
   image: ubuntu:trusty
   stage: build
   script: 
-    - apt-get update && apt-get -y software-properties-common 
+    - apt-get update && apt-get install -y software-properties-common 
     - add-apt-repository ppa:ubuntu-toolchain-r/test -y
     - apt-get update && apt-get -y install cmake gcc-7 g++-7 libstdc++6 build-essential automake gperf help2man libtool libglib2.0-dev libgearman-dev wget tar
     - useradd -d /opt/naemon -m -s /bin/bash --system naemon
