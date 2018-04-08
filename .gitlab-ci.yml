@@ -123,7 +123,7 @@ build:jessie:
     - >
       apt-get update &&
       apt-get -y install clang-5.0 build-essential automake gperf help2man libtool libglib2.0-dev libgearman-dev tar wget &&
-      apt-get -y -t stretch-backports install cmake
+      apt-get -y -t jessie-backports install cmake
     - useradd -d /opt/naemon -m -s /bin/bash --system naemon
     - >
       set -e &&
