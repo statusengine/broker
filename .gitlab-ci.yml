@@ -60,6 +60,36 @@ build:xenial:
       - build/libstatusengine.so
 
 
+build:jessie:
+  image: debian:jessie
+  stage: build
+  script:
+    - apt-get update && apt-get -y install wget
+    - echo "deb http://apt.llvm.org/jessie/ llvm-toolchain-jessie-5.0 main" > /etc/apt/sources.list.d/llvm.list
+    - wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key|sudo apt-key add -
+    - apt-get update && apt-get -y install cmake clang-5.0 build-essential automake gperf help2man libtool libglib2.0-dev libgearman-dev tar
+    - useradd -d /opt/naemon -m -s /bin/bash --system naemon
+    - >
+      set -e &&
+      OLDWD="$(pwd)" &&
+      cd /tmp/ &&
+      wget https://github.com/naemon/naemon-core/archive/v1.0.6.tar.gz &&
+      tar xfv v1.0.6.tar.gz && cd naemon-core-1.0.6/ &&
+      ./autogen.sh --prefix=/opt/naemon --with-naemon-user=naemon --with-naemon-group=naemon --with-pluginsdir=/usr/lib/nagios/plugins &&
+      make all -j5 &&
+      make install &&
+      mkdir -p /opt/naemon/var/ /opt/naemon/var/cache/naemon /opt/naemon/var/spool/checkresults &&
+      chown naemon:naemon /opt/naemon/var -R &&
+      mkdir -p /usr/local/lib/pkgconfig &&
+      ln -s /opt/naemon/lib/pkgconfig/naemon.pc /usr/local/lib/pkgconfig/naemon.pc &&
+      cd "${OLDWD}"
+    - >
+      mkdir build &&
+      cd build &&
+      cmake -DCMAKE_C_COMPILER=/usr/bin/clang-5.0 -DCMAKE_CXX_COMPILER=/usr/bin/clang++-5.0 .. &&
+      make -j5
+
+
 build:stretch:
   image: debian:stretch
   stage: build
