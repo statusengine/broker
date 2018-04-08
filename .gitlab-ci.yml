@@ -64,7 +64,6 @@ build:jessie:
   image: debian:jessie
   stage: build
   script:
-    - apt-get update && apt-get -y install wget
     - echo "deb http://apt.llvm.org/jessie/ llvm-toolchain-jessie-5.0 main" > /etc/apt/sources.list.d/llvm.list
     - |
       echo "
@@ -120,7 +119,7 @@ build:jessie:
       bXb5c6gCHESH5PXwPU4jQEE7Ib9J6sbk7ZT2Mw==
       =j+4q
       -----END PGP PUBLIC KEY BLOCK-----" | apt-key add -
-    - apt-get update && apt-get -y install cmake clang-5.0 build-essential automake gperf help2man libtool libglib2.0-dev libgearman-dev tar
+    - apt-get update && apt-get -y install cmake clang-5.0 build-essential automake gperf help2man libtool libglib2.0-dev libgearman-dev tar wget
     - useradd -d /opt/naemon -m -s /bin/bash --system naemon
     - >
       set -e &&
