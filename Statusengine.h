@@ -3,11 +3,12 @@
 
 #include <sstream>
 #include <string>
+#include <list>
+#include <memory>
 
 #include "nebmodule.h"
 
 #include "GearmanClient.h"
-#include "Configuration.h"
 #include "NagiosCallbacks/HostStatusCallback.h"
 #include "NagiosCallbacks/HostCheckCallback.h"
 #include "NagiosCallbacks/ServiceStatusCallback.h"
@@ -30,6 +31,8 @@
 
 
 namespace statusengine {
+	class Configuration;
+
 	class Statusengine {
 	public:
 		Statusengine(nebmodule *handle, std::string configurationPath);
@@ -53,7 +56,7 @@ namespace statusengine {
 		nebmodule *nebhandle;
 		std::ostringstream ls; // logging
 		std::string configurationPath;
-		Configuration configuration;
+		Configuration *configuration;
 		GearmanClient *gearman;
 
 		HostStatusCallback *cbHostStatus;

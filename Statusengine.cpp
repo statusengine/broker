@@ -3,11 +3,12 @@
 #include <sstream>
 #include <memory>
 #include <fstream>
+#include <exception>
 
 #include "vendor/json.hpp"
+#include "vendor/toml.hpp"
 
 #include "LogStream.h"
-
 #include "Configuration.h"
 
 
@@ -30,113 +31,113 @@ namespace statusengine {
 		ls << "the missing event broker" << eom;
 		ls << "This is the c++ version of statusengine event broker" << eom;
 
-		std::ifstream cfgFile = std::ifstream(configurationPath, std::fstream::in);
-		json j;
 		try {
-			cfgFile >> j;
+			const auto data = toml::parse(configurationPath);
+			configuration = new Configuration(this, data);
 		}
-		catch (nlohmann::detail::parse_error &pe) {
-			ls << "Invalid json configuration file" << eoem;
+		catch (std::runtime_error &rte) {
+			ls << "Could not read file: " << rte.what() << eoem;
+			return 1;
+		}
+		catch (toml::syntax_error &ste) {
+			ls << "configuration syntax error: " << ste.what() << eoem;
 			return 1;
 		}
 
-		configuration = j;
-		cfgFile.close();
+		gearmanClients = configuration->GetGearmanClients(this);
 
-		gearmanClients = configuration.GetGearmanClients(this);
-
-		if (configuration.GetQueueHostStatus()) {
+		if (configuration->GetQueueHostStatus()) {
 			cbHostStatus = new HostStatusCallback(this);
 			RegisterCallback(cbHostStatus);
 		}
 
-		if (configuration.GetQueueHostCheck() || configuration.GetQueueOCHP()) {
-			cbHostCheck = new HostCheckCallback(this, configuration.GetQueueHostCheck(), configuration.GetQueueOCHP());
+		if (configuration->GetQueueHostCheck() || configuration->GetQueueOCHP()) {
+			cbHostCheck = new HostCheckCallback(this, configuration->GetQueueHostCheck(), configuration->GetQueueOCHP());
 			RegisterCallback(cbHostCheck);
 		}
 
-		if (configuration.GetQueueServiceStatus()) {
+		if (configuration->GetQueueServiceStatus()) {
 			cbServiceStatus = new ServiceStatusCallback(this);
 			RegisterCallback(cbServiceStatus);
 		}
 
-		if (configuration.GetQueueServiceCheck() || configuration.GetQueueOCSP() || configuration.GetQueueServicePerfData()) {
-			cbServiceCheck = new ServiceCheckCallback(this, configuration.GetQueueServiceCheck(), configuration.GetQueueOCSP(), configuration.GetQueueServicePerfData());
+		if (configuration->GetQueueServiceCheck() || configuration->GetQueueOCSP() || configuration->GetQueueServicePerfData()) {
+			cbServiceCheck = new ServiceCheckCallback(this, configuration->GetQueueServiceCheck(), configuration->GetQueueOCSP(), configuration->GetQueueServicePerfData());
 			RegisterCallback(cbServiceCheck);
 		}
 
-		if (configuration.GetQueueStateChange()) {
+		if (configuration->GetQueueStateChange()) {
 			cbStateChange = new StateChangeCallback(this);
 			RegisterCallback(cbStateChange);
 		}
 
-		if (configuration.GetQueueLogData()) {
+		if (configuration->GetQueueLogData()) {
 			cbLogData = new LogDataCallback(this);
 			RegisterCallback(cbLogData);
 		}
 
-		if (configuration.GetQueueSystemCommandData()) {
+		if (configuration->GetQueueSystemCommandData()) {
 			cbSystemCommandData = new SystemCommandDataCallback(this);
 			RegisterCallback(cbSystemCommandData);
 		}
 
-		if (configuration.GetQueueCommentData()) {
+		if (configuration->GetQueueCommentData()) {
 			cbCommentData = new CommentDataCallback(this);
 			RegisterCallback(cbCommentData);
 		}
 
-		if (configuration.GetQueueExternalCommandData()) {
+		if (configuration->GetQueueExternalCommandData()) {
 			cbExternalCommandData = new ExternalCommandDataCallback(this);
 			RegisterCallback(cbExternalCommandData);
 		}
 
-		if (configuration.GetQueueAcknowledgementData()) {
+		if (configuration->GetQueueAcknowledgementData()) {
 			cbAcknowledgementData = new AcknowledgementDataCallback(this);
 			RegisterCallback(cbAcknowledgementData);
 		}
 
-		if (configuration.GetQueueFlappingData()) {
+		if (configuration->GetQueueFlappingData()) {
 			cbFlappingData = new FlappingDataCallback(this);
 			RegisterCallback(cbFlappingData);
 		}
 
-		if (configuration.GetQueueDowntimeData()) {
+		if (configuration->GetQueueDowntimeData()) {
 			cbDowntimeData = new DowntimeDataCallback(this);
 			RegisterCallback(cbDowntimeData);
 		}
 
-		if (configuration.GetQueueNotificationData()) {
+		if (configuration->GetQueueNotificationData()) {
 			cbNotificationData = new NotificationDataCallback(this);
 			RegisterCallback(cbNotificationData);
 		}
 
-		if (configuration.GetQueueProgramStatusData()) {
+		if (configuration->GetQueueProgramStatusData()) {
 			cbProgramStatusData = new ProgramStatusDataCallback(this);
 			RegisterCallback(cbProgramStatusData);
 		}
 
-		if (configuration.GetQueueContactStatusData()) {
+		if (configuration->GetQueueContactStatusData()) {
 			cbContactStatusData = new ContactStatusDataCallback(this);
 			RegisterCallback(cbContactStatusData);
 		}
 
-		if (configuration.GetQueueContactNotificationData()) {
+		if (configuration->GetQueueContactNotificationData()) {
 			cbContactNotificationData = new ContactNotificationDataCallback(this);
 			RegisterCallback(cbContactNotificationData);
 		}
 
-		if (configuration.GetQueueContactNotificationMethodData()) {
+		if (configuration->GetQueueContactNotificationMethodData()) {
 			cbContactNotificationMethodData = new ContactNotificationMethodDataCallback(this);
 			RegisterCallback(cbContactNotificationMethodData);
 		}
 
-		if (configuration.GetQueueEventHandlerData()) {
+		if (configuration->GetQueueEventHandlerData()) {
 			cbEventHandlerData = new EventHandlerDataCallback(this);
 			RegisterCallback(cbEventHandlerData);
 		}
 
-		if (configuration.GetQueueRestartData() || configuration.GetQueueProcessData()) {
-			cbProcessData = new ProcessDataCallback(this, configuration.GetQueueRestartData(), configuration.GetQueueProcessData());
+		if (configuration->GetQueueRestartData() || configuration->GetQueueProcessData()) {
+			cbProcessData = new ProcessDataCallback(this, configuration->GetQueueRestartData(), configuration->GetQueueProcessData());
 			RegisterCallback(cbProcessData);
 		}
 
@@ -144,10 +145,8 @@ namespace statusengine {
 	}
 	
 	Statusengine::~Statusengine() {
-		ls << "unload" << eom;
+		ls << "unloading..." << eom;
 		neb_deregister_module_callbacks(nebhandle);
-		ls << "unload finished" << eom;
-		delete gearman;
 
 		delete cbHostStatus;
 		delete cbHostCheck;
@@ -168,6 +167,10 @@ namespace statusengine {
 		delete cbContactNotificationMethodData;
 		delete cbEventHandlerData;
 		delete cbProcessData;
+		delete configuration;
+
+		ls << "unloading finished" << eom;
+		delete gearman;
 	}
 
 	std::ostream& Statusengine::Log() {

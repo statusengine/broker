@@ -1,12 +1,72 @@
 #include "Configuration.h"
 
+#include <list>
+
 #include "Statusengine.h"
 
 
 namespace statusengine {
 
-	Configuration::Configuration() {
+	Configuration::Configuration(Statusengine *se, const toml::Table &cfg) : se(se) {
+		toml::Table queues;
+		try {
+			queues = cfg.at("Queues").cast<toml::value_t::Table>();
+		}
+		catch (std::out_of_range &oor) {
+		}
+		catch (const toml::type_error &tte) {
+			se->Log() << "Invalid configuration: Queues isn't a table! Ignoring for now..." << eoem;
+		}
 
+		SetQueueHostStatus(GetIgnore(queues, "HostStatus", false));
+		SetQueueHostCheck(GetIgnore(queues, "HostCheck", false));
+		SetQueueOCHP(GetIgnore(queues, "OCHP", false));
+		SetQueueServiceStatus(GetIgnore(queues, "ServiceStatus", false));
+		SetQueueServiceCheck(GetIgnore(queues, "ServiceCheck", false));
+		SetQueueServicePerfData(GetIgnore(queues, "ServicePerfData", false));
+		SetQueueOCSP(GetIgnore(queues, "OCSP", false));
+		SetQueueStateChange(GetIgnore(queues, "StateChange", false));
+		SetQueueLogData(GetIgnore(queues, "LogData", false));
+		SetQueueSystemCommandData(GetIgnore(queues, "SystemCommandData", false));
+		SetQueueCommentData(GetIgnore(queues, "CommentData", false));
+		SetQueueExternalCommandData(GetIgnore(queues, "ExternalCommandData", false));
+		SetQueueAcknowledgementData(GetIgnore(queues, "AcknowledgementData", false));
+		SetQueueFlappingData(GetIgnore(queues, "FlappingData", false));
+		SetQueueDowntimeData(GetIgnore(queues, "DowntimeData", false));
+		SetQueueNotificationData(GetIgnore(queues, "NotificationData", false));
+		SetQueueProgramStatusData(GetIgnore(queues, "ProgramStatusData", false));
+		SetQueueContactStatusData(GetIgnore(queues, "ContactStatusData", false));
+		SetQueueContactNotificationData(GetIgnore(queues, "ContactNotificationData", false));
+		SetQueueContactNotificationMethodData(GetIgnore(queues, "ContactNotificationMethodData", false));
+		SetQueueEventHandlerData(GetIgnore(queues, "EventHandlerData", false));
+		SetQueueProcessData(GetIgnore(queues, "ProcessData", false));
+
+		toml::Table gearman;
+		try {
+			gearman = cfg.at("Gearman").cast<toml::value_t::Table>();
+		}
+		catch (const std::out_of_range &oor) {
+		}
+		catch (const toml::type_error &tte) {
+			se->Log() << "Invalid configuration: Gearman isn't a table! Ignoring for now..." << eoem;
+		}
+
+		std::list<std::string> servers;
+		try {
+			servers = toml::get<std::list<std::string>>(gearman.at("Servers"));
+		}
+		catch (std::out_of_range &oor) {
+		}
+		catch (const toml::type_error &tte) {
+			se->Log() << "Invalid configuration: Gearman::Servers isn't an array! Ignoring for now..." << eoem;
+		}
+
+		ResetGearman();
+		if (!servers.empty()) {
+			for (auto it = servers.begin(); it != servers.end(); ++it) {
+				AddGearman(*it);
+			}
+		}
 	}
 
 	bool Configuration::GetQueueHostStatus() const {
@@ -215,95 +275,4 @@ namespace statusengine {
 		return gearmanClients;
 	}
 
-	void to_json(json& j, const Configuration& c) {
-		json queues;
-		queues["HostStatus"] = c.GetQueueHostStatus();
-		queues["HostCheck"] = c.GetQueueHostCheck();
-		queues["OCHP"] = c.GetQueueOCHP();
-		queues["ServiceStatus"] = c.GetQueueServiceStatus();
-		queues["ServiceCheck"] = c.GetQueueServiceCheck();
-		queues["ServicePerfData"] = c.GetQueueServicePerfData();
-		queues["OCSP"] = c.GetQueueOCSP();
-		queues["StateChange"] = c.GetQueueStateChange();
-		queues["LogData"] = c.GetQueueLogData();
-		queues["SystemCommandData"] = c.GetQueueSystemCommandData();
-		queues["CommentData"] = c.GetQueueCommentData();
-		queues["ExternalCommandData"] = c.GetQueueExternalCommandData();
-		queues["AcknowledgementData"] = c.GetQueueAcknowledgementData();
-		queues["FlappingData"] = c.GetQueueFlappingData();
-		queues["DowntimeData"] = c.GetQueueDowntimeData();
-		queues["NotificationData"] = c.GetQueueNotificationData();
-		queues["ProgramStatusData"] = c.GetQueueProgramStatusData();
-		queues["ContactStatusData"] = c.GetQueueContactStatusData();
-		queues["ContactNotificationData"] = c.GetQueueContactNotificationData();
-		queues["ContactNotificationMethodData"] = c.GetQueueContactNotificationMethodData();
-		queues["EventHandlerData"] = c.GetQueueEventHandlerData();
-		queues["ProcessData"] = c.GetQueueProcessData();
-		j["Queues"] = queues;
-
-		json gearman;
-
-		auto gearmanUrls = c.GetGearmanList();
-		for (auto it = gearmanUrls.begin(); it != gearmanUrls.end(); ++it) {
-			gearman.push_back(*it);
-		}
-
-		j["Gearman"] = gearman;
-	}
-
-	template<typename T>
-	T get_json(const json& j, const char* name, T defaultValue) {
-		try {
-			return j.at(name);
-		}
-		catch (const nlohmann::detail::out_of_range &oor) {
-		}
-		return defaultValue;
-	}
-
-	void from_json(const json& j, Configuration& c) {
-		json queues;
-		try {
-			queues = j.at("Queues");
-		}
-		catch (const nlohmann::detail::out_of_range &oor) {
-		}
-
-		c.SetQueueHostStatus(get_json<bool>(queues, "HostStatus", false));
-		c.SetQueueHostCheck(get_json<bool>(queues, "HostCheck", false));
-		c.SetQueueOCHP(get_json<bool>(queues, "OCHP", false));
-		c.SetQueueServiceStatus(get_json<bool>(queues, "ServiceStatus", false));
-		c.SetQueueServiceCheck(get_json<bool>(queues, "ServiceCheck", false));
-		c.SetQueueServicePerfData(get_json<bool>(queues, "ServicePerfData", false));
-		c.SetQueueOCSP(get_json<bool>(queues, "OCSP", false));
-		c.SetQueueStateChange(get_json<bool>(queues, "StateChange", false));
-		c.SetQueueLogData(get_json<bool>(queues, "LogData", false));
-		c.SetQueueSystemCommandData(get_json<bool>(queues, "SystemCommandData", false));
-		c.SetQueueCommentData(get_json<bool>(queues, "CommentData", false));
-		c.SetQueueExternalCommandData(get_json<bool>(queues, "ExternalCommandData", false));
-		c.SetQueueAcknowledgementData(get_json<bool>(queues, "AcknowledgementData", false));
-		c.SetQueueFlappingData(get_json<bool>(queues, "FlappingData", false));
-		c.SetQueueDowntimeData(get_json<bool>(queues, "DowntimeData", false));
-		c.SetQueueNotificationData(get_json<bool>(queues, "NotificationData", false));
-		c.SetQueueProgramStatusData(get_json<bool>(queues, "ProgramStatusData", false));
-		c.SetQueueContactStatusData(get_json<bool>(queues, "ContactStatusData", false));
-		c.SetQueueContactNotificationData(get_json<bool>(queues, "ContactNotificationData", false));
-		c.SetQueueContactNotificationMethodData(get_json<bool>(queues, "ContactNotificationMethodData", false));
-		c.SetQueueEventHandlerData(get_json<bool>(queues, "EventHandlerData", false));
-		c.SetQueueProcessData(get_json<bool>(queues, "ProcessData", false));
-
-		json gearman;
-		try {
-			gearman = j.at("Gearman");
-		}
-		catch (const nlohmann::detail::out_of_range &oor) {
-		}
-
-		c.ResetGearman();
-		if (!gearman.empty()) {
-			for (json::iterator it = gearman.begin(); it != gearman.end(); ++it) {
-				c.AddGearman(*it);
-			}
-		}
-	}
 }

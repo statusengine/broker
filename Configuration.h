@@ -4,21 +4,17 @@
 #include <string>
 #include <list>
 
-#include "vendor/json.hpp"
+#include "vendor/toml.hpp"
 
+#include "Statusengine.h"
 #include "GearmanClient.h"
-
-
-using json = nlohmann::json;
+#include "LogStream.h"
 
 
 namespace statusengine {
-
-	class Statusengine;
-
 	class Configuration {
 	public:
-		Configuration();
+		Configuration(Statusengine *se, const toml::Table &cfg);
 
 		bool GetQueueHostStatus() const;
 		void SetQueueHostStatus(const bool v);
@@ -71,7 +67,21 @@ namespace statusengine {
 		void AddGearman(const std::string &url);
 		const std::list<std::string>& GetGearmanList() const;
 		std::list<std::shared_ptr<GearmanClient>> GetGearmanClients(Statusengine *se);
+
 	private:
+		template <typename T>
+		T GetIgnore(const toml::Table &tab, const toml::key &ky, T &&opt) {
+			try {
+				return toml::get_or(tab, ky, opt);
+			}
+			catch (const toml::type_error &tte) {
+				se->Log() << "Invalid configuration: Invalid value for key " << ky << eoem;
+			}
+			return std::move(opt);
+		}
+
+		Statusengine *se;
+
 		bool HostStatus = false;
 		bool HostCheck = false;
 		bool OCHP = false;
@@ -100,9 +110,6 @@ namespace statusengine {
 
 		std::list<std::shared_ptr<GearmanClient>> gearmanClients;
 	};
-
-	void to_json(json& j, const Configuration& c);
-	void from_json(const json& j, Configuration& c);
 }
 
 #endif // !CONFIGURATION_H

@@ -65,3 +65,5 @@ target_link_libraries(statusengine PUBLIC ${GEARMAND_LIBRARIES})
 
 target_compile_options(statusengine PUBLIC ${NAEMON_CFLAGS_OTHER} ${GEARMAND_CFLAGS_OTHER})
 target_compile_features(statusengine INTERFACE ${MY_CXX_COMPILE_FEATURES})
+
+install(TARGETS statusengine LIBRARY DESTINATION lib)
