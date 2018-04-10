@@ -1,7 +1,8 @@
 #include "ProcessDataCallback.h"
 
 #include "Statusengine.h"
-#include "NagiosObjects/NagiosStateChangeData.h"
+#include "NagiosObjects/NagiosProcessData.h"
+#include "LogStream.h"
 
 
 namespace statusengine {
@@ -19,11 +20,7 @@ namespace statusengine {
 			se->SendMessage("statusngin_core_restart", restartData.dump());
 		}
 
-		// TODO: Object Dump?
-
-
-
-		//auto statusData = NagiosStateChangeData(data);
-		//se->SendMessage("statusngin_statechanges", statusData.GetData().dump());
+		NagiosProcessData processData(data);
+		se->SendMessage("statusngin_processdata", processData.GetData().dump());
 	}
 }

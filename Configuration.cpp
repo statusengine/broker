@@ -40,6 +40,7 @@ namespace statusengine {
 		SetQueueContactNotificationMethodData(GetIgnore(queues, "ContactNotificationMethodData", false));
 		SetQueueEventHandlerData(GetIgnore(queues, "EventHandlerData", false));
 		SetQueueProcessData(GetIgnore(queues, "ProcessData", false));
+		SetQueueRestartData(GetIgnore(queues, "RestartData", false));
 
 		toml::Table gearman;
 		try {

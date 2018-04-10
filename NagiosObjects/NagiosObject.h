@@ -31,18 +31,16 @@ namespace statusengine {
 			if (other == nullptr) {
 				other = &Data;
 			}
-			if (value != nullptr) {
-				if (value == nullptr) {
-					(*other)[name] = nullptr;
+			if (value == nullptr) {
+				(*other)[name] = nullptr;
+			}
+			else {
+				if (std::is_same<T, char*>::value) {
+					// fancy strings instead of c bullshit
+					(*other)[name] = std::string(reinterpret_cast<char*>(value));
 				}
 				else {
-					if (std::is_same<T, char*>::value) {
-						// fancy strings instead of c bullshit
-						(*other)[name] = std::string(reinterpret_cast<char*>(value));
-					}
-					else {
-						(*other)[name] = value;
-					}
+					(*other)[name] = value;
 				}
 			}
 		}
