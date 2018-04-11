@@ -190,7 +190,7 @@ build:nagios:xenial:
       tar xfv nagios-4.3.4.tar.gz && cd nagios-4.3.4/ &&
       ./configure --prefix=/opt/nagios --enable-event-broker &&
       make all -j5 &&
-      make install &&
+      make install install-config install-commandmode install-lib install-devel  &&
       cd "${OLDWD}"
     - >
       mkdir build &&
