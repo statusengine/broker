@@ -147,7 +147,7 @@ build:jessie:
 
 
 build:stretch:
-  image: debian:stretch
+  image: ubuntu:stretch
   stage: build
   script:
     - apt-get update && apt-get -y install cmake gcc g++ build-essential automake gperf help2man libtool libglib2.0-dev libgearman-dev wget tar
@@ -170,6 +170,32 @@ build:stretch:
       mkdir build &&
       cd build &&
       cmake -DCMAKE_C_COMPILER=/usr/bin/gcc -DCMAKE_CXX_COMPILER=/usr/bin/g++ .. &&
+      make -j5
+  artifacts:
+    paths:
+      - build/libstatusengine.so
+      
+      
+build:nagios:xenial:
+  image: ubuntu:xenial
+  stage: build
+  script:
+    - apt-get update && apt-get -y install cmake gcc g++ build-essential libgd-dev libpng12-dev unzip wget tar libgearman-dev
+    - useradd -d /opt/nagios -m -s /bin/bash --system nagios
+    - >
+      set -e &&
+      OLDWD="$(pwd)" &&
+      cd /tmp/ &&
+      wget https://assets.nagios.com/downloads/nagioscore/releases/nagios-4.3.4.tar.gz &&
+      tar xfv nagios-4.3.4.tar.gz && cd nagios-4.3.4/ &&
+      ./autogen.sh --prefix=/opt/nagios --enable-event-broker &&
+      make all -j5 &&
+      make install &&
+      cd "${OLDWD}"
+    - >
+      mkdir build &&
+      cd build &&
+      cmake -DCMAKE_C_COMPILER=/usr/bin/gcc -DCMAKE_CXX_COMPILER=/usr/bin/g++ -DBUILD_NAGIOS=ON -DNAGIOS_INCLUDE_DIR=/opt/nagios/include .. &&
       make -j5
   artifacts:
     paths:
