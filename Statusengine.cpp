@@ -18,6 +18,7 @@ namespace statusengine {
 
 	Statusengine::Statusengine(nebmodule *handle, std::string configurationPath) :
 		nebhandle(handle), configurationPath(configurationPath) {
+            ls << "Statusengine: ";
 	}
 
 	int Statusengine::Init() {

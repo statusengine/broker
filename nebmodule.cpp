@@ -10,7 +10,6 @@ extern "C" {
 	NEB_API_VERSION(CURRENT_NEB_API_VERSION);
 }
 
-
 statusengine::Statusengine *se;
 
 extern "C" int nebmodule_init(int flags, char *args, nebmodule *handle) {

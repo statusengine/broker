@@ -1,4 +1,6 @@
 /naemon
+/nagios
 /CMakeSettings.json
 /.vs
 /libgearman-1.0
+/CppProperties.json
