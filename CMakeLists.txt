@@ -65,11 +65,8 @@ target_compile_options(statusengine PUBLIC ${GEARMAND_CFLAGS_OTHER})
 
 
 if(DEFINED BUILD_NAGIOS)
-	if(DEFINED NAGIOS_INCLUDE_DIR)
-		target_include_directories(statusengine PUBLIC ${NAGIOS_INCLUDE_DIR})
-	endif(DEFINED NAGIOS_INCLUDE_DIR)
+	target_include_directories(statusengine PUBLIC ${NAGIOS_INCLUDE_DIR})
 	target_link_libraries(statusengine PUBLIC uuid event gearman)
-	#target_compile_options(statusengine PUBLIC -luuid -levent -lgearman -ljson-c)
 	add_definitions(-DBUILD_NAGIOS)
         if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
             target_compile_options(statusengine PUBLIC -Wno-pointer-arith)
