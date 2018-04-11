@@ -65,7 +65,10 @@ target_compile_options(statusengine PUBLIC ${GEARMAND_CFLAGS_OTHER})
 
 
 if(DEFINED BUILD_NAGIOS)
-	target_include_directories(statusengine PUBLIC ${NAGIOS_INCLUDE_DIR})
+	if(DEFINED NAGIOS_INCLUDE_DIR)
+		target_include_directories(statusengine PUBLIC ${NAGIOS_INCLUDE_DIR})
+	endif(DEFINED NAGIOS_INCLUDE_DIR)
+
 	target_link_libraries(statusengine PUBLIC uuid event gearman)
 	add_definitions(-DBUILD_NAGIOS)
         if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
