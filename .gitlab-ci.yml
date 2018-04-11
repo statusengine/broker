@@ -147,7 +147,7 @@ build:jessie:
 
 
 build:stretch:
-  image: ubuntu:stretch
+  image: debian:stretch
   stage: build
   script:
     - apt-get update && apt-get -y install cmake gcc g++ build-essential automake gperf help2man libtool libglib2.0-dev libgearman-dev wget tar
@@ -188,7 +188,7 @@ build:nagios:xenial:
       cd /tmp/ &&
       wget https://assets.nagios.com/downloads/nagioscore/releases/nagios-4.3.4.tar.gz &&
       tar xfv nagios-4.3.4.tar.gz && cd nagios-4.3.4/ &&
-      ./autogen.sh --prefix=/opt/nagios --enable-event-broker &&
+      ./configure --prefix=/opt/nagios --enable-event-broker &&
       make all -j5 &&
       make install &&
       cd "${OLDWD}"
