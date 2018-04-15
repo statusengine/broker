@@ -183,12 +183,12 @@ build:nagios:xenial:
     - apt-get update && apt-get -y install cmake gcc g++ build-essential libgd-dev libpng12-dev unzip wget tar libgearman-dev
     - useradd -d /opt/nagios -m -s /bin/bash --system nagios
     - |
-      set -e &&
-      OLDWD="$(pwd)" &&
-      cd /tmp/ &&
-      wget https://assets.nagios.com/downloads/nagioscore/releases/nagios-4.3.4.tar.gz &&
-      tar xfv nagios-4.3.4.tar.gz && cd nagios-4.3.4/ &&
-      patch -p1  -l -r /dev/stdout << ENDOFMESSAGE
+      OLDWD="$(pwd)"
+      cd /tmp/
+      wget https://assets.nagios.com/downloads/nagioscore/releases/nagios-4.3.4.tar.gz
+      tar xfv nagios-4.3.4.tar.gz
+      cd nagios-4.3.4/
+      patch -p1  -l << ENDOFMESSAGE
       From 2ba617d68ab7da3f082e84e13a2111ef37257636 Mon Sep 17 00:00:00 2001
       From: jabdr <j.drummer@thelambda.de>
       Date: Wed, 11 Apr 2018 22:08:43 +0200
@@ -211,10 +211,10 @@ build:nagios:xenial:
       +NAGIOS_END_DECL
          
        #endif
-      ENDOFMESSAGE | /bin/true &&
-      ./configure --prefix=/opt/nagios --enable-event-broker &&
-      make all -j5 &&
-      make install install-config install-commandmode install-lib install-devel  &&
+      ENDOFMESSAGE
+      ./configure --prefix=/opt/nagios --enable-event-broker
+      make all -j5
+      make install install-config install-commandmode install-lib install-devel
       cd "${OLDWD}"
     - >
       mkdir build &&
