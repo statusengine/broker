@@ -6,13 +6,14 @@
 #include "NebmoduleCallback.h"
 
 namespace statusengine {
-	class EventHandlerDataCallback : public NebmoduleCallback<nebstruct_event_handler_data> {
-	public:
-		EventHandlerDataCallback(Statusengine *se);
+    class EventHandlerDataCallback
+        : public NebmoduleCallback<nebstruct_event_handler_data> {
+      public:
+        EventHandlerDataCallback(Statusengine *se);
 
-		virtual void Callback(int event_type, nebstruct_event_handler_data *data);
-	};
-}
+        virtual void Callback(int event_type,
+                              nebstruct_event_handler_data *data);
+    };
+} // namespace statusengine
 
 #endif // !EVENTHANDLERDATA_CALLBACK_H
-

@@ -6,12 +6,13 @@
 #include "NebmoduleCallback.h"
 
 namespace statusengine {
-	class StateChangeCallback : public NebmoduleCallback<nebstruct_statechange_data> {
-	public:
-		StateChangeCallback(Statusengine *se);
+    class StateChangeCallback
+        : public NebmoduleCallback<nebstruct_statechange_data> {
+      public:
+        StateChangeCallback(Statusengine *se);
 
-		virtual void Callback(int event_type, nebstruct_statechange_data *data);
-	};
-}
+        virtual void Callback(int event_type, nebstruct_statechange_data *data);
+    };
+} // namespace statusengine
 
 #endif // !STATECHANGE_CALLBACK_H

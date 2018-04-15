@@ -1,16 +1,14 @@
 #ifndef NAGIOS_FLAPPINGDATA_H
 #define NAGIOS_FLAPPINGDATA_H
 
-#include "nebmodule.h"
 #include "NagiosObject.h"
-
+#include "nebmodule.h"
 
 namespace statusengine {
-	class NagiosFlappingData : public NagiosObject {
-	public:
-		NagiosFlappingData(const nebstruct_flapping_data *flappingData);
-	};
-}
+    class NagiosFlappingData : public NagiosObject {
+      public:
+        NagiosFlappingData(const nebstruct_flapping_data *flappingData);
+    };
+} // namespace statusengine
 
 #endif // !NAGIOS_FLAPPINGDATA_H
-

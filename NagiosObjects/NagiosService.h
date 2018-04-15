@@ -6,11 +6,11 @@
 #include "NagiosObject.h"
 
 namespace statusengine {
-	class NagiosService : public NagiosObject {
-	public:
-		NagiosService(const service *data);
-	};
+    class NagiosService : public NagiosObject {
+      public:
+        NagiosService(const service *data);
+    };
 
-}
+} // namespace statusengine
 
 #endif // !NAGIOS_SERVICE_H

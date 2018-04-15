@@ -6,12 +6,13 @@
 #include "NebmoduleCallback.h"
 
 namespace statusengine {
-	class CommentDataCallback : public NebmoduleCallback<nebstruct_comment_data> {
-	public:
-		CommentDataCallback(Statusengine *se);
+    class CommentDataCallback
+        : public NebmoduleCallback<nebstruct_comment_data> {
+      public:
+        CommentDataCallback(Statusengine *se);
 
-		virtual void Callback(int event_type, nebstruct_comment_data *data);
-	};
-}
+        virtual void Callback(int event_type, nebstruct_comment_data *data);
+    };
+} // namespace statusengine
 
 #endif // !COMMENT_DATA_CALLBACK_H

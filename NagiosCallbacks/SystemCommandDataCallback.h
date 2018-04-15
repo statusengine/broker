@@ -5,14 +5,15 @@
 
 #include "NebmoduleCallback.h"
 
-
 namespace statusengine {
-	class SystemCommandDataCallback : public NebmoduleCallback<nebstruct_system_command_data> {
-	public:
-		SystemCommandDataCallback(Statusengine *se);
+    class SystemCommandDataCallback
+        : public NebmoduleCallback<nebstruct_system_command_data> {
+      public:
+        SystemCommandDataCallback(Statusengine *se);
 
-		virtual void Callback(int event_type, nebstruct_system_command_data *data);
-	};
-}
+        virtual void Callback(int event_type,
+                              nebstruct_system_command_data *data);
+    };
+} // namespace statusengine
 
 #endif // !SYSTEM_COMMAND_DATA_CALLBACK_H

@@ -2,15 +2,9 @@
 
 namespace statusengine {
 
-	NagiosObject::NagiosObject() {
-		Data = json();
-	}
+    NagiosObject::NagiosObject() { Data = json(); }
 
-	NagiosObject::NagiosObject(const json &j) {
-		Data = json(j);
-	}
+    NagiosObject::NagiosObject(const json &j) { Data = json(j); }
 
-	json& NagiosObject::GetData() {
-		return Data;
-	}
-}
+    json &NagiosObject::GetData() { return Data; }
+} // namespace statusengine

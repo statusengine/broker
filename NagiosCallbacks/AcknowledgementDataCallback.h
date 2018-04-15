@@ -6,13 +6,14 @@
 #include "NebmoduleCallback.h"
 
 namespace statusengine {
-	class AcknowledgementDataCallback : public NebmoduleCallback<nebstruct_acknowledgement_data> {
-	public:
-		AcknowledgementDataCallback(Statusengine *se);
+    class AcknowledgementDataCallback
+        : public NebmoduleCallback<nebstruct_acknowledgement_data> {
+      public:
+        AcknowledgementDataCallback(Statusengine *se);
 
-		virtual void Callback(int event_type, nebstruct_acknowledgement_data *data);
-	};
-}
+        virtual void Callback(int event_type,
+                              nebstruct_acknowledgement_data *data);
+    };
+} // namespace statusengine
 
 #endif // !ACKNOWLEDGEMENTDATA_CALLBACK_H
-

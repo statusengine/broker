@@ -1,14 +1,14 @@
 #ifndef NAGIOS_HOST_CHECK_DATA_H
 #define NAGIOS_HOST_CHECK_DATA_H
 
-#include "nebmodule.h"
 #include "NagiosObject.h"
+#include "nebmodule.h"
 
 namespace statusengine {
-	class NagiosHostCheckData : public NagiosObject {
-	public:
-		NagiosHostCheckData(const nebstruct_host_check_data *hostCheckData);
-	};
-}
+    class NagiosHostCheckData : public NagiosObject {
+      public:
+        NagiosHostCheckData(const nebstruct_host_check_data *hostCheckData);
+    };
+} // namespace statusengine
 
 #endif // !NAGIOS_HOST_CHECK_DATA_H

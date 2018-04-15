@@ -1,14 +1,15 @@
 #ifndef NAGIOS_STATECHANGE_DATA_H
 #define NAGIOS_STATECHANGE_DATA_H
 
-#include "nebmodule.h"
 #include "NagiosObject.h"
+#include "nebmodule.h"
 
 namespace statusengine {
-	class NagiosStateChangeData : public NagiosObject {
-	public:
-		NagiosStateChangeData(const nebstruct_statechange_data *serviceStatusData);
-	};
-}
+    class NagiosStateChangeData : public NagiosObject {
+      public:
+        NagiosStateChangeData(
+            const nebstruct_statechange_data *serviceStatusData);
+    };
+} // namespace statusengine
 
 #endif // !NAGIOS_STATECHANGE_DATA_H

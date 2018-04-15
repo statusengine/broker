@@ -6,13 +6,13 @@
 #include "NebmoduleCallback.h"
 
 namespace statusengine {
-	class DowntimeDataCallback : public NebmoduleCallback<nebstruct_downtime_data> {
-	public:
-		DowntimeDataCallback(Statusengine *se);
+    class DowntimeDataCallback
+        : public NebmoduleCallback<nebstruct_downtime_data> {
+      public:
+        DowntimeDataCallback(Statusengine *se);
 
-		virtual void Callback(int event_type, nebstruct_downtime_data *data);
-	};
-}
+        virtual void Callback(int event_type, nebstruct_downtime_data *data);
+    };
+} // namespace statusengine
 
 #endif // !DOWNTIMEDATA_CALLBACK_H
-

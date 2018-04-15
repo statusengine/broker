@@ -1,16 +1,15 @@
 #ifndef NAGIOS_EVENTHANDLERDATA_H
 #define NAGIOS_EVENTHANDLERDATA_H
 
-#include "nebmodule.h"
 #include "NagiosObject.h"
-
+#include "nebmodule.h"
 
 namespace statusengine {
-	class NagiosEventHandlerData : public NagiosObject {
-	public:
-		NagiosEventHandlerData(const nebstruct_event_handler_data *eventHandlerData);
-	};
-}
+    class NagiosEventHandlerData : public NagiosObject {
+      public:
+        NagiosEventHandlerData(
+            const nebstruct_event_handler_data *eventHandlerData);
+    };
+} // namespace statusengine
 
 #endif // !NAGIOS_EVENTHANDLERDATA_H
-

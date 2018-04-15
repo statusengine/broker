@@ -6,13 +6,14 @@
 #include "NebmoduleCallback.h"
 
 namespace statusengine {
-	class ContactNotificationDataCallback : public NebmoduleCallback<nebstruct_contact_notification_data> {
-	public:
-		ContactNotificationDataCallback(Statusengine *se);
+    class ContactNotificationDataCallback
+        : public NebmoduleCallback<nebstruct_contact_notification_data> {
+      public:
+        ContactNotificationDataCallback(Statusengine *se);
 
-		virtual void Callback(int event_type, nebstruct_contact_notification_data *data);
-	};
-}
+        virtual void Callback(int event_type,
+                              nebstruct_contact_notification_data *data);
+    };
+} // namespace statusengine
 
 #endif // !CONTACTNOTIFICATIONDATA_CALLBACK_H
-
