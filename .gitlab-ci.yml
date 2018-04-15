@@ -188,7 +188,7 @@ build:nagios:xenial:
       cd /tmp/ &&
       wget https://assets.nagios.com/downloads/nagioscore/releases/nagios-4.3.4.tar.gz &&
       tar xfv nagios-4.3.4.tar.gz && cd nagios-4.3.4/ &&
-      patch -p1  -l -r /dev/stderr << ENDOFMESSAGE
+      patch -p1  -l -r /dev/stdout << ENDOFMESSAGE
       From 2ba617d68ab7da3f082e84e13a2111ef37257636 Mon Sep 17 00:00:00 2001
       From: jabdr <j.drummer@thelambda.de>
       Date: Wed, 11 Apr 2018 22:08:43 +0200
@@ -211,7 +211,7 @@ build:nagios:xenial:
       +NAGIOS_END_DECL
          
        #endif
-      ENDOFMESSAGE &&
+      ENDOFMESSAGE | /bin/true &&
       ./configure --prefix=/opt/nagios --enable-event-broker &&
       make all -j5 &&
       make install install-config install-commandmode install-lib install-devel  &&
