@@ -11,12 +11,12 @@ using json = nlohmann::json;
 namespace statusengine {
     class NagiosObject {
       public:
-        NagiosObject(const json &j);
+        explicit NagiosObject(const json &j);
 
         json &GetData();
 
       protected:
-        NagiosObject();
+        explicit NagiosObject();
 
         template <typename T>
         void SetData(std::string name, T value, json *other = nullptr) {

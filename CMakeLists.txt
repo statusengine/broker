@@ -13,7 +13,7 @@ find_package(PkgConfig REQUIRED)
 
 add_library(statusengine SHARED
 	nebmodule.cpp Statusengine.cpp
-	GearmanClient.cpp LogStream.cpp Configuration.cpp
+	GearmanClient.cpp Configuration.cpp
 	NagiosObjects/NagiosObject.cpp
 	NagiosObjects/NagiosHost.cpp
 	NagiosObjects/NagiosHostStatusData.cpp

@@ -7,7 +7,7 @@
 namespace statusengine {
     class NagiosServiceCheckPerfData : public NagiosObject {
       public:
-        NagiosServiceCheckPerfData(
+        explicit NagiosServiceCheckPerfData(
             const nebstruct_service_check_data *serviceCheckData);
     };
 } // namespace statusengine

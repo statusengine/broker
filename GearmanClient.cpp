@@ -4,7 +4,7 @@
 
 namespace statusengine {
 
-    GearmanClient::GearmanClient(std::ostream &ls, const std::string url)
+    GearmanClient::GearmanClient(std::ostream &ls, const std::string &url)
         : ls(ls) {
         client = gearman_client_create(nullptr);
         gearman_return_t ret = gearman_client_add_servers(client, url.c_str());
@@ -22,8 +22,8 @@ namespace statusengine {
         gearman_client_free(client);
     }
 
-    void GearmanClient::SendMessage(const std::string queue,
-                                    const std::string message) const {
+    void GearmanClient::SendMessage(const std::string &queue,
+                                    const std::string &message) const {
         auto ret = gearman_client_do_background(client, queue.c_str(), nullptr,
                                                 message.c_str(),
                                                 message.length(), nullptr);

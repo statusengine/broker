@@ -9,7 +9,7 @@ namespace statusengine {
     class HostStatusCallback
         : public NebmoduleCallback<nebstruct_host_status_data> {
       public:
-        HostStatusCallback(Statusengine *se);
+        explicit HostStatusCallback(Statusengine *se);
 
         virtual void Callback(int event_type, nebstruct_host_status_data *data);
     };

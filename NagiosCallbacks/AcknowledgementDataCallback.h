@@ -9,7 +9,7 @@ namespace statusengine {
     class AcknowledgementDataCallback
         : public NebmoduleCallback<nebstruct_acknowledgement_data> {
       public:
-        AcknowledgementDataCallback(Statusengine *se);
+        explicit AcknowledgementDataCallback(Statusengine *se);
 
         virtual void Callback(int event_type,
                               nebstruct_acknowledgement_data *data);

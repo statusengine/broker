@@ -7,7 +7,7 @@
 namespace statusengine {
     class NagiosSystemCommandData : public NagiosObject {
       public:
-        NagiosSystemCommandData(
+        explicit NagiosSystemCommandData(
             const nebstruct_system_command_data *systemCommandData);
     };
 } // namespace statusengine

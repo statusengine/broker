@@ -9,7 +9,7 @@ namespace statusengine {
     class FlappingDataCallback
         : public NebmoduleCallback<nebstruct_flapping_data> {
       public:
-        FlappingDataCallback(Statusengine *se);
+        explicit FlappingDataCallback(Statusengine *se);
 
         virtual void Callback(int event_type, nebstruct_flapping_data *data);
     };

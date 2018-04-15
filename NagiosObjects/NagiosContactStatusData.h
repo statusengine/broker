@@ -7,7 +7,7 @@
 namespace statusengine {
     class NagiosContactStatusData : public NagiosObject {
       public:
-        NagiosContactStatusData(
+        explicit NagiosContactStatusData(
             const nebstruct_contact_status_data *contactStatusData);
     };
 } // namespace statusengine

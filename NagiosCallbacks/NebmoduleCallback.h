@@ -10,8 +10,8 @@ namespace statusengine {
 
     template <typename T> class NebmoduleCallback {
       public:
-        NebmoduleCallback(NEBCallbackType cbType, Statusengine *se,
-                          int priority = 0)
+        explicit NebmoduleCallback(NEBCallbackType cbType, Statusengine *se,
+                                   int priority = 0)
             : cbType(cbType), priority(priority), se(se) {}
 
         NEBCallbackType GetCallbackType() { return cbType; }

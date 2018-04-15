@@ -7,7 +7,7 @@
 namespace statusengine {
     class NagiosStateChangeData : public NagiosObject {
       public:
-        NagiosStateChangeData(
+        explicit NagiosStateChangeData(
             const nebstruct_statechange_data *serviceStatusData);
     };
 } // namespace statusengine

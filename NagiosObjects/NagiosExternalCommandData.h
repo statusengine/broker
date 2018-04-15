@@ -7,7 +7,7 @@
 namespace statusengine {
     class NagiosExternalCommandData : public NagiosObject {
       public:
-        NagiosExternalCommandData(
+        explicit NagiosExternalCommandData(
             const nebstruct_external_command_data *externalCommandData);
     };
 } // namespace statusengine

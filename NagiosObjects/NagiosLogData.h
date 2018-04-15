@@ -7,7 +7,7 @@
 namespace statusengine {
     class NagiosLogData : public NagiosObject {
       public:
-        NagiosLogData(const nebstruct_log_data *logData);
+        explicit NagiosLogData(const nebstruct_log_data *logData);
     };
 } // namespace statusengine
 

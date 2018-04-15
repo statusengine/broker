@@ -7,7 +7,7 @@
 namespace statusengine {
     class NagiosCommentData : public NagiosObject {
       public:
-        NagiosCommentData(const nebstruct_comment_data *commentData);
+        explicit NagiosCommentData(const nebstruct_comment_data *commentData);
     };
 } // namespace statusengine
 

@@ -7,7 +7,8 @@
 namespace statusengine {
     class NagiosDowntimeData : public NagiosObject {
       public:
-        NagiosDowntimeData(const nebstruct_downtime_data *downtimeData);
+        explicit NagiosDowntimeData(
+            const nebstruct_downtime_data *downtimeData);
     };
 } // namespace statusengine
 

@@ -7,7 +7,7 @@
 namespace statusengine {
     class NagiosEventHandlerData : public NagiosObject {
       public:
-        NagiosEventHandlerData(
+        explicit NagiosEventHandlerData(
             const nebstruct_event_handler_data *eventHandlerData);
     };
 } // namespace statusengine

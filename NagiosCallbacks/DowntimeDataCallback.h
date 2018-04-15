@@ -9,7 +9,7 @@ namespace statusengine {
     class DowntimeDataCallback
         : public NebmoduleCallback<nebstruct_downtime_data> {
       public:
-        DowntimeDataCallback(Statusengine *se);
+        explicit DowntimeDataCallback(Statusengine *se);
 
         virtual void Callback(int event_type, nebstruct_downtime_data *data);
     };

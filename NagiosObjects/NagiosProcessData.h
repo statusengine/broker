@@ -7,7 +7,7 @@
 namespace statusengine {
     class NagiosProcessData : public NagiosObject {
       public:
-        NagiosProcessData(const nebstruct_process_data *processData);
+        explicit NagiosProcessData(const nebstruct_process_data *processData);
     };
 } // namespace statusengine
 

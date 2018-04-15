@@ -9,7 +9,7 @@ namespace statusengine {
     class ContactStatusDataCallback
         : public NebmoduleCallback<nebstruct_contact_status_data> {
       public:
-        ContactStatusDataCallback(Statusengine *se);
+        explicit ContactStatusDataCallback(Statusengine *se);
 
         virtual void Callback(int event_type,
                               nebstruct_contact_status_data *data);

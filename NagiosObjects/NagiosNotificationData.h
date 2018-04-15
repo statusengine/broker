@@ -7,7 +7,7 @@
 namespace statusengine {
     class NagiosNotificationData : public NagiosObject {
       public:
-        NagiosNotificationData(
+        explicit NagiosNotificationData(
             const nebstruct_notification_data *notificationData);
     };
 } // namespace statusengine

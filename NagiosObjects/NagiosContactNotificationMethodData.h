@@ -7,7 +7,7 @@
 namespace statusengine {
     class NagiosContactNotificationMethodData : public NagiosObject {
       public:
-        NagiosContactNotificationMethodData(
+        explicit NagiosContactNotificationMethodData(
             const nebstruct_contact_notification_method_data
                 *contactNotificationMethodData);
     };

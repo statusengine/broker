@@ -8,7 +8,7 @@
 namespace statusengine {
     class LogDataCallback : public NebmoduleCallback<nebstruct_log_data> {
       public:
-        LogDataCallback(Statusengine *se);
+        explicit LogDataCallback(Statusengine *se);
 
         virtual void Callback(int event_type, nebstruct_log_data *data);
     };

@@ -9,7 +9,7 @@ namespace statusengine {
     class StateChangeCallback
         : public NebmoduleCallback<nebstruct_statechange_data> {
       public:
-        StateChangeCallback(Statusengine *se);
+        explicit StateChangeCallback(Statusengine *se);
 
         virtual void Callback(int event_type, nebstruct_statechange_data *data);
     };

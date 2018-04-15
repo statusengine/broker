@@ -8,7 +8,7 @@
 namespace statusengine {
     class NagiosService : public NagiosObject {
       public:
-        NagiosService(const service *data);
+        explicit NagiosService(const service *data);
     };
 
 } // namespace statusengine
