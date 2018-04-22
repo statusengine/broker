@@ -2,10 +2,23 @@ build:trusty:
   image: ubuntu:trusty
   stage: build
   script: 
-    - apt-get update && apt-get install -y software-properties-common 
-    - add-apt-repository ppa:ubuntu-toolchain-r/test -y
-    - apt-get update && apt-get -y install cmake3 gcc-7 g++-7 libstdc++6 build-essential automake gperf help2man libtool libglib2.0-dev libgearman-dev wget tar uuid-dev libicu-dev
-    - useradd -d /opt/naemon -m -s /bin/bash --system naemon
+    - echo "deb http://ppa.launchpad.net/ubuntu-toolchain-r/test/ubuntu trusty main" > /etc/apt/sources.list.d/toolchain.list
+    - |
+      echo "
+      -----BEGIN PGP PUBLIC KEY BLOCK-----
+      Version: SKS 1.1.6
+      Comment: Hostname: keyserver.ubuntu.com
+
+      mI0ESuBvRwEEAMi4cDba7xlKaaoXjO1n1HX8RKrkW+HEIl79nSOSJyvzysajs7zUow/OzCQp
+      9NswqrDmNuH1+lPTTRNAGtK8r2ouq2rnXT1mTl23dpgHZ9spseR73s4ZBGw/ag4bpU5dNUSt
+      vfmHhIjVCuiSpNn7cyy1JSSvSs3N2mxteKjXLBf7ABEBAAG0GkxhdW5jaHBhZCBUb29sY2hh
+      aW4gYnVpbGRziLYEEwECACAFAkrgb0cCGwMGCwkIBwMCBBUCCAMEFgIDAQIeAQIXgAAKCRAe
+      k3eiup7yfzGKA/4xzUqNACSlB+k+DxFFHqkwKa/ziFiAlkLQyyhm+iqz80htRZr7Ls/ZRYZl
+      0aSU56/hLe0V+TviJ1s8qdN2lamkKdXIAFfavA04nOnTzyIBJ82EAUT3Nh45skMxo4z4iZMN
+      msyaQpNl/m/lNtOLhR64v5ZybofB2EWkMxUzX8D/FQ==
+      =LcUQ
+      -----END PGP PUBLIC KEY BLOCK-----" | apt-key add -
+    - DEBIAN_FRONTEND=noninteractive apt-get update && apt-get -y install cmake3 gcc-7 g++-7 libstdc++6 build-essential automake gperf help2man libtool libglib2.0-dev libgearman-dev wget tar uuid-dev libicu-dev
     - |
       set -e
       mkdir -p /usr/local/lib/pkgconfig /opt/naemon/include
@@ -16,39 +29,32 @@ build:trusty:
       cd build
       cmake -DCMAKE_C_COMPILER=/usr/bin/gcc-7 -DCMAKE_CXX_COMPILER=/usr/bin/g++-7 ..
       make -j5
+      mv libstatusengine.so ..
   artifacts:
     paths:
-      - build/libstatusengine.so
+      - libstatusengine.so
 
 
 build:xenial:
   image: ubuntu:xenial
   stage: build
   script:
-    - apt-get update && apt-get -y install cmake gcc g++ build-essential automake gperf help2man libtool libglib2.0-dev libgearman-dev wget tar uuid-dev libicu-dev
-    - useradd -d /opt/naemon -m -s /bin/bash --system naemon
-    - >
-      set -e &&
-      OLDWD="$(pwd)" &&
-      cd /tmp/ &&
-      wget https://github.com/naemon/naemon-core/archive/v1.0.6.tar.gz &&
-      tar xfv v1.0.6.tar.gz && cd naemon-core-1.0.6/ &&
-      ./autogen.sh --prefix=/opt/naemon --with-naemon-user=naemon --with-naemon-group=naemon --with-pluginsdir=/usr/lib/nagios/plugins &&
-      make all -j5 &&
-      make install &&
-      mkdir -p /opt/naemon/var/ /opt/naemon/var/cache/naemon /opt/naemon/var/spool/checkresults &&
-      chown naemon:naemon /opt/naemon/var -R &&
-      mkdir -p /usr/local/lib/pkgconfig &&
-      ln -s /opt/naemon/lib/pkgconfig/naemon.pc /usr/local/lib/pkgconfig/naemon.pc &&
-      cd "${OLDWD}"
-    - >
-      mkdir build &&
-      cd build &&
-      cmake -DCMAKE_C_COMPILER=/usr/bin/gcc -DCMAKE_CXX_COMPILER=/usr/bin/g++ .. &&
+    - DEBIAN_FRONTEND=noninteractive apt-get update && apt-get -y install cmake gcc g++ build-essential automake gperf help2man libtool libglib2.0-dev libgearman-dev wget tar uuid-dev libicu-dev
+    - |
+      set -e
+      mkdir -p /usr/local/lib/pkgconfig /opt/naemon/include
+      ln -s /opt/naemon/lib/pkgconfig/naemon.pc /usr/local/lib/pkgconfig/naemon.pc
+      ln -s $(readlink -f .ci/naemon) /opt/naemon/include/naemon
+      ln -s $(readlink -f .ci/naemon.pc) /usr/local/lib/pkgconfig/naemon.pc
+    - |
+      mkdir build
+      cd build
+      cmake -DCMAKE_C_COMPILER=/usr/bin/gcc -DCMAKE_CXX_COMPILER=/usr/bin/g++ ..
       make -j5
+      mv libstatusengine.so ..
   artifacts:
     paths:
-      - build/libstatusengine.so
+      - libstatusengine.so
 
 
 build:jessie:
@@ -111,110 +117,67 @@ build:jessie:
       bXb5c6gCHESH5PXwPU4jQEE7Ib9J6sbk7ZT2Mw==
       =j+4q
       -----END PGP PUBLIC KEY BLOCK-----" | apt-key add -
-    - >
-      apt-get update &&
-      apt-get -y install clang-5.0 build-essential automake gperf help2man libtool libglib2.0-dev libgearman-dev tar wget uuid-dev libicu-dev &&
-      apt-get -y -t jessie-backports install cmake
-    - useradd -d /opt/naemon -m -s /bin/bash --system naemon
-    - >
-      set -e &&
-      OLDWD="$(pwd)" &&
-      cd /tmp/ &&
-      wget https://github.com/naemon/naemon-core/archive/v1.0.6.tar.gz &&
-      tar xfv v1.0.6.tar.gz && cd naemon-core-1.0.6/ &&
-      ./autogen.sh --prefix=/opt/naemon --with-naemon-user=naemon --with-naemon-group=naemon --with-pluginsdir=/usr/lib/nagios/plugins &&
-      make all -j5 &&
-      make install &&
-      mkdir -p /opt/naemon/var/ /opt/naemon/var/cache/naemon /opt/naemon/var/spool/checkresults &&
-      chown naemon:naemon /opt/naemon/var -R &&
-      mkdir -p /usr/local/lib/pkgconfig &&
-      ln -s /opt/naemon/lib/pkgconfig/naemon.pc /usr/local/lib/pkgconfig/naemon.pc &&
-      cd "${OLDWD}"
-    - >
-      mkdir build &&
-      cd build &&
-      cmake -DCMAKE_C_COMPILER=/usr/bin/clang-5.0 -DCMAKE_CXX_COMPILER=/usr/bin/clang++-5.0 .. &&
+    - |
+      apt-get update
+      DEBIAN_FRONTEND=noninteractive apt-get -y install clang-5.0 build-essential automake gperf help2man libtool libglib2.0-dev libgearman-dev tar wget uuid-dev libicu-dev
+      DEBIAN_FRONTEND=noninteractive apt-get -y -t jessie-backports install cmake
+    - |
+      set -e
+      mkdir -p /usr/local/lib/pkgconfig /opt/naemon/include
+      ln -s /opt/naemon/lib/pkgconfig/naemon.pc /usr/local/lib/pkgconfig/naemon.pc
+      ln -s $(readlink -f .ci/naemon) /opt/naemon/include/naemon
+      ln -s $(readlink -f .ci/naemon.pc) /usr/local/lib/pkgconfig/naemon.pc
+    - |
+      mkdir build
+      cd build
+      cmake -DCMAKE_C_COMPILER=/usr/bin/clang-5.0 -DCMAKE_CXX_COMPILER=/usr/bin/clang++-5.0 ..
       make -j5
+      mv libstatusengine.so ..
+  artifacts:
+    paths:
+      - libstatusengine.so
 
 
 build:stretch:
   image: debian:stretch
   stage: build
   script:
-    - apt-get update && apt-get -y install cmake gcc g++ build-essential automake gperf help2man libtool libglib2.0-dev libgearman-dev wget tar uuid-dev libicu-dev
-    - useradd -d /opt/naemon -m -s /bin/bash --system naemon
-    - >
-      set -e &&
-      OLDWD="$(pwd)" &&
-      cd /tmp/ &&
-      wget https://github.com/naemon/naemon-core/archive/v1.0.6.tar.gz &&
-      tar xfv v1.0.6.tar.gz && cd naemon-core-1.0.6/ &&
-      ./autogen.sh --prefix=/opt/naemon --with-naemon-user=naemon --with-naemon-group=naemon --with-pluginsdir=/usr/lib/nagios/plugins &&
-      make all -j5 &&
-      make install &&
-      mkdir -p /opt/naemon/var/ /opt/naemon/var/cache/naemon /opt/naemon/var/spool/checkresults &&
-      chown naemon:naemon /opt/naemon/var -R &&
-      mkdir -p /usr/local/lib/pkgconfig &&
-      ln -s /opt/naemon/lib/pkgconfig/naemon.pc /usr/local/lib/pkgconfig/naemon.pc &&
-      cd "${OLDWD}"
-    - >
-      mkdir build &&
-      cd build &&
-      cmake -DCMAKE_C_COMPILER=/usr/bin/gcc -DCMAKE_CXX_COMPILER=/usr/bin/g++ .. &&
+    - DEBIAN_FRONTEND=noninteractive apt-get update && apt-get -y install cmake gcc g++ build-essential automake gperf help2man libtool libglib2.0-dev libgearman-dev wget tar uuid-dev libicu-dev
+    - |
+      set -e
+      mkdir -p /usr/local/lib/pkgconfig /opt/naemon/include
+      ln -s /opt/naemon/lib/pkgconfig/naemon.pc /usr/local/lib/pkgconfig/naemon.pc
+      ln -s $(readlink -f .ci/naemon) /opt/naemon/include/naemon
+      ln -s $(readlink -f .ci/naemon.pc) /usr/local/lib/pkgconfig/naemon.pc
+    - |
+      mkdir build
+      cd build
+      cmake -DCMAKE_C_COMPILER=/usr/bin/gcc -DCMAKE_CXX_COMPILER=/usr/bin/g++ ..
       make -j5
+      mv libstatusengine.so ..
   artifacts:
     paths:
-      - build/libstatusengine.so
-      
-      
+      - libstatusengine.so
+
+
 build:nagios:xenial:
   image: ubuntu:xenial
   stage: build
   script:
     - apt-get update && apt-get -y install cmake gcc g++ build-essential libgd-dev libpng12-dev unzip wget tar libgearman-dev uuid-dev libicu-dev
-    - useradd -d /opt/nagios -m -s /bin/bash --system nagios
     - |
-      OLDWD="$(pwd)"
-      cd /tmp/
-      wget https://assets.nagios.com/downloads/nagioscore/releases/nagios-4.3.4.tar.gz
-      tar xfv nagios-4.3.4.tar.gz
-      cd nagios-4.3.4/
-      patch -p1  -l << ENDOFMESSAGE
-      From 2ba617d68ab7da3f082e84e13a2111ef37257636 Mon Sep 17 00:00:00 2001
-      From: jabdr <j.drummer@thelambda.de>
-      Date: Wed, 11 Apr 2018 22:08:43 +0200
-      Subject: [PATCH] Fix typo in comments.h
-      
-      Fix typo that breaks c++ broker builds
-      ---
-       include/comments.h | 2 +-
-       1 file changed, 1 insertion(+), 1 deletion(-)
-        
-      diff --git a/include/comments.h b/include/comments.h
-      index 91f337c6..bb468416 100644
-      --- a/include/comments.h
-      +++ b/include/comments.h
-      @@ -113,6 +113,6 @@ int add_comment_to_hashlist(struct nagios_comment *);
-         
-       void free_comment_data(void);                                             /* frees memory allocated to the comment list */
-         
-      -NAGIOS_BEGIN_DECL
-      +NAGIOS_END_DECL
-         
-       #endif
-      ENDOFMESSAGE
-      ./configure --prefix=/opt/nagios --enable-event-broker
-      make all -j5
-      make install install-config install-commandmode install-lib install-devel
-      cd "${OLDWD}"
-    - >
-      mkdir build &&
-      cd build &&
-      cmake -DCMAKE_C_COMPILER=/usr/bin/gcc -DCMAKE_CXX_COMPILER=/usr/bin/g++ -DBUILD_NAGIOS=ON -DNAGIOS_INCLUDE_DIR=/opt/nagios/include .. &&
+      set -e
+      mkdir -p /opt/nagios/include
+      ln -s $(readlink -f .ci/nagios) /opt/nagios/include/nagios
+    - |
+      mkdir build
+      cd build
+      cmake -DCMAKE_C_COMPILER=/usr/bin/gcc -DCMAKE_CXX_COMPILER=/usr/bin/g++ -DBUILD_NAGIOS=ON -DNAGIOS_INCLUDE_DIR=/opt/nagios/include ..
       make -j5
+      mv libstatusengine.so ..
   artifacts:
     paths:
-      - build/libstatusengine.so
+      - libstatusengine.so
 
 # run tests using the binary built before
 #test:
