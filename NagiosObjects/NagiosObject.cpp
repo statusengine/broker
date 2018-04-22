@@ -3,8 +3,6 @@
 #include <set>
 #include <unicode/unistr.h>
 
-#include "vendor/base64.h"
-
 namespace statusengine {
 
     NagiosObject::NagiosObject() { Data = json(); }
@@ -14,11 +12,6 @@ namespace statusengine {
     json &NagiosObject::GetData() { return Data; }
 
     std::string NagiosObject::EncodeString(char *value) {
-        /*
-        std::string ret;
-        Base64::Encode(std::string(value), ret);
-        return ret;
-        */
         std::string result;
         icu::UnicodeString(value, "UTF-8").toUTF8String(result);
         return result;
