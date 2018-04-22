@@ -63,6 +63,10 @@ target_include_directories(statusengine PUBLIC ${GEARMAND_INCLUDE_DIRS})
 target_link_libraries(statusengine PUBLIC ${GEARMAND_LIBRARIES})
 target_compile_options(statusengine PUBLIC ${GEARMAND_CFLAGS_OTHER})
 
+pkg_check_modules(ICUUC REQUIRED icu-uc)
+target_include_directories(statusengine PUBLIC ${ICUUC_INCLUDE_DIRS})
+target_link_libraries(statusengine PUBLIC ${ICUUC_LIBRARIES})
+target_compile_options(statusengine PUBLIC ${ICUUC_CFLAGS_OTHER})
 
 if(DEFINED BUILD_NAGIOS)
 	if(DEFINED NAGIOS_INCLUDE_DIR)

@@ -4,10 +4,10 @@ namespace statusengine {
     NagiosService::NagiosService(const service *data) {
         SetData<>("host_name", data->host_name);
         SetData<>("description", data->description);
-        SetData<>("plugin_output", data->plugin_output);
-        SetData<>("long_plugin_output", data->long_plugin_output);
+        SetData<>("plugin_output", EncodeString(data->plugin_output));
+        SetData<>("long_plugin_output", EncodeString(data->long_plugin_output));
         SetData<>("event_handler", data->event_handler);
-        SetData<>("perf_data", data->perf_data);
+        SetData<>("perf_data", EncodeString(data->perf_data));
         SetData<>("check_command", data->check_command);
         SetData<>("check_period", data->check_period);
         SetData<>("current_state", data->current_state);

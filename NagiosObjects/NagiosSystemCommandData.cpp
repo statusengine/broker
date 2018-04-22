@@ -13,8 +13,8 @@ namespace statusengine {
 
         SetData<>("command_line", systemCommandData->command_line,
                   &systemcommand);
-        SetData<>("output", systemCommandData->output, &systemcommand);
-        SetData<>("long_output", systemCommandData->output, &systemcommand);
+        SetData<>("output", EncodeString(systemCommandData->output), &systemcommand);
+        SetData<>("long_output", EncodeString(systemCommandData->output), &systemcommand);
         SetData<>("start_time", systemCommandData->start_time.tv_sec,
                   &systemcommand);
         SetData<>("end_time", systemCommandData->end_time.tv_sec,

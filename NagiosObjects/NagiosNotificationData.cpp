@@ -14,8 +14,8 @@ namespace statusengine {
         SetData<>("host_name", notificationData->host_name, &notification_data);
         SetData<>("service_description", notificationData->service_description,
                   &notification_data);
-        SetData<>("output", notificationData->output, &notification_data);
-        SetData<>("long_output", notificationData->output, &notification_data);
+        SetData<>("output", EncodeString(notificationData->output), &notification_data);
+        SetData<>("long_output", EncodeString(notificationData->output), &notification_data);
         SetData<>("ack_author", notificationData->ack_author,
                   &notification_data);
         SetData<>("ack_data", notificationData->ack_data, &notification_data);

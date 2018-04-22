@@ -32,9 +32,9 @@ namespace statusengine {
                        ? std::string(nag_service->check_command)
                        : nullptr),
                   &servicecheck);
-        SetData<>("output", serviceCheckData->output, &servicecheck);
-        SetData<>("long_output", serviceCheckData->long_output, &servicecheck);
-        SetData<>("perf_data", serviceCheckData->perf_data, &servicecheck);
+        SetData<>("output", EncodeString(serviceCheckData->output), &servicecheck);
+        SetData<>("long_output", EncodeString(serviceCheckData->long_output), &servicecheck);
+        SetData<>("perf_data", EncodeString(serviceCheckData->perf_data), &servicecheck);
         SetData<>("check_type", serviceCheckData->check_type, &servicecheck);
         SetData<>("current_attempt", serviceCheckData->current_attempt,
                   &servicecheck);

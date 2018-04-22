@@ -15,9 +15,9 @@ namespace statusengine {
         SetData<>("service_description",
                   contactNotificationData->service_description,
                   &contactnotificationdata);
-        SetData<>("output", contactNotificationData->output,
+        SetData<>("output", EncodeString(contactNotificationData->output),
                   &contactnotificationdata);
-        SetData<>("long_output", contactNotificationData->output,
+        SetData<>("long_output", EncodeString(contactNotificationData->output),
                   &contactnotificationdata);
         SetData<>("ack_author", contactNotificationData->ack_author,
                   &contactnotificationdata);

@@ -32,8 +32,8 @@ namespace statusengine {
         SetData<>("host_name", stateChangeData->host_name, &statechange);
         SetData<>("service_description", stateChangeData->service_description,
                   &statechange);
-        SetData<>("output", stateChangeData->output, &statechange);
-        SetData<>("long_output", stateChangeData->output, &statechange);
+        SetData<>("output", EncodeString(stateChangeData->output), &statechange);
+        SetData<>("long_output", EncodeString(stateChangeData->output), &statechange);
         SetData<>("statechange_type", stateChangeData->statechange_type,
                   &statechange);
         SetData<>("state", stateChangeData->state, &statechange);

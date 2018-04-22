@@ -28,9 +28,9 @@ namespace statusengine {
                       ? std::string(nag_host->check_command)
                       : nullptr,
                   &hostcheck);
-        SetData<>("output", hostCheckData->output, &hostcheck);
-        SetData<>("long_output", hostCheckData->long_output, &hostcheck);
-        SetData<>("perf_data", hostCheckData->perf_data, &hostcheck);
+        SetData<>("output", EncodeString(hostCheckData->output), &hostcheck);
+        SetData<>("long_output", EncodeString(hostCheckData->long_output), &hostcheck);
+        SetData<>("perf_data", EncodeString(hostCheckData->perf_data), &hostcheck);
         SetData<>("check_type", hostCheckData->check_type, &hostcheck);
         SetData<>("current_attempt", hostCheckData->current_attempt,
                   &hostcheck);

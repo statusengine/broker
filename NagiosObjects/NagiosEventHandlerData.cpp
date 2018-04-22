@@ -13,8 +13,8 @@ namespace statusengine {
         SetData<>("host_name", eventHandlerData->host_name, &eventhandler);
         SetData<>("service_description", eventHandlerData->service_description,
                   &eventhandler);
-        SetData<>("output", eventHandlerData->output, &eventhandler);
-        SetData<>("long_output", eventHandlerData->output, &eventhandler);
+        SetData<>("output", EncodeString(eventHandlerData->output), &eventhandler);
+        SetData<>("long_output", EncodeString(eventHandlerData->output), &eventhandler);
         SetData<>("command_name", eventHandlerData->command_name,
                   &eventhandler);
         SetData<>("command_args", eventHandlerData->command_args,

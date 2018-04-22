@@ -4,7 +4,7 @@ build:trusty:
   script: 
     - apt-get update && apt-get install -y software-properties-common 
     - add-apt-repository ppa:ubuntu-toolchain-r/test -y
-    - apt-get update && apt-get -y install cmake3 gcc-7 g++-7 libstdc++6 build-essential automake gperf help2man libtool libglib2.0-dev libgearman-dev wget tar uuid-dev
+    - apt-get update && apt-get -y install cmake3 gcc-7 g++-7 libstdc++6 build-essential automake gperf help2man libtool libglib2.0-dev libgearman-dev wget tar uuid-dev libicu-dev
     - useradd -d /opt/naemon -m -s /bin/bash --system naemon
     - >
       set -e &&
@@ -34,7 +34,7 @@ build:xenial:
   image: ubuntu:xenial
   stage: build
   script:
-    - apt-get update && apt-get -y install cmake gcc g++ build-essential automake gperf help2man libtool libglib2.0-dev libgearman-dev wget tar uuid-dev
+    - apt-get update && apt-get -y install cmake gcc g++ build-essential automake gperf help2man libtool libglib2.0-dev libgearman-dev wget tar uuid-dev libicu-dev
     - useradd -d /opt/naemon -m -s /bin/bash --system naemon
     - >
       set -e &&
@@ -122,7 +122,7 @@ build:jessie:
       -----END PGP PUBLIC KEY BLOCK-----" | apt-key add -
     - >
       apt-get update &&
-      apt-get -y install clang-5.0 build-essential automake gperf help2man libtool libglib2.0-dev libgearman-dev tar wget uuid-dev &&
+      apt-get -y install clang-5.0 build-essential automake gperf help2man libtool libglib2.0-dev libgearman-dev tar wget uuid-dev libicu-dev &&
       apt-get -y -t jessie-backports install cmake
     - useradd -d /opt/naemon -m -s /bin/bash --system naemon
     - >
@@ -150,7 +150,7 @@ build:stretch:
   image: debian:stretch
   stage: build
   script:
-    - apt-get update && apt-get -y install cmake gcc g++ build-essential automake gperf help2man libtool libglib2.0-dev libgearman-dev wget tar uuid-dev
+    - apt-get update && apt-get -y install cmake gcc g++ build-essential automake gperf help2man libtool libglib2.0-dev libgearman-dev wget tar uuid-dev libicu-dev
     - useradd -d /opt/naemon -m -s /bin/bash --system naemon
     - >
       set -e &&
@@ -180,7 +180,7 @@ build:nagios:xenial:
   image: ubuntu:xenial
   stage: build
   script:
-    - apt-get update && apt-get -y install cmake gcc g++ build-essential libgd-dev libpng12-dev unzip wget tar libgearman-dev uuid-dev
+    - apt-get update && apt-get -y install cmake gcc g++ build-essential libgd-dev libpng12-dev unzip wget tar libgearman-dev uuid-dev libicu-dev
     - useradd -d /opt/nagios -m -s /bin/bash --system nagios
     - |
       OLDWD="$(pwd)"

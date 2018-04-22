@@ -18,6 +18,8 @@ namespace statusengine {
       protected:
         explicit NagiosObject();
 
+        std::string EncodeString(char *value);
+
         template <typename T>
         void SetData(std::string name, T value, json *other = nullptr) {
             if (other == nullptr) {
@@ -35,14 +37,7 @@ namespace statusengine {
                 (*other)[name] = nullptr;
             }
             else {
-                if (std::is_same<T, char *>::value) {
-                    // fancy strings instead of c bullshit
-                    (*other)[name] =
-                        std::string(reinterpret_cast<char *>(value));
-                }
-                else {
-                    (*other)[name] = value;
-                }
+                (*other)[name] = value;
             }
         }
 
@@ -51,4 +46,4 @@ namespace statusengine {
 
 } // namespace statusengine
 
-#endif // !NAGIOS_OBJECT_H
+#endif // NAGIOS_OBJECT_H
