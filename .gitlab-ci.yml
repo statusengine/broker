@@ -43,7 +43,6 @@ build:xenial:
     - |
       set -e
       mkdir -p /usr/local/lib/pkgconfig /opt/naemon/include
-      ln -s /opt/naemon/lib/pkgconfig/naemon.pc /usr/local/lib/pkgconfig/naemon.pc
       ln -s $(readlink -f .ci/naemon) /opt/naemon/include/naemon
       ln -s $(readlink -f .ci/naemon.pc) /usr/local/lib/pkgconfig/naemon.pc
     - |
@@ -124,7 +123,6 @@ build:jessie:
     - |
       set -e
       mkdir -p /usr/local/lib/pkgconfig /opt/naemon/include
-      ln -s /opt/naemon/lib/pkgconfig/naemon.pc /usr/local/lib/pkgconfig/naemon.pc
       ln -s $(readlink -f .ci/naemon) /opt/naemon/include/naemon
       ln -s $(readlink -f .ci/naemon.pc) /usr/local/lib/pkgconfig/naemon.pc
     - |
@@ -146,7 +144,6 @@ build:stretch:
     - |
       set -e
       mkdir -p /usr/local/lib/pkgconfig /opt/naemon/include
-      ln -s /opt/naemon/lib/pkgconfig/naemon.pc /usr/local/lib/pkgconfig/naemon.pc
       ln -s $(readlink -f .ci/naemon) /opt/naemon/include/naemon
       ln -s $(readlink -f .ci/naemon.pc) /usr/local/lib/pkgconfig/naemon.pc
     - |
