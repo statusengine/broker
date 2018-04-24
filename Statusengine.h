@@ -39,7 +39,7 @@ namespace statusengine {
 
         int Init();
 
-        std::ostream &Log();
+        std::stringstream Log();
         void SendMessage(const std::string queue,
                          const std::string message) const;
 
@@ -56,10 +56,8 @@ namespace statusengine {
         // *));
 
         nebmodule *nebhandle;
-        std::ostringstream ls; // logging
         std::string configurationPath;
         Configuration *configuration;
-        GearmanClient *gearman;
 
         HostStatusCallback *cbHostStatus;
         HostCheckCallback *cbHostCheck;

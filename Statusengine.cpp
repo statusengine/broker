@@ -16,9 +16,7 @@ using json = nlohmann::json;
 namespace statusengine {
 
     Statusengine::Statusengine(nebmodule *handle, std::string configurationPath)
-        : nebhandle(handle), configurationPath(configurationPath) {
-        ls << "Statusengine: ";
-    }
+        : nebhandle(handle), configurationPath(configurationPath) {}
 
     int Statusengine::Init() {
         SetModuleInfo(NEBMODULE_MODINFO_TITLE,
@@ -31,19 +29,19 @@ namespace statusengine {
         SetModuleInfo(NEBMODULE_MODINFO_DESC,
                       "A powerful and flexible event broker");
 
-        ls << "the missing event broker" << eom;
-        ls << "This is the c++ version of statusengine event broker" << eom;
+        Log() << "the missing event broker" << eom;
+        Log() << "This is the c++ version of statusengine event broker" << eom;
 
         try {
             const auto data = toml::parse(configurationPath);
             configuration = new Configuration(this, data);
         }
         catch (std::runtime_error &rte) {
-            ls << "Could not read file: " << rte.what() << eoem;
+            Log() << "Could not read file: " << rte.what() << eoem;
             return 1;
         }
         catch (toml::syntax_error &ste) {
-            ls << "configuration syntax error: " << ste.what() << eoem;
+            Log() << "configuration syntax error: " << ste.what() << eoem;
             return 1;
         }
 
@@ -161,7 +159,7 @@ namespace statusengine {
     }
 
     Statusengine::~Statusengine() {
-        ls << "unloading..." << eom;
+        Log() << "unloading..." << eom;
         neb_deregister_module_callbacks(nebhandle);
 
         delete cbHostStatus;
@@ -185,11 +183,13 @@ namespace statusengine {
         delete cbProcessData;
         delete configuration;
 
-        ls << "unloading finished" << eom;
-        delete gearman;
+        // Delete all gearman clients
+        gearmanClients.clear();
+
+        Log() << "unloading finished" << eom;
     }
 
-    std::ostream &Statusengine::Log() { return ls; }
+    std::stringstream Statusengine::Log() { return std::stringstream(); }
 
     void Statusengine::SendMessage(const std::string queue,
                                    const std::string message) const {
@@ -211,10 +211,10 @@ namespace statusengine {
             neb_register_callback(type, nebhandle, priority, callback);
 
         if (result != 0) {
-            ls << "Could not register callback: " << result << eoem;
+            Log() << "Could not register callback: " << result << eoem;
         }
         else {
-            ls << "Register Callback successful" << eom;
+            Log() << "Register Callback successful" << eom;
         }
     }
 } // namespace statusengine

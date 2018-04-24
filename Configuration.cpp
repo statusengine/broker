@@ -236,7 +236,7 @@ namespace statusengine {
         if (gearmanUrls.size() != 0 && gearmanClients.size() == 0) {
             for (auto it = gearmanUrls.begin(); it != gearmanUrls.end(); ++it) {
                 gearmanClients.push_back(
-                    std::make_shared<GearmanClient>(se->Log(), *it));
+                    std::make_shared<GearmanClient>(se, *it));
             }
         }
         return gearmanClients;

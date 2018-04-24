@@ -6,17 +6,18 @@
 #include "libgearman-1.0/gearman.h"
 
 namespace statusengine {
+    class Statusengine;
 
     class GearmanClient {
       public:
-        explicit GearmanClient(std::ostream &ls, const std::string &url);
+        explicit GearmanClient(Statusengine *se, const std::string &url);
         ~GearmanClient();
 
         void SendMessage(const std::string &queue,
                          const std::string &message) const;
 
       private:
-        std::ostream &ls;
+        Statusengine *se;
         gearman_client_st *client;
     };
 } // namespace statusengine
