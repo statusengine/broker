@@ -18,7 +18,10 @@ namespace statusengine {
             se->SendMessage("statusngin_core_restart", restartData.dump());
         }
 
-        NagiosProcessData processData(data);
-        se->SendMessage("statusngin_processdata", processData.GetData().dump());
+        if (process_data) {
+            NagiosProcessData processData(data);
+            se->SendMessage("statusngin_processdata",
+                            processData.GetData().dump());
+        }
     }
 } // namespace statusengine
