@@ -16,7 +16,16 @@ using json = nlohmann::json;
 namespace statusengine {
 
     Statusengine::Statusengine(nebmodule *handle, std::string configurationPath)
-        : nebhandle(handle), configurationPath(configurationPath) {}
+        : nebhandle(handle), configurationPath(configurationPath),
+          cbHostStatus(nullptr), cbHostCheck(nullptr), cbServiceStatus(nullptr),
+          cbServiceCheck(nullptr), cbStateChange(nullptr), cbLogData(nullptr),
+          cbSystemCommandData(nullptr), cbCommentData(nullptr),
+          cbExternalCommandData(nullptr), cbAcknowledgementData(nullptr),
+          cbFlappingData(nullptr), cbDowntimeData(nullptr),
+          cbNotificationData(nullptr), cbProgramStatusData(nullptr),
+          cbContactStatusData(nullptr), cbContactNotificationData(nullptr),
+          cbContactNotificationMethodData(nullptr), cbEventHandlerData(nullptr),
+          cbProcessData(nullptr) {}
 
     int Statusengine::Init() {
         SetModuleInfo(NEBMODULE_MODINFO_TITLE,
