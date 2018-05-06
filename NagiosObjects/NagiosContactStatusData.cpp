@@ -12,22 +12,22 @@ namespace statusengine {
         auto tmpContact =
             reinterpret_cast<contact *>(contactStatusData->object_ptr);
 
-        json contactstatus;
-        SetData<>("contact_name", tmpContact->name, &contactstatus);
+        json_object *contactstatus = json_object_new_object();
+        SetData<>("contact_name", tmpContact->name, contactstatus);
         SetData<>("host_notifications_enabled",
-                  tmpContact->host_notifications_enabled, &contactstatus);
+                  tmpContact->host_notifications_enabled, contactstatus);
         SetData<>("service_notifications_enabled",
-                  tmpContact->service_notifications_enabled, &contactstatus);
+                  tmpContact->service_notifications_enabled, contactstatus);
         SetData<>("last_host_notification", tmpContact->last_host_notification,
-                  &contactstatus);
+                  contactstatus);
         SetData<>("last_service_notification",
-                  tmpContact->last_service_notification, &contactstatus);
+                  tmpContact->last_service_notification, contactstatus);
         SetData<>("modified_attributes", tmpContact->modified_attributes,
-                  &contactstatus);
+                  contactstatus);
         SetData<>("modified_host_attributes",
-                  tmpContact->modified_host_attributes, &contactstatus);
+                  tmpContact->modified_host_attributes, contactstatus);
         SetData<>("modified_service_attributes",
-                  tmpContact->modified_service_attributes, &contactstatus);
+                  tmpContact->modified_service_attributes, contactstatus);
 
         SetData<>("contactstatus", contactstatus);
     }

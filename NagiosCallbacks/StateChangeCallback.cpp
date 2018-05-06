@@ -10,6 +10,6 @@ namespace statusengine {
     void StateChangeCallback::Callback(int event_type,
                                        nebstruct_statechange_data *data) {
         auto statusData = NagiosStateChangeData(data);
-        se->SendMessage("statusngin_statechanges", statusData.GetData().dump());
+        se->SendMessage("statusngin_statechanges", statusData.ToString());
     }
 } // namespace statusengine

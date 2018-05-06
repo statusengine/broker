@@ -12,6 +12,6 @@ namespace statusengine {
                                         nebstruct_system_command_data *data) {
         auto statusData = NagiosSystemCommandData(data);
         se->SendMessage("statusngin_systemcommands",
-                        statusData.GetData().dump());
+                        statusData.ToString());
     }
 } // namespace statusengine

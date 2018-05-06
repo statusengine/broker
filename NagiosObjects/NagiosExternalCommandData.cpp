@@ -9,15 +9,15 @@ namespace statusengine {
         SetData<>("attr", externalCommandData->attr);
         SetData<>("timestamp", externalCommandData->timestamp.tv_sec);
 
-        json externalcommand;
+        json_object *externalcommand = json_object_new_object();
         SetData<>("command_string", externalCommandData->command_string,
-                  &externalcommand);
+                  externalcommand);
         SetData<>("command_args", externalCommandData->command_args,
-                  &externalcommand);
+                  externalcommand);
         SetData<>("command_type", externalCommandData->command_type,
-                  &externalcommand);
+                  externalcommand);
         SetData<>("entry_time", externalCommandData->entry_time,
-                  &externalcommand);
+                  externalcommand);
 
         SetData<>("externalcommand", externalcommand);
     }

@@ -19,17 +19,17 @@ namespace statusengine {
                 auto checkData = NagiosServiceCheckData(data);
                 if (servicechecks) {
                     se->SendMessage("statusngin_servicechecks",
-                                    checkData.GetData().dump());
+                                    checkData.ToString());
                 }
                 if (ocsp) {
                     se->SendMessage("statusngin_ocsp",
-                                    checkData.GetData().dump());
+                                    checkData.ToString());
                 }
             }
             if (service_perfdata) {
                 auto checkPerfData = NagiosServiceCheckPerfData(data);
                 se->SendMessage("statusngin_service_perfdata",
-                                checkPerfData.GetData().dump());
+                                checkPerfData.ToString());
             }
         }
     }

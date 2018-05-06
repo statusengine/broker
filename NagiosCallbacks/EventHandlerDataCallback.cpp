@@ -11,6 +11,6 @@ namespace statusengine {
     EventHandlerDataCallback::Callback(int event_type,
                                        nebstruct_event_handler_data *data) {
         auto myData = NagiosEventHandlerData(data);
-        se->SendMessage("statusngin_eventhandler", myData.GetData().dump());
+        se->SendMessage("statusngin_eventhandler", myData.ToString());
     }
 } // namespace statusengine

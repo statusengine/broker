@@ -10,7 +10,7 @@ namespace statusengine {
     void
     ProgramStatusDataCallback::Callback(int event_type,
                                         nebstruct_program_status_data *data) {
-        auto myData = NagiosProgramStatusData(data);
-        se->SendMessage("statusngin_programmstatus", myData.GetData().dump());
+        NagiosProgramStatusData myData(data);
+        se->SendMessage("statusngin_programmstatus", myData.ToString());
     }
 } // namespace statusengine

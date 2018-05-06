@@ -27,22 +27,23 @@ namespace statusengine {
             last_hard_state = tmp_host->last_hard_state;
         }
 
-        json statechange;
+        json_object *statechange = json_object_new_object();
 
-        SetData<>("host_name", stateChangeData->host_name, &statechange);
+        SetData<>("host_name", stateChangeData->host_name, statechange);
         SetData<>("service_description", stateChangeData->service_description,
-                  &statechange);
-        SetData<>("output", EncodeString(stateChangeData->output), &statechange);
-        SetData<>("long_output", EncodeString(stateChangeData->output), &statechange);
+                  statechange);
+        SetData<>("output", EncodeString(stateChangeData->output), statechange);
+        SetData<>("long_output", EncodeString(stateChangeData->output),
+                  statechange);
         SetData<>("statechange_type", stateChangeData->statechange_type,
-                  &statechange);
-        SetData<>("state", stateChangeData->state, &statechange);
-        SetData<>("state_type", stateChangeData->state_type, &statechange);
+                  statechange);
+        SetData<>("state", stateChangeData->state, statechange);
+        SetData<>("state_type", stateChangeData->state_type, statechange);
         SetData<>("current_attempt", stateChangeData->current_attempt,
-                  &statechange);
-        SetData<>("max_attempts", stateChangeData->max_attempts, &statechange);
-        SetData<>("last_state", last_state, &statechange);
-        SetData<>("last_hard_state", last_hard_state, &statechange);
+                  statechange);
+        SetData<>("max_attempts", stateChangeData->max_attempts, statechange);
+        SetData<>("last_state", last_state, statechange);
+        SetData<>("last_hard_state", last_hard_state, statechange);
 
         SetData<>("statechange", statechange);
     }

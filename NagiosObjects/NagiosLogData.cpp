@@ -8,11 +8,11 @@ namespace statusengine {
         SetData<>("attr", logData->attr);
         SetData<>("timestamp", logData->timestamp.tv_sec);
 
-        json logentry;
+        json_object *logentry = json_object_new_object();
 
-        SetData<>("entry_time", logData->entry_time, &logentry);
-        SetData<>("data_type", logData->data_type, &logentry);
-        SetData<>("data", logData->data, &logentry);
+        SetData<>("entry_time", logData->entry_time, logentry);
+        SetData<>("data_type", logData->data_type, logentry);
+        SetData<>("data", logData->data, logentry);
 
         SetData<>("logentry", logentry);
     }

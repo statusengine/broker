@@ -10,8 +10,8 @@ namespace statusengine {
         SetData<>("flags", hostStatusData->flags);
         SetData<>("attr", hostStatusData->attr);
         SetData<>("timestamp", hostStatusData->timestamp.tv_sec);
-        SetData<>("hoststatus", NagiosHost(reinterpret_cast<host *>(
-                                               hostStatusData->object_ptr))
-                                    .GetData());
+        NagiosHost hostStatus(
+            reinterpret_cast<host *>(hostStatusData->object_ptr));
+        SetData<>("hoststatus", &hostStatus);
     }
 } // namespace statusengine

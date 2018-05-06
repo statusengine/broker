@@ -5,13 +5,10 @@
 #include <memory>
 #include <sstream>
 
-#include "vendor/json.hpp"
 #include "vendor/toml.hpp"
 
 #include "Configuration.h"
 #include "LogStream.h"
-
-using json = nlohmann::json;
 
 namespace statusengine {
 

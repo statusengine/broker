@@ -10,6 +10,6 @@ namespace statusengine {
     void DowntimeDataCallback::Callback(int event_type,
                                         nebstruct_downtime_data *data) {
         auto myData = NagiosDowntimeData(data);
-        se->SendMessage("statusngin_downtimes", myData.GetData().dump());
+        se->SendMessage("statusngin_downtimes", myData.ToString());
     }
 } // namespace statusengine

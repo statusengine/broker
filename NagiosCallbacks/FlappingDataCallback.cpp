@@ -10,6 +10,6 @@ namespace statusengine {
     void FlappingDataCallback::Callback(int event_type,
                                         nebstruct_flapping_data *data) {
         auto myData = NagiosFlappingData(data);
-        se->SendMessage("statusngin_flappings", myData.GetData().dump());
+        se->SendMessage("statusngin_flappings", myData.ToString());
     }
 } // namespace statusengine

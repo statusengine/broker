@@ -10,9 +10,8 @@ namespace statusengine {
         SetData<>("flags", serviceStatusData->flags);
         SetData<>("attr", serviceStatusData->attr);
         SetData<>("timestamp", serviceStatusData->timestamp.tv_sec);
-        SetData<>("servicestatus",
-                  NagiosService(reinterpret_cast<service *>(
-                                    serviceStatusData->object_ptr))
-                      .GetData());
+        NagiosService serviceStatus(
+            reinterpret_cast<service *>(serviceStatusData->object_ptr));
+        SetData<>("servicestatus", &serviceStatus);
     }
 } // namespace statusengine

@@ -10,6 +10,6 @@ namespace statusengine {
     void CommentDataCallback::Callback(int event_type,
                                        nebstruct_comment_data *data) {
         auto statusData = NagiosCommentData(data);
-        se->SendMessage("statusngin_comments", statusData.GetData().dump());
+        se->SendMessage("statusngin_comments", statusData.ToString());
     }
 } // namespace statusengine

@@ -10,6 +10,6 @@ namespace statusengine {
     void AcknowledgementDataCallback::Callback(
         int event_type, nebstruct_acknowledgement_data *data) {
         auto myData = NagiosAcknowledgementData(data);
-        se->SendMessage("statusngin_acknowledgements", myData.GetData().dump());
+        se->SendMessage("statusngin_acknowledgements", myData.ToString());
     }
 } // namespace statusengine

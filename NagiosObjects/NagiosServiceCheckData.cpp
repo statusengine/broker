@@ -19,39 +19,41 @@ namespace statusengine {
                                nag_service->check_command_ptr,
                                nag_service->check_command, &raw_command, 0);
 
-        json servicecheck;
+        json_object *servicecheck = json_object_new_object();
 
-        SetData<>("host_name", serviceCheckData->host_name, &servicecheck);
+        SetData<>("host_name", serviceCheckData->host_name, servicecheck);
         SetData<>("service_description", serviceCheckData->service_description,
-                  &servicecheck);
+                  servicecheck);
         SetData<>("command_line",
                   (raw_command != nullptr ? std::string(raw_command) : nullptr),
-                  &servicecheck);
+                  servicecheck);
         SetData<>("command_name",
                   (nag_service->check_command != nullptr
                        ? std::string(nag_service->check_command)
                        : nullptr),
-                  &servicecheck);
-        SetData<>("output", EncodeString(serviceCheckData->output), &servicecheck);
-        SetData<>("long_output", EncodeString(serviceCheckData->long_output), &servicecheck);
-        SetData<>("perf_data", EncodeString(serviceCheckData->perf_data), &servicecheck);
-        SetData<>("check_type", serviceCheckData->check_type, &servicecheck);
+                  servicecheck);
+        SetData<>("output", EncodeString(serviceCheckData->output),
+                  servicecheck);
+        SetData<>("long_output", EncodeString(serviceCheckData->long_output),
+                  servicecheck);
+        SetData<>("perf_data", EncodeString(serviceCheckData->perf_data),
+                  servicecheck);
+        SetData<>("check_type", serviceCheckData->check_type, servicecheck);
         SetData<>("current_attempt", serviceCheckData->current_attempt,
-                  &servicecheck);
-        SetData<>("max_attempts", serviceCheckData->max_attempts,
-                  &servicecheck);
-        SetData<>("state_type", serviceCheckData->state_type, &servicecheck);
-        SetData<>("state", serviceCheckData->state, &servicecheck);
-        SetData<>("timeout", serviceCheckData->timeout, &servicecheck);
+                  servicecheck);
+        SetData<>("max_attempts", serviceCheckData->max_attempts, servicecheck);
+        SetData<>("state_type", serviceCheckData->state_type, servicecheck);
+        SetData<>("state", serviceCheckData->state, servicecheck);
+        SetData<>("timeout", serviceCheckData->timeout, servicecheck);
         SetData<>("start_time", serviceCheckData->start_time.tv_sec,
-                  &servicecheck);
-        SetData<>("end_time", serviceCheckData->end_time.tv_sec, &servicecheck);
+                  servicecheck);
+        SetData<>("end_time", serviceCheckData->end_time.tv_sec, servicecheck);
         SetData<>("early_timeout", serviceCheckData->early_timeout,
-                  &servicecheck);
+                  servicecheck);
         SetData<>("execution_time", serviceCheckData->execution_time,
-                  &servicecheck);
-        SetData<>("latency", serviceCheckData->latency, &servicecheck);
-        SetData<>("return_code", serviceCheckData->return_code, &servicecheck);
+                  servicecheck);
+        SetData<>("latency", serviceCheckData->latency, servicecheck);
+        SetData<>("return_code", serviceCheckData->return_code, servicecheck);
 
         SetData<>("servicecheck", servicecheck);
     }

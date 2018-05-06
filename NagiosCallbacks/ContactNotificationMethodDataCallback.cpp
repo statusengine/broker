@@ -12,6 +12,6 @@ namespace statusengine {
         int event_type, nebstruct_contact_notification_method_data *data) {
         auto myData = NagiosContactNotificationMethodData(data);
         se->SendMessage("statusngin_contactnotificationmethod",
-                        myData.GetData().dump());
+                        myData.ToString());
     }
 } // namespace statusengine

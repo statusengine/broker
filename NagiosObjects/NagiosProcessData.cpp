@@ -13,10 +13,11 @@ namespace statusengine {
         SetData<>("attr", processData->attr);
         SetData<>("timestamp", processData->timestamp.tv_sec);
 
-        json processdata;
-        SetData<>("programmname", std::string("Naemon"));
-        SetData<>("modification_data", std::string("removed"));
-        SetData<>("programmversion", std::string(get_program_version()));
+        json_object *processdata = json_object_new_object();
+        SetData<>("programmname", std::string("Naemon"), processdata);
+        SetData<>("modification_data", std::string("removed"), processdata);
+        SetData<>("programmversion", std::string(get_program_version()),
+                  processdata);
         SetData<>("pid", getpid());
 
         SetData<>("processdata", processdata);

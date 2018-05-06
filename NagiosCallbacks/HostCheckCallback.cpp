@@ -15,10 +15,10 @@ namespace statusengine {
             auto checkData = NagiosHostCheckData(data);
             if (hostchecks) {
                 se->SendMessage("statusngin_hostchecks",
-                                checkData.GetData().dump());
+                                checkData.ToString());
             }
             if (ocsp) {
-                se->SendMessage("statusngin_ochp", checkData.GetData().dump());
+                se->SendMessage("statusngin_ochp", checkData.ToString());
             }
         }
     }

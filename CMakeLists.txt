@@ -68,6 +68,11 @@ target_include_directories(statusengine PUBLIC ${ICUUC_INCLUDE_DIRS})
 target_link_libraries(statusengine PUBLIC ${ICUUC_LIBRARIES})
 target_compile_options(statusengine PUBLIC ${ICUUC_CFLAGS_OTHER})
 
+pkg_check_modules(JSONC REQUIRED json-c)
+target_include_directories(statusengine PUBLIC ${JSONC_INCLUDE_DIRS})
+target_link_libraries(statusengine PUBLIC ${JSONC_LIBRARIES})
+target_compile_options(statusengine PUBLIC ${JSONC_CFLAGS_OTHER})
+
 if(DEFINED BUILD_NAGIOS)
 	if(DEFINED NAGIOS_INCLUDE_DIR)
 		target_include_directories(statusengine PUBLIC ${NAGIOS_INCLUDE_DIR})

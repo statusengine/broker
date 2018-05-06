@@ -1,49 +1,47 @@
-#ifndef NAGIOS_OBJECT_H
-#define NAGIOS_OBJECT_H
+#pragma once
 
-#include "vendor/json.hpp"
 #include <string>
 
-#include "nebmodule.h"
+#include <json.h>
 
-using json = nlohmann::json;
+#include "nebmodule.h"
 
 namespace statusengine {
     class NagiosObject {
       public:
-        explicit NagiosObject(const json &j);
-
-        json &GetData();
+        std::string ToString();
 
       protected:
-        explicit NagiosObject();
+        NagiosObject();
+        ~NagiosObject();
 
         std::string EncodeString(char *value);
 
         template <typename T>
-        void SetData(std::string name, T value, json *other = nullptr) {
-            if (other == nullptr) {
-                other = &Data;
-            }
-            (*other)[name] = value;
+        void SetData(std::string name, T value, json_object *obj = nullptr) {
+            SetData<T>(name.c_str(), value, obj);
         }
-
         template <typename T>
-        void SetData(std::string name, T *value, json *other = nullptr) {
-            if (other == nullptr) {
-                other = &Data;
+        void SetData(const char *name, T value, json_object *obj = nullptr) {
+            if (obj == nullptr) {
+                obj = data;
             }
-            if (value == nullptr) {
-                (*other)[name] = nullptr;
-            }
-            else {
-                (*other)[name] = value;
-            }
+            SetJSONData(obj, name, value);
         }
 
-        json Data;
+        void SetJSONData(json_object *obj, const char *name, std::string value);
+        void SetJSONData(json_object *obj, const char *name, const char *value);
+        void SetJSONData(json_object *obj, const char *name, int value);
+        void SetJSONData(json_object *obj, const char *name, long int value);
+        void SetJSONData(json_object *obj, const char *name, double value);
+        void SetJSONData(json_object *obj, const char *name,
+                         long unsigned int value);
+        void SetJSONData(json_object *obj, const char *name,
+                         NagiosObject *other);
+        void SetJSONData(json_object *obj, const char *name,
+                         json_object *other);
+
+        json_object *data;
     };
 
 } // namespace statusengine
-
-#endif // NAGIOS_OBJECT_H

@@ -10,33 +10,33 @@ namespace statusengine {
         SetData<>("attr", contactNotificationMethodData->attr);
         SetData<>("timestamp", contactNotificationMethodData->timestamp.tv_sec);
 
-        json contactnotificationmethod;
+        json_object *contactnotificationmethod = json_object_new_object();
         SetData<>("host_name", contactNotificationMethodData->host_name,
-                  &contactnotificationmethod);
+                  contactnotificationmethod);
         SetData<>("service_description",
                   contactNotificationMethodData->service_description,
-                  &contactnotificationmethod);
+                  contactnotificationmethod);
         SetData<>("output", EncodeString(contactNotificationMethodData->output),
-                  &contactnotificationmethod);
+                  contactnotificationmethod);
         SetData<>("ack_author", contactNotificationMethodData->ack_author,
-                  &contactnotificationmethod);
+                  contactnotificationmethod);
         SetData<>("ack_data", contactNotificationMethodData->ack_data,
-                  &contactnotificationmethod);
+                  contactnotificationmethod);
         SetData<>("contact_name", contactNotificationMethodData->contact_name,
-                  &contactnotificationmethod);
+                  contactnotificationmethod);
         SetData<>("command_name", contactNotificationMethodData->command_name,
-                  &contactnotificationmethod);
+                  contactnotificationmethod);
         SetData<>("command_args", contactNotificationMethodData->command_args,
-                  &contactnotificationmethod);
+                  contactnotificationmethod);
         SetData<>("reason_type", contactNotificationMethodData->reason_type,
-                  &contactnotificationmethod);
+                  contactnotificationmethod);
         SetData<>("state", contactNotificationMethodData->state,
-                  &contactnotificationmethod);
+                  contactnotificationmethod);
         SetData<>("start_time",
                   contactNotificationMethodData->start_time.tv_sec,
-                  &contactnotificationmethod);
+                  contactnotificationmethod);
         SetData<>("end_time", contactNotificationMethodData->end_time.tv_sec,
-                  &contactnotificationmethod);
+                  contactnotificationmethod);
 
         SetData<>("contactnotificationmethod", contactnotificationmethod);
     }

@@ -18,7 +18,7 @@ build:trusty:
       msyaQpNl/m/lNtOLhR64v5ZybofB2EWkMxUzX8D/FQ==
       =LcUQ
       -----END PGP PUBLIC KEY BLOCK-----" | apt-key add -
-    - DEBIAN_FRONTEND=noninteractive apt-get update && apt-get -y install cmake3 gcc-7 g++-7 libstdc++6 build-essential automake gperf help2man libtool libglib2.0-dev libgearman-dev wget tar uuid-dev libicu-dev
+    - apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -y install cmake3 gcc-7 g++-7 libstdc++6 build-essential automake gperf help2man libtool libglib2.0-dev libgearman-dev wget tar uuid-dev libicu-dev libjson-c-dev
     - |
       set -e
       mkdir -p /usr/local/lib/pkgconfig /opt/naemon/include
@@ -39,7 +39,7 @@ build:xenial:
   image: ubuntu:xenial
   stage: build
   script:
-    - DEBIAN_FRONTEND=noninteractive apt-get update && apt-get -y install cmake gcc g++ build-essential automake gperf help2man libtool libglib2.0-dev libgearman-dev wget tar uuid-dev libicu-dev
+    - apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -y install cmake gcc g++ build-essential automake gperf help2man libtool libglib2.0-dev libgearman-dev wget tar uuid-dev libicu-dev libjson-c-dev
     - |
       set -e
       mkdir -p /usr/local/lib/pkgconfig /opt/naemon/include
@@ -60,7 +60,7 @@ build:stretch:
   image: debian:stretch
   stage: build
   script:
-    - DEBIAN_FRONTEND=noninteractive apt-get update && apt-get -y install cmake gcc g++ build-essential automake gperf help2man libtool libglib2.0-dev libgearman-dev wget tar uuid-dev libicu-dev
+    - apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -y install cmake gcc g++ build-essential automake gperf help2man libtool libglib2.0-dev libgearman-dev wget tar uuid-dev libicu-dev libjson-c-dev
     - |
       set -e
       mkdir -p /usr/local/lib/pkgconfig /opt/naemon/include
@@ -81,7 +81,7 @@ build:nagios:xenial:
   image: ubuntu:xenial
   stage: build
   script:
-    - apt-get update && apt-get -y install cmake gcc g++ build-essential libgd-dev libpng12-dev unzip wget tar libgearman-dev uuid-dev libicu-dev
+    - apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -y install cmake gcc g++ build-essential libgd-dev libpng12-dev unzip wget tar libgearman-dev uuid-dev libicu-dev libjson-c-dev
     - |
       set -e
       mkdir -p /opt/nagios/include

@@ -11,14 +11,15 @@ namespace statusengine {
         SetData<>("attr", serviceCheckData->attr);
         SetData<>("timestamp", serviceCheckData->timestamp.tv_sec);
 
-        json servicecheck;
+        json_object *servicecheck = json_object_new_object();
 
-        SetData<>("host_name", serviceCheckData->host_name, &servicecheck);
+        SetData<>("host_name", serviceCheckData->host_name, servicecheck);
         SetData<>("service_description", serviceCheckData->service_description,
-                  &servicecheck);
-        SetData<>("perf_data", EncodeString(serviceCheckData->perf_data), &servicecheck);
+                  servicecheck);
+        SetData<>("perf_data", EncodeString(serviceCheckData->perf_data),
+                  servicecheck);
         SetData<>("start_time", serviceCheckData->start_time.tv_sec,
-                  &servicecheck);
+                  servicecheck);
         SetData<>("servicecheck", servicecheck);
     }
 } // namespace statusengine
