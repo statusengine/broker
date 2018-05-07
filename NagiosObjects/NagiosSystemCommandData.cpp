@@ -8,18 +8,18 @@ namespace statusengine {
         SetData<>("attr", systemCommandData->attr);
         SetData<>("timestamp", systemCommandData->timestamp.tv_sec);
 
-        json_object *systemcommand = json_object_new_object();
+        NagiosObject systemcommand;
 
-        SetData<>("command_line", systemCommandData->command_line, systemcommand);
-        SetData<>("output", EncodeString(systemCommandData->output), systemcommand);
-        SetData<>("long_output", EncodeString(systemCommandData->output), systemcommand);
-        SetData<>("start_time", systemCommandData->start_time.tv_sec, systemcommand);
-        SetData<>("end_time", systemCommandData->end_time.tv_sec, systemcommand);
-        SetData<>("timeout", systemCommandData->timeout, systemcommand);
-        SetData<>("early_timeout", systemCommandData->early_timeout, systemcommand);
-        SetData<>("return_code", systemCommandData->return_code, systemcommand);
-        SetData<>("execution_time", systemCommandData->execution_time, systemcommand);
+        systemcommand.SetData<>("command_line", systemCommandData->command_line);
+        systemcommand.SetData<>("output", EncodeString(systemCommandData->output));
+        systemcommand.SetData<>("long_output", EncodeString(systemCommandData->output));
+        systemcommand.SetData<>("start_time", systemCommandData->start_time.tv_sec);
+        systemcommand.SetData<>("end_time", systemCommandData->end_time.tv_sec);
+        systemcommand.SetData<>("timeout", systemCommandData->timeout);
+        systemcommand.SetData<>("early_timeout", systemCommandData->early_timeout);
+        systemcommand.SetData<>("return_code", systemCommandData->return_code);
+        systemcommand.SetData<>("execution_time", systemCommandData->execution_time);
 
-        SetData<>("systemcommand", systemcommand);
+        SetData<>("systemcommand", &systemcommand);
     }
 } // namespace statusengine

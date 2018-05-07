@@ -10,12 +10,12 @@ namespace statusengine {
         SetData<>("attr", serviceCheckData->attr);
         SetData<>("timestamp", serviceCheckData->timestamp.tv_sec);
 
-        json_object *servicecheck = json_object_new_object();
+        NagiosObject servicecheck;
 
-        SetData<>("host_name", serviceCheckData->host_name, servicecheck);
-        SetData<>("service_description", serviceCheckData->service_description, servicecheck);
-        SetData<>("perf_data", EncodeString(serviceCheckData->perf_data), servicecheck);
-        SetData<>("start_time", serviceCheckData->start_time.tv_sec, servicecheck);
-        SetData<>("servicecheck", servicecheck);
+        servicecheck.SetData<>("host_name", serviceCheckData->host_name);
+        servicecheck.SetData<>("service_description", serviceCheckData->service_description);
+        servicecheck.SetData<>("perf_data", EncodeString(serviceCheckData->perf_data));
+        servicecheck.SetData<>("start_time", serviceCheckData->start_time.tv_sec);
+        SetData<>("servicecheck", &servicecheck);
     }
 } // namespace statusengine

@@ -12,12 +12,12 @@ namespace statusengine {
         SetData<>("attr", processData->attr);
         SetData<>("timestamp", processData->timestamp.tv_sec);
 
-        json_object *processdata = json_object_new_object();
-        SetData<>("programmname", std::string("Naemon"), processdata);
-        SetData<>("modification_data", std::string("removed"), processdata);
-        SetData<>("programmversion", std::string(get_program_version()), processdata);
+        NagiosObject processdata;
+        processdata.SetData<>("programmname", std::string("Naemon"));
+        processdata.SetData<>("modification_data", std::string("removed"));
+        processdata.SetData<>("programmversion", std::string(get_program_version()));
         SetData<>("pid", getpid());
 
-        SetData<>("processdata", processdata);
+        SetData<>("processdata", &processdata);
     }
 } // namespace statusengine

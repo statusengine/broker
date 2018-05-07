@@ -8,12 +8,12 @@ namespace statusengine {
         SetData<>("attr", logData->attr);
         SetData<>("timestamp", logData->timestamp.tv_sec);
 
-        json_object *logentry = json_object_new_object();
+        NagiosObject logentry;
 
-        SetData<>("entry_time", logData->entry_time, logentry);
-        SetData<>("data_type", logData->data_type, logentry);
-        SetData<>("data", logData->data, logentry);
+        logentry.SetData<>("entry_time", logData->entry_time);
+        logentry.SetData<>("data_type", logData->data_type);
+        logentry.SetData<>("data", logData->data);
 
-        SetData<>("logentry", logentry);
+        SetData<>("logentry", &logentry);
     }
 } // namespace statusengine
