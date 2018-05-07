@@ -1,5 +1,4 @@
-#ifndef CHACKS_H
-#define CHACKS_H
+#pragma once
 
 #include <type_traits>
 #include <utility>
@@ -25,5 +24,3 @@ template <int, typename Callable, typename Ret, typename... Args> auto fnptr_(Ca
 template <typename Fn, int N = 0, typename Callable> Fn *fnptr(Callable &&c) {
     return fnptr_<N>(std::forward<Callable>(c), (Fn *)nullptr);
 }
-
-#endif // !CHACKS_H
