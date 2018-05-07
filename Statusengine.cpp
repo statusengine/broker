@@ -18,7 +18,9 @@ namespace statusengine {
           cbSystemCommandData(nullptr), cbCommentData(nullptr), cbExternalCommandData(nullptr),
           cbAcknowledgementData(nullptr), cbFlappingData(nullptr), cbDowntimeData(nullptr), cbNotificationData(nullptr),
           cbProgramStatusData(nullptr), cbContactStatusData(nullptr), cbContactNotificationData(nullptr),
-          cbContactNotificationMethodData(nullptr), cbEventHandlerData(nullptr), cbProcessData(nullptr) {}
+          cbContactNotificationMethodData(nullptr), cbEventHandlerData(nullptr), cbProcessData(nullptr) {
+        configuration = new Configuration(this);
+    }
 
     int Statusengine::Init() {
         SetModuleInfo(NEBMODULE_MODINFO_TITLE, "Statusengine - the missing event broker");
@@ -31,20 +33,9 @@ namespace statusengine {
         Log() << "the missing event broker" << eom;
         Log() << "This is the c++ version of statusengine event broker" << eom;
 
-        try {
-            const auto data = toml::parse(configurationPath);
-            configuration = new Configuration(this, data);
-        }
-        catch (std::runtime_error &rte) {
-            Log() << "Could not read file: " << rte.what() << eoem;
+        if (!configuration->Load(configurationPath)) {
             return 1;
         }
-        catch (toml::syntax_error &ste) {
-            Log() << "configuration syntax error: " << ste.what() << eoem;
-            return 1;
-        }
-
-        gearmanClients = configuration->GetGearmanClients(this);
 
         if (configuration->GetQueueHostStatus()) {
             cbHostStatus = new HostStatusCallback(this);
@@ -174,19 +165,12 @@ namespace statusengine {
         delete cbProcessData;
         delete configuration;
 
-        // Delete all gearman clients
-        gearmanClients.clear();
-
         Log() << "unloading finished" << eom;
     }
 
     std::stringstream Statusengine::Log() { return std::stringstream(); }
 
-    void Statusengine::SendMessage(const std::string queue, const std::string message) const {
-        for (auto it = gearmanClients.begin(); it != gearmanClients.end(); ++it) {
-            (*it)->SendMessage(queue, message);
-        }
-    }
+    void Statusengine::SendMessage(const std::string queue, const std::string message) const {}
 
     void Statusengine::SetModuleInfo(int modinfo, std::string text) {
         neb_set_module_info(nebhandle, modinfo, const_cast<char *>(text.c_str()));

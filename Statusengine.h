@@ -75,8 +75,6 @@ namespace statusengine {
         ContactNotificationMethodDataCallback *cbContactNotificationMethodData;
         EventHandlerDataCallback *cbEventHandlerData;
         ProcessDataCallback *cbProcessData;
-
-        std::list<std::shared_ptr<GearmanClient>> gearmanClients;
     };
 } // namespace statusengine
 
