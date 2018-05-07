@@ -7,25 +7,7 @@
 
 #include "MessageHandler/MessageHandlerList.h"
 
-#include "NagiosCallbacks/AcknowledgementDataCallback.h"
-#include "NagiosCallbacks/CommentDataCallback.h"
-#include "NagiosCallbacks/ContactNotificationDataCallback.h"
-#include "NagiosCallbacks/ContactNotificationMethodDataCallback.h"
-#include "NagiosCallbacks/ContactStatusDataCallback.h"
-#include "NagiosCallbacks/DowntimeDataCallback.h"
-#include "NagiosCallbacks/EventHandlerDataCallback.h"
-#include "NagiosCallbacks/ExternalCommandDataCallback.h"
-#include "NagiosCallbacks/FlappingDataCallback.h"
-#include "NagiosCallbacks/HostCheckCallback.h"
-#include "NagiosCallbacks/HostStatusCallback.h"
-#include "NagiosCallbacks/LogDataCallback.h"
-#include "NagiosCallbacks/NotificationDataCallback.h"
-#include "NagiosCallbacks/ProcessDataCallback.h"
-#include "NagiosCallbacks/ProgramStatusDataCallback.h"
-#include "NagiosCallbacks/ServiceCheckCallback.h"
-#include "NagiosCallbacks/ServiceStatusCallback.h"
-#include "NagiosCallbacks/StateChangeCallback.h"
-#include "NagiosCallbacks/SystemCommandDataCallback.h"
+#include "NagiosCallbacks/NagiosCallbacks.h"
 
 namespace statusengine {
     class Configuration;
