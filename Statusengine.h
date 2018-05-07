@@ -40,18 +40,15 @@ namespace statusengine {
         int Init();
 
         std::stringstream Log();
-        void SendMessage(const std::string queue,
-                         const std::string message) const;
+        void SendMessage(const std::string queue, const std::string message) const;
 
         template <typename T> void RegisterCallback(NebmoduleCallback<T> *cb) {
-            RegisterCallback(cb->GetCallbackType(), cb->GetCallbackFunction(),
-                             cb->GetPriority());
+            RegisterCallback(cb->GetCallbackType(), cb->GetCallbackFunction(), cb->GetPriority());
         };
 
       private:
         void SetModuleInfo(int modinfo, std::string text);
-        void RegisterCallback(NEBCallbackType type, int callback(int, void *),
-                              int priority = 0);
+        void RegisterCallback(NEBCallbackType type, int callback(int, void *), int priority = 0);
         // void DeregisterCallback(NEBCallbackType type, int callback(int, void
         // *));
 

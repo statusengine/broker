@@ -6,8 +6,7 @@
 #include "NebmoduleCallback.h"
 
 namespace statusengine {
-    class CommentDataCallback
-        : public NebmoduleCallback<nebstruct_comment_data> {
+    class CommentDataCallback : public NebmoduleCallback<nebstruct_comment_data> {
       public:
         explicit CommentDataCallback(Statusengine *se);
 

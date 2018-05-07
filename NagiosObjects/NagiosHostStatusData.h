@@ -7,8 +7,7 @@
 namespace statusengine {
     class NagiosHostStatusData : public NagiosObject {
       public:
-        explicit NagiosHostStatusData(
-            const nebstruct_host_status_data *hostStatusData);
+        explicit NagiosHostStatusData(const nebstruct_host_status_data *hostStatusData);
     };
 } // namespace statusengine
 

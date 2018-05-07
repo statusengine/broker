@@ -2,8 +2,7 @@
 
 namespace statusengine {
 
-    NagiosCommentData::NagiosCommentData(
-        const nebstruct_comment_data *commentData) {
+    NagiosCommentData::NagiosCommentData(const nebstruct_comment_data *commentData) {
         SetData<>("type", commentData->type);
         SetData<>("flags", commentData->flags);
         SetData<>("attr", commentData->attr);
@@ -12,8 +11,7 @@ namespace statusengine {
         json_object *comment = json_object_new_object();
 
         SetData<>("host_name", commentData->host_name, comment);
-        SetData<>("service_description", commentData->service_description,
-                  comment);
+        SetData<>("service_description", commentData->service_description, comment);
         SetData<>("author_name", commentData->author_name, comment);
         SetData<>("comment_data", commentData->comment_data, comment);
         SetData<>("comment_type", commentData->comment_type, comment);

@@ -9,8 +9,7 @@ template <typename Callable> union storage {
     std::decay_t<Callable> callable;
 };
 
-template <int, typename Callable, typename Ret, typename... Args>
-auto fnptr_(Callable &&c, Ret (*)(Args...)) {
+template <int, typename Callable, typename Ret, typename... Args> auto fnptr_(Callable &&c, Ret (*)(Args...)) {
     static bool used = false;
     static storage<Callable> s;
     using type = decltype(s.callable);

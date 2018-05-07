@@ -4,8 +4,7 @@
 
 namespace statusengine {
 
-    NagiosHostCheckData::NagiosHostCheckData(
-        const nebstruct_host_check_data *hostCheckData) {
+    NagiosHostCheckData::NagiosHostCheckData(const nebstruct_host_check_data *hostCheckData) {
         SetData<>("type", hostCheckData->type);
         SetData<>("flags", hostCheckData->flags);
         SetData<>("attr", hostCheckData->attr);
@@ -14,25 +13,18 @@ namespace statusengine {
         host *nag_host = reinterpret_cast<host *>(hostCheckData->object_ptr);
 
         char *raw_command = nullptr;
-        get_raw_command_line_r(get_global_macros(), nag_host->check_command_ptr,
-                               nag_host->check_command, &raw_command, 0);
+        get_raw_command_line_r(get_global_macros(), nag_host->check_command_ptr, nag_host->check_command, &raw_command,
+                               0);
 
         json_object *hostcheck = json_object_new_object();
 
         SetData<>("host_name", hostCheckData->host_name, hostcheck);
-        SetData<>("command_line",
-                  raw_command != nullptr ? std::string(raw_command) : nullptr,
-                  hostcheck);
-        SetData<>("command_name",
-                  nag_host->check_command != nullptr
-                      ? std::string(nag_host->check_command)
-                      : nullptr,
+        SetData<>("command_line", raw_command != nullptr ? std::string(raw_command) : nullptr, hostcheck);
+        SetData<>("command_name", nag_host->check_command != nullptr ? std::string(nag_host->check_command) : nullptr,
                   hostcheck);
         SetData<>("output", EncodeString(hostCheckData->output), hostcheck);
-        SetData<>("long_output", EncodeString(hostCheckData->long_output),
-                  hostcheck);
-        SetData<>("perf_data", EncodeString(hostCheckData->perf_data),
-                  hostcheck);
+        SetData<>("long_output", EncodeString(hostCheckData->long_output), hostcheck);
+        SetData<>("perf_data", EncodeString(hostCheckData->perf_data), hostcheck);
         SetData<>("check_type", hostCheckData->check_type, hostcheck);
         SetData<>("current_attempt", hostCheckData->current_attempt, hostcheck);
         SetData<>("max_attempts", hostCheckData->max_attempts, hostcheck);

@@ -65,18 +65,15 @@ namespace statusengine {
         void ResetGearman();
         void AddGearman(const std::string &url);
         const std::list<std::string> &GetGearmanList() const;
-        std::list<std::shared_ptr<GearmanClient>>
-        GetGearmanClients(Statusengine *se);
+        std::list<std::shared_ptr<GearmanClient>> GetGearmanClients(Statusengine *se);
 
       private:
-        template <typename T>
-        T GetIgnore(const toml::Table &tab, const toml::key &ky, T &&opt) {
+        template <typename T> T GetIgnore(const toml::Table &tab, const toml::key &ky, T &&opt) {
             try {
                 return toml::get_or(tab, ky, opt);
             }
             catch (const toml::type_error &tte) {
-                se->Log() << "Invalid configuration: Invalid value for key "
-                          << ky << eoem;
+                se->Log() << "Invalid configuration: Invalid value for key " << ky << eoem;
             }
             return std::move(opt);
         }

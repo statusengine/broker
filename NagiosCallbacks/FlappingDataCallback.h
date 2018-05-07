@@ -6,8 +6,7 @@
 #include "NebmoduleCallback.h"
 
 namespace statusengine {
-    class FlappingDataCallback
-        : public NebmoduleCallback<nebstruct_flapping_data> {
+    class FlappingDataCallback : public NebmoduleCallback<nebstruct_flapping_data> {
       public:
         explicit FlappingDataCallback(Statusengine *se);
 

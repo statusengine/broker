@@ -2,8 +2,7 @@
 
 namespace statusengine {
 
-    NagiosDowntimeData::NagiosDowntimeData(
-        const nebstruct_downtime_data *downtimeData) {
+    NagiosDowntimeData::NagiosDowntimeData(const nebstruct_downtime_data *downtimeData) {
         SetData<>("type", downtimeData->type);
         SetData<>("flags", downtimeData->flags);
         SetData<>("attr", downtimeData->attr);
@@ -11,8 +10,7 @@ namespace statusengine {
 
         json_object *downtime = json_object_new_object();
         SetData<>("host_name", downtimeData->host_name, downtime);
-        SetData<>("service_description", downtimeData->service_description,
-                  downtime);
+        SetData<>("service_description", downtimeData->service_description, downtime);
         SetData<>("author_name", downtimeData->author_name, downtime);
         SetData<>("comment_data", downtimeData->comment_data, downtime);
         SetData<>("host_name", downtimeData->host_name, downtime);

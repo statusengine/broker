@@ -31,11 +31,9 @@ namespace statusengine {
         SetData<>("next_notification", data->next_notification);
         SetData<>("no_more_notifications", data->no_more_notifications);
         SetData<>("notifications_enabled", data->notifications_enabled);
-        SetData<>("problem_has_been_acknowledged",
-                  data->problem_has_been_acknowledged);
+        SetData<>("problem_has_been_acknowledged", data->problem_has_been_acknowledged);
         SetData<>("acknowledgement_type", data->acknowledgement_type);
-        SetData<>("current_notification_number",
-                  data->current_notification_number);
+        SetData<>("current_notification_number", data->current_notification_number);
         SetData<>("accept_passive_checks", data->accept_passive_checks);
         SetData<>("event_handler_enabled", data->event_handler_enabled);
         SetData<>("checks_enabled", data->checks_enabled);

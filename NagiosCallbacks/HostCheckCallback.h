@@ -6,11 +6,9 @@
 #include "NebmoduleCallback.h"
 
 namespace statusengine {
-    class HostCheckCallback
-        : public NebmoduleCallback<nebstruct_host_check_data> {
+    class HostCheckCallback : public NebmoduleCallback<nebstruct_host_check_data> {
       public:
-        explicit HostCheckCallback(Statusengine *se, bool hostchecks,
-                                   bool ocsp);
+        explicit HostCheckCallback(Statusengine *se, bool hostchecks, bool ocsp);
 
         virtual void Callback(int event_type, nebstruct_host_check_data *data);
 

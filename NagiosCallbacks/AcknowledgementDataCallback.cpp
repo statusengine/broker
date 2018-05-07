@@ -7,8 +7,7 @@ namespace statusengine {
     AcknowledgementDataCallback::AcknowledgementDataCallback(Statusengine *se)
         : NebmoduleCallback(NEBCALLBACK_ACKNOWLEDGEMENT_DATA, se) {}
 
-    void AcknowledgementDataCallback::Callback(
-        int event_type, nebstruct_acknowledgement_data *data) {
+    void AcknowledgementDataCallback::Callback(int event_type, nebstruct_acknowledgement_data *data) {
         auto myData = NagiosAcknowledgementData(data);
         se->SendMessage("statusngin_acknowledgements", myData.ToString());
     }

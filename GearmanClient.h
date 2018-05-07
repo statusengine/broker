@@ -13,8 +13,7 @@ namespace statusengine {
         explicit GearmanClient(Statusengine *se, const std::string &url);
         ~GearmanClient();
 
-        void SendMessage(const std::string &queue,
-                         const std::string &message) const;
+        void SendMessage(const std::string &queue, const std::string &message) const;
 
       private:
         Statusengine *se;

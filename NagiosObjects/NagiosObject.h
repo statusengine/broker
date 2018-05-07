@@ -17,12 +17,10 @@ namespace statusengine {
 
         std::string EncodeString(char *value);
 
-        template <typename T>
-        void SetData(std::string name, T value, json_object *obj = nullptr) {
+        template <typename T> void SetData(std::string name, T value, json_object *obj = nullptr) {
             SetData<T>(name.c_str(), value, obj);
         }
-        template <typename T>
-        void SetData(const char *name, T value, json_object *obj = nullptr) {
+        template <typename T> void SetData(const char *name, T value, json_object *obj = nullptr) {
             if (obj == nullptr) {
                 obj = data;
             }
@@ -34,12 +32,9 @@ namespace statusengine {
         void SetJSONData(json_object *obj, const char *name, int value);
         void SetJSONData(json_object *obj, const char *name, long int value);
         void SetJSONData(json_object *obj, const char *name, double value);
-        void SetJSONData(json_object *obj, const char *name,
-                         long unsigned int value);
-        void SetJSONData(json_object *obj, const char *name,
-                         NagiosObject *other);
-        void SetJSONData(json_object *obj, const char *name,
-                         json_object *other);
+        void SetJSONData(json_object *obj, const char *name, long unsigned int value);
+        void SetJSONData(json_object *obj, const char *name, NagiosObject *other);
+        void SetJSONData(json_object *obj, const char *name, json_object *other);
 
         json_object *data;
     };

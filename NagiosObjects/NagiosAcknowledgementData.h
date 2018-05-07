@@ -7,8 +7,7 @@
 namespace statusengine {
     class NagiosAcknowledgementData : public NagiosObject {
       public:
-        explicit NagiosAcknowledgementData(
-            const nebstruct_acknowledgement_data *acknowledgementData);
+        explicit NagiosAcknowledgementData(const nebstruct_acknowledgement_data *acknowledgementData);
     };
 } // namespace statusengine
 

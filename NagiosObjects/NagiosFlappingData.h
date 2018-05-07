@@ -7,8 +7,7 @@
 namespace statusengine {
     class NagiosFlappingData : public NagiosObject {
       public:
-        explicit NagiosFlappingData(
-            const nebstruct_flapping_data *flappingData);
+        explicit NagiosFlappingData(const nebstruct_flapping_data *flappingData);
     };
 } // namespace statusengine
 

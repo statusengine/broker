@@ -13,27 +13,20 @@
 namespace statusengine {
 
     Statusengine::Statusengine(nebmodule *handle, std::string configurationPath)
-        : nebhandle(handle), configurationPath(configurationPath),
-          cbHostStatus(nullptr), cbHostCheck(nullptr), cbServiceStatus(nullptr),
-          cbServiceCheck(nullptr), cbStateChange(nullptr), cbLogData(nullptr),
-          cbSystemCommandData(nullptr), cbCommentData(nullptr),
-          cbExternalCommandData(nullptr), cbAcknowledgementData(nullptr),
-          cbFlappingData(nullptr), cbDowntimeData(nullptr),
-          cbNotificationData(nullptr), cbProgramStatusData(nullptr),
-          cbContactStatusData(nullptr), cbContactNotificationData(nullptr),
-          cbContactNotificationMethodData(nullptr), cbEventHandlerData(nullptr),
-          cbProcessData(nullptr) {}
+        : nebhandle(handle), configurationPath(configurationPath), cbHostStatus(nullptr), cbHostCheck(nullptr),
+          cbServiceStatus(nullptr), cbServiceCheck(nullptr), cbStateChange(nullptr), cbLogData(nullptr),
+          cbSystemCommandData(nullptr), cbCommentData(nullptr), cbExternalCommandData(nullptr),
+          cbAcknowledgementData(nullptr), cbFlappingData(nullptr), cbDowntimeData(nullptr), cbNotificationData(nullptr),
+          cbProgramStatusData(nullptr), cbContactStatusData(nullptr), cbContactNotificationData(nullptr),
+          cbContactNotificationMethodData(nullptr), cbEventHandlerData(nullptr), cbProcessData(nullptr) {}
 
     int Statusengine::Init() {
-        SetModuleInfo(NEBMODULE_MODINFO_TITLE,
-                      "Statusengine - the missing event broker");
+        SetModuleInfo(NEBMODULE_MODINFO_TITLE, "Statusengine - the missing event broker");
         SetModuleInfo(NEBMODULE_MODINFO_AUTHOR, "Johannes Drummer");
-        SetModuleInfo(NEBMODULE_MODINFO_TITLE,
-                      "Copyright (c) 2018 - present Johannes Drummer");
+        SetModuleInfo(NEBMODULE_MODINFO_TITLE, "Copyright (c) 2018 - present Johannes Drummer");
         SetModuleInfo(NEBMODULE_MODINFO_VERSION, "4.0.0");
         SetModuleInfo(NEBMODULE_MODINFO_LICENSE, "GPL v2");
-        SetModuleInfo(NEBMODULE_MODINFO_DESC,
-                      "A powerful and flexible event broker");
+        SetModuleInfo(NEBMODULE_MODINFO_DESC, "A powerful and flexible event broker");
 
         Log() << "the missing event broker" << eom;
         Log() << "This is the c++ version of statusengine event broker" << eom;
@@ -58,11 +51,9 @@ namespace statusengine {
             RegisterCallback(cbHostStatus);
         }
 
-        if (configuration->GetQueueHostCheck() ||
-            configuration->GetQueueOCHP()) {
+        if (configuration->GetQueueHostCheck() || configuration->GetQueueOCHP()) {
             cbHostCheck =
-                new HostCheckCallback(this, configuration->GetQueueHostCheck(),
-                                      configuration->GetQueueOCHP());
+                new HostCheckCallback(this, configuration->GetQueueHostCheck(), configuration->GetQueueOCHP());
             RegisterCallback(cbHostCheck);
         }
 
@@ -71,13 +62,11 @@ namespace statusengine {
             RegisterCallback(cbServiceStatus);
         }
 
-        if (configuration->GetQueueServiceCheck() ||
-            configuration->GetQueueOCSP() ||
+        if (configuration->GetQueueServiceCheck() || configuration->GetQueueOCSP() ||
             configuration->GetQueueServicePerfData()) {
-            cbServiceCheck = new ServiceCheckCallback(
-                this, configuration->GetQueueServiceCheck(),
-                configuration->GetQueueOCSP(),
-                configuration->GetQueueServicePerfData());
+            cbServiceCheck =
+                new ServiceCheckCallback(this, configuration->GetQueueServiceCheck(), configuration->GetQueueOCSP(),
+                                         configuration->GetQueueServicePerfData());
             RegisterCallback(cbServiceCheck);
         }
 
@@ -137,14 +126,12 @@ namespace statusengine {
         }
 
         if (configuration->GetQueueContactNotificationData()) {
-            cbContactNotificationData =
-                new ContactNotificationDataCallback(this);
+            cbContactNotificationData = new ContactNotificationDataCallback(this);
             RegisterCallback(cbContactNotificationData);
         }
 
         if (configuration->GetQueueContactNotificationMethodData()) {
-            cbContactNotificationMethodData =
-                new ContactNotificationMethodDataCallback(this);
+            cbContactNotificationMethodData = new ContactNotificationMethodDataCallback(this);
             RegisterCallback(cbContactNotificationMethodData);
         }
 
@@ -153,11 +140,9 @@ namespace statusengine {
             RegisterCallback(cbEventHandlerData);
         }
 
-        if (configuration->GetQueueRestartData() ||
-            configuration->GetQueueProcessData()) {
-            cbProcessData = new ProcessDataCallback(
-                this, configuration->GetQueueRestartData(),
-                configuration->GetQueueProcessData());
+        if (configuration->GetQueueRestartData() || configuration->GetQueueProcessData()) {
+            cbProcessData = new ProcessDataCallback(this, configuration->GetQueueRestartData(),
+                                                    configuration->GetQueueProcessData());
             RegisterCallback(cbProcessData);
         }
 
@@ -197,24 +182,18 @@ namespace statusengine {
 
     std::stringstream Statusengine::Log() { return std::stringstream(); }
 
-    void Statusengine::SendMessage(const std::string queue,
-                                   const std::string message) const {
-        for (auto it = gearmanClients.begin(); it != gearmanClients.end();
-             ++it) {
+    void Statusengine::SendMessage(const std::string queue, const std::string message) const {
+        for (auto it = gearmanClients.begin(); it != gearmanClients.end(); ++it) {
             (*it)->SendMessage(queue, message);
         }
     }
 
     void Statusengine::SetModuleInfo(int modinfo, std::string text) {
-        neb_set_module_info(nebhandle, modinfo,
-                            const_cast<char *>(text.c_str()));
+        neb_set_module_info(nebhandle, modinfo, const_cast<char *>(text.c_str()));
     }
 
-    void Statusengine::RegisterCallback(NEBCallbackType type,
-                                        int callback(int, void *),
-                                        int priority) {
-        auto result =
-            neb_register_callback(type, nebhandle, priority, callback);
+    void Statusengine::RegisterCallback(NEBCallbackType type, int callback(int, void *), int priority) {
+        auto result = neb_register_callback(type, nebhandle, priority, callback);
 
         if (result != 0) {
             Log() << "Could not register callback: " << result << eoem;
