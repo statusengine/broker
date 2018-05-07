@@ -13,11 +13,17 @@ namespace statusengine {
         explicit NebmoduleCallback(NEBCallbackType cbType, Statusengine *se, int priority = 0)
             : cbType(cbType), priority(priority), se(se) {}
 
-        NEBCallbackType GetCallbackType() { return cbType; }
+        NEBCallbackType GetCallbackType() {
+            return cbType;
+        }
 
-        int GetPriority() { return priority; }
+        int GetPriority() {
+            return priority;
+        }
 
-        void RawCallback(int event_type, void *data) { Callback(event_type, reinterpret_cast<T *>(data)); };
+        void RawCallback(int event_type, void *data) {
+            Callback(event_type, reinterpret_cast<T *>(data));
+        };
         virtual void Callback(int event_type, T *data) = 0;
 
         int (*GetCallbackFunction())(int, void *) {

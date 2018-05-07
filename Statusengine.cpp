@@ -168,7 +168,9 @@ namespace statusengine {
         Log() << "unloading finished" << eom;
     }
 
-    std::stringstream Statusengine::Log() { return std::stringstream(); }
+    std::stringstream Statusengine::Log() {
+        return std::stringstream();
+    }
 
     void Statusengine::SendMessage(const std::string queue, const std::string message) const {}
 

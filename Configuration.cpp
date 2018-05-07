@@ -44,29 +44,49 @@ namespace statusengine {
         return true;
     }
 
-    bool Configuration::GetQueueHostStatus() const { return GetTomlIgnore(queueTable, "HostStatus", false); }
+    bool Configuration::GetQueueHostStatus() const {
+        return GetTomlIgnore(queueTable, "HostStatus", false);
+    }
 
-    bool Configuration::GetQueueHostCheck() const { return GetTomlIgnore(queueTable, "HostCheck", false); }
+    bool Configuration::GetQueueHostCheck() const {
+        return GetTomlIgnore(queueTable, "HostCheck", false);
+    }
 
-    bool Configuration::GetQueueOCHP() const { return GetTomlIgnore(queueTable, "OCHP", false); }
+    bool Configuration::GetQueueOCHP() const {
+        return GetTomlIgnore(queueTable, "OCHP", false);
+    }
 
-    bool Configuration::GetQueueServiceStatus() const { return GetTomlIgnore(queueTable, "ServiceStatus", false); }
+    bool Configuration::GetQueueServiceStatus() const {
+        return GetTomlIgnore(queueTable, "ServiceStatus", false);
+    }
 
-    bool Configuration::GetQueueServiceCheck() const { return GetTomlIgnore(queueTable, "ServiceCheck", false); }
+    bool Configuration::GetQueueServiceCheck() const {
+        return GetTomlIgnore(queueTable, "ServiceCheck", false);
+    }
 
-    bool Configuration::GetQueueServicePerfData() const { return GetTomlIgnore(queueTable, "ServicePerfData", false); }
+    bool Configuration::GetQueueServicePerfData() const {
+        return GetTomlIgnore(queueTable, "ServicePerfData", false);
+    }
 
-    bool Configuration::GetQueueOCSP() const { return GetTomlIgnore(queueTable, "OCSP", false); }
+    bool Configuration::GetQueueOCSP() const {
+        return GetTomlIgnore(queueTable, "OCSP", false);
+    }
 
-    bool Configuration::GetQueueStateChange() const { return GetTomlIgnore(queueTable, "StateChange", false); }
+    bool Configuration::GetQueueStateChange() const {
+        return GetTomlIgnore(queueTable, "StateChange", false);
+    }
 
-    bool Configuration::GetQueueLogData() const { return GetTomlIgnore(queueTable, "LogData", false); }
+    bool Configuration::GetQueueLogData() const {
+        return GetTomlIgnore(queueTable, "LogData", false);
+    }
 
     bool Configuration::GetQueueSystemCommandData() const {
         return GetTomlIgnore(queueTable, "SystemCommandData", false);
     }
 
-    bool Configuration::GetQueueCommentData() const { return GetTomlIgnore(queueTable, "CommentData", false); }
+    bool Configuration::GetQueueCommentData() const {
+        return GetTomlIgnore(queueTable, "CommentData", false);
+    }
 
     bool Configuration::GetQueueExternalCommandData() const {
         return GetTomlIgnore(queueTable, "ExternalCommandData", false);
@@ -76,9 +96,13 @@ namespace statusengine {
         return GetTomlIgnore(queueTable, "AcknowledgementData", false);
     }
 
-    bool Configuration::GetQueueFlappingData() const { return GetTomlIgnore(queueTable, "FlappingData", false); }
+    bool Configuration::GetQueueFlappingData() const {
+        return GetTomlIgnore(queueTable, "FlappingData", false);
+    }
 
-    bool Configuration::GetQueueDowntimeData() const { return GetTomlIgnore(queueTable, "DowntimeData", false); }
+    bool Configuration::GetQueueDowntimeData() const {
+        return GetTomlIgnore(queueTable, "DowntimeData", false);
+    }
 
     bool Configuration::GetQueueNotificationData() const {
         return GetTomlIgnore(queueTable, "NotificationData", false);
@@ -104,9 +128,13 @@ namespace statusengine {
         return GetTomlIgnore(queueTable, "EventHandlerData", false);
     }
 
-    bool Configuration::GetQueueProcessData() const { return GetTomlIgnore(queueTable, "ProcessData", false); }
+    bool Configuration::GetQueueProcessData() const {
+        return GetTomlIgnore(queueTable, "ProcessData", false);
+    }
 
-    bool Configuration::GetQueueRestartData() const { return GetTomlIgnore(queueTable, "RestartData", false); }
+    bool Configuration::GetQueueRestartData() const {
+        return GetTomlIgnore(queueTable, "RestartData", false);
+    }
 
     std::vector<std::string> Configuration::GetGearmanList() {
         try {

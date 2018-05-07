@@ -5,14 +5,18 @@
 
 namespace statusengine {
 
-    NagiosObject::NagiosObject() { data = json_object_new_object(); }
+    NagiosObject::NagiosObject() {
+        data = json_object_new_object();
+    }
     NagiosObject::~NagiosObject() {
         if (data != nullptr) {
             json_object_put(data);
         }
     }
 
-    std::string NagiosObject::ToString() { return std::string(json_object_to_json_string(data)); }
+    std::string NagiosObject::ToString() {
+        return std::string(json_object_to_json_string(data));
+    }
 
     std::string NagiosObject::EncodeString(char *value) {
         std::string result;
