@@ -37,6 +37,8 @@ namespace statusengine {
             return 1;
         }
 
+        messageHandlers = new MessageHandlerList(this, configuration);
+
         if (configuration->GetQueueHostStatus()) {
             cbHostStatus = new HostStatusCallback(this);
             RegisterCallback(cbHostStatus);
@@ -164,6 +166,7 @@ namespace statusengine {
         delete cbEventHandlerData;
         delete cbProcessData;
         delete configuration;
+        delete messageHandlers;
 
         Log() << "unloading finished" << eom;
     }
@@ -172,7 +175,9 @@ namespace statusengine {
         return std::stringstream();
     }
 
-    void Statusengine::SendMessage(const std::string queue, const std::string message) const {}
+    void Statusengine::SendMessage(const std::string queue, const std::string message) const {
+        messageHandlers->SendMessage(queue, message);
+    }
 
     void Statusengine::SetModuleInfo(int modinfo, std::string text) {
         neb_set_module_info(nebhandle, modinfo, const_cast<char *>(text.c_str()));

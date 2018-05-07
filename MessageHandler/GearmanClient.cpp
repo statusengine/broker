@@ -5,7 +5,7 @@
 
 namespace statusengine {
 
-    GearmanClient::GearmanClient(Statusengine *se, const std::string &url) : se(se) {
+    GearmanClient::GearmanClient(Statusengine *se, const std::string &url) : MessageHandler(se) {
         client = gearman_client_create(nullptr);
         gearman_return_t ret = gearman_client_add_servers(client, url.c_str());
         if (gearman_success(ret)) {

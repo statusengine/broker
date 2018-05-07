@@ -1,14 +1,11 @@
-#ifndef GEARMAN_CLIENT_H
-#define GEARMAN_CLIENT_H
+#pragma once
 
-#include <sstream>
+#include "MessageHandler.h"
 
 #include "libgearman-1.0/gearman.h"
 
 namespace statusengine {
-    class Statusengine;
-
-    class GearmanClient {
+    class GearmanClient : public MessageHandler {
       public:
         explicit GearmanClient(Statusengine *se, const std::string &url);
         ~GearmanClient();
@@ -20,5 +17,3 @@ namespace statusengine {
         gearman_client_st *client;
     };
 } // namespace statusengine
-
-#endif // !GEARMAN_CLIENT_H

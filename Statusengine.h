@@ -1,14 +1,12 @@
-#ifndef STATUSENGINE_H
-#define STATUSENGINE_H
+#pragma once
 
-#include <list>
-#include <memory>
 #include <sstream>
 #include <string>
 
 #include "nebmodule.h"
 
-#include "GearmanClient.h"
+#include "MessageHandler/MessageHandlerList.h"
+
 #include "NagiosCallbacks/AcknowledgementDataCallback.h"
 #include "NagiosCallbacks/CommentDataCallback.h"
 #include "NagiosCallbacks/ContactNotificationDataCallback.h"
@@ -55,6 +53,7 @@ namespace statusengine {
         nebmodule *nebhandle;
         std::string configurationPath;
         Configuration *configuration;
+        MessageHandlerList *messageHandlers;
 
         HostStatusCallback *cbHostStatus;
         HostCheckCallback *cbHostCheck;
@@ -77,5 +76,3 @@ namespace statusengine {
         ProcessDataCallback *cbProcessData;
     };
 } // namespace statusengine
-
-#endif // !STATUSENGINE_H

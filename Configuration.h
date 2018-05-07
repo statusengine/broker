@@ -1,5 +1,4 @@
-#ifndef CONFIGURATION_H
-#define CONFIGURATION_H
+#pragma once
 
 #include <string>
 #include <vector>
@@ -42,6 +41,16 @@ namespace statusengine {
         std::vector<std::string> GetGearmanList();
 
       private:
+        template <typename T> T GetTomlIgnore(const toml::Table &tab, const char *ky, T &&opt) const {
+            try {
+                return toml::get_or(tab, ky, opt);
+            }
+            catch (const toml::type_error &tte) {
+                se->Log() << "Invalid configuration: Invalid value for key " << ky << eoem;
+            }
+            return std::move(opt);
+        }
+
         Statusengine *se;
         toml::Table cfg;
         toml::Table queueTable;
@@ -49,5 +58,3 @@ namespace statusengine {
         toml::Table amqpTable;
     };
 } // namespace statusengine
-
-#endif // !CONFIGURATION_H

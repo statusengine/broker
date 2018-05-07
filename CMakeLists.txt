@@ -11,9 +11,9 @@ include(FindPkgConfig)
 
 find_package(PkgConfig REQUIRED)
 
-add_library(statusengine SHARED
-	nebmodule.cpp Statusengine.cpp
-	GearmanClient.cpp Configuration.cpp
+set (SESources
+	nebmodule.cpp Statusengine.cpp Configuration.cpp
+	MessageHandler/MessageHandler.cpp MessageHandler/MessageHandlerList.cpp
 	NagiosObjects/NagiosObject.cpp
 	NagiosObjects/NagiosHost.cpp
 	NagiosObjects/NagiosHostStatusData.cpp
@@ -58,36 +58,46 @@ add_library(statusengine SHARED
 	NagiosObjects/NagiosProcessData.cpp
 )
 
-pkg_check_modules(GEARMAND REQUIRED gearmand)
-target_include_directories(statusengine PUBLIC ${GEARMAND_INCLUDE_DIRS})
-target_link_libraries(statusengine PUBLIC ${GEARMAND_LIBRARIES})
-target_compile_options(statusengine PUBLIC ${GEARMAND_CFLAGS_OTHER})
-
+pkg_check_modules(GEARMAND gearmand)
 pkg_check_modules(ICUUC REQUIRED icu-uc)
+pkg_check_modules(JSONC REQUIRED json-c)
+
+if(GEARMAND_FOUND AND NOT WITHOUT_GEARMAN)
+	list(APPEND SESources MessageHandler/GearmanClient.cpp)
+endif(GEARMAND_FOUND AND NOT WITHOUT_GEARMAN)
+
+add_library(statusengine SHARED ${SESources})
+
+if(GEARMAND_FOUND AND NOT WITHOUT_GEARMAN)
+	target_include_directories(statusengine PUBLIC ${GEARMAND_INCLUDE_DIRS})
+	target_link_libraries(statusengine PUBLIC ${GEARMAND_LIBRARIES})
+	target_compile_options(statusengine PUBLIC ${GEARMAND_CFLAGS_OTHER})
+	add_definitions(-DWITH_GEARMAN)
+endif(GEARMAND_FOUND AND NOT WITHOUT_GEARMAN)
+
 target_include_directories(statusengine PUBLIC ${ICUUC_INCLUDE_DIRS})
 target_link_libraries(statusengine PUBLIC ${ICUUC_LIBRARIES})
 target_compile_options(statusengine PUBLIC ${ICUUC_CFLAGS_OTHER})
 
-pkg_check_modules(JSONC REQUIRED json-c)
 target_include_directories(statusengine PUBLIC ${JSONC_INCLUDE_DIRS})
 target_link_libraries(statusengine PUBLIC ${JSONC_LIBRARIES})
 target_compile_options(statusengine PUBLIC ${JSONC_CFLAGS_OTHER})
 
-if(DEFINED BUILD_NAGIOS)
-	if(DEFINED NAGIOS_INCLUDE_DIR)
+if(BUILD_NAGIOS)
+	if(NAGIOS_INCLUDE_DIR)
 		target_include_directories(statusengine PUBLIC ${NAGIOS_INCLUDE_DIR})
-	endif(DEFINED NAGIOS_INCLUDE_DIR)
+	endif(NAGIOS_INCLUDE_DIR)
 
 	target_link_libraries(statusengine PUBLIC uuid event gearman)
 	add_definitions(-DBUILD_NAGIOS)
         if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
             target_compile_options(statusengine PUBLIC -Wno-pointer-arith)
         endif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-else(DEFINED BUILD_NAGIOS)
+else(BUILD_NAGIOS)
 	pkg_check_modules(NAEMON REQUIRED naemon)
 	target_include_directories(statusengine PUBLIC ${NAEMON_INCLUDE_DIRS})
 	target_compile_options(statusengine PUBLIC ${NAEMON_CFLAGS_OTHER})
-endif(DEFINED BUILD_NAGIOS)
+endif(BUILD_NAGIOS)
 
 target_compile_features(statusengine INTERFACE ${MY_CXX_COMPILE_FEATURES})
 
