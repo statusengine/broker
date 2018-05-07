@@ -1,5 +1,4 @@
-#ifndef EVENTHANDLERDATA_CALLBACK_H
-#define EVENTHANDLERDATA_CALLBACK_H
+#pragma once
 
 #include "nebmodule.h"
 
@@ -13,5 +12,3 @@ namespace statusengine {
         virtual void Callback(int event_type, nebstruct_event_handler_data *data);
     };
 } // namespace statusengine
-
-#endif // !EVENTHANDLERDATA_CALLBACK_H

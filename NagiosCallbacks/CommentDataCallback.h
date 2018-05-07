@@ -1,5 +1,4 @@
-#ifndef COMMENT_DATA_CALLBACK_H
-#define COMMENT_DATA_CALLBACK_H
+#pragma once
 
 #include "nebmodule.h"
 
@@ -13,5 +12,3 @@ namespace statusengine {
         virtual void Callback(int event_type, nebstruct_comment_data *data);
     };
 } // namespace statusengine
-
-#endif // !COMMENT_DATA_CALLBACK_H

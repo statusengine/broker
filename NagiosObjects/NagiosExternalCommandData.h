@@ -1,5 +1,4 @@
-#ifndef NAGIOS_EXTERNALCOMMANDDATA_H
-#define NAGIOS_EXTERNALCOMMANDDATA_H
+#pragma once
 
 #include "NagiosObject.h"
 #include "nebmodule.h"
@@ -10,5 +9,3 @@ namespace statusengine {
         explicit NagiosExternalCommandData(const nebstruct_external_command_data *externalCommandData);
     };
 } // namespace statusengine
-
-#endif // !NAGIOS_EXTERNALCOMMANDDATA_H

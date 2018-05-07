@@ -1,5 +1,4 @@
-#ifndef LOGSTREAM_H
-#define LOGSTREAM_H
+#pragma once
 
 #include <sstream>
 
@@ -31,5 +30,3 @@ namespace statusengine {
         return os;
     }
 } // namespace statusengine
-
-#endif // !LOGSTREAM_H

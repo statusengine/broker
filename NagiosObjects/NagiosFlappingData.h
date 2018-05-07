@@ -1,5 +1,4 @@
-#ifndef NAGIOS_FLAPPINGDATA_H
-#define NAGIOS_FLAPPINGDATA_H
+#pragma once
 
 #include "NagiosObject.h"
 #include "nebmodule.h"
@@ -10,5 +9,3 @@ namespace statusengine {
         explicit NagiosFlappingData(const nebstruct_flapping_data *flappingData);
     };
 } // namespace statusengine
-
-#endif // !NAGIOS_FLAPPINGDATA_H

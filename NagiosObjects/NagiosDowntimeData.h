@@ -1,5 +1,4 @@
-#ifndef NAGIOS_DOWNTIMEDATA_H
-#define NAGIOS_DOWNTIMEDATA_H
+#pragma once
 
 #include "NagiosObject.h"
 #include "nebmodule.h"
@@ -10,5 +9,3 @@ namespace statusengine {
         explicit NagiosDowntimeData(const nebstruct_downtime_data *downtimeData);
     };
 } // namespace statusengine
-
-#endif // !NAGIOS_DOWNTIMEDATA_H

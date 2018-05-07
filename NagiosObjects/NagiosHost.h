@@ -1,5 +1,4 @@
-#ifndef NAGIOS_HOST_H
-#define NAGIOS_HOST_H
+#pragma once
 
 #include "nebmodule.h"
 
@@ -12,5 +11,3 @@ namespace statusengine {
     };
 
 } // namespace statusengine
-
-#endif // !NAGIOS_HOST_H

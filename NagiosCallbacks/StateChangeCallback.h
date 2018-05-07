@@ -1,5 +1,4 @@
-#ifndef STATECHANGE_CALLBACK_H
-#define STATECHANGE_CALLBACK_H
+#pragma once
 
 #include "nebmodule.h"
 
@@ -13,5 +12,3 @@ namespace statusengine {
         virtual void Callback(int event_type, nebstruct_statechange_data *data);
     };
 } // namespace statusengine
-
-#endif // !STATECHANGE_CALLBACK_H

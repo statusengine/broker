@@ -1,5 +1,4 @@
-#ifndef FLAPPINGDATA_CALLBACK_H
-#define FLAPPINGDATA_CALLBACK_H
+#pragma once
 
 #include "nebmodule.h"
 
@@ -13,5 +12,3 @@ namespace statusengine {
         virtual void Callback(int event_type, nebstruct_flapping_data *data);
     };
 } // namespace statusengine
-
-#endif // !FLAPPINGDATA_CALLBACK_H

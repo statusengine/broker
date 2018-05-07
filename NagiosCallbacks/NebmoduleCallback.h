@@ -1,5 +1,4 @@
-#ifndef NEBMODULE_CALLBACK_H
-#define NEBMODULE_CALLBACK_H
+#pragma once
 
 #include <functional>
 
@@ -40,5 +39,3 @@ namespace statusengine {
     };
 
 } // namespace statusengine
-
-#endif // !NEBMODULE_CALLBACK_H

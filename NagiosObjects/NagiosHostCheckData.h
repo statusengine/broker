@@ -1,5 +1,4 @@
-#ifndef NAGIOS_HOST_CHECK_DATA_H
-#define NAGIOS_HOST_CHECK_DATA_H
+#pragma once
 
 #include "NagiosObject.h"
 #include "nebmodule.h"
@@ -10,5 +9,3 @@ namespace statusengine {
         explicit NagiosHostCheckData(const nebstruct_host_check_data *hostCheckData);
     };
 } // namespace statusengine
-
-#endif // !NAGIOS_HOST_CHECK_DATA_H

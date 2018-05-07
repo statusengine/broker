@@ -1,5 +1,4 @@
-#ifndef NEBMODULE_H
-#define NEBMODULE_H
+#pragma once
 
 #ifndef BUILD_NAGIOS
 extern "C" {
@@ -28,5 +27,3 @@ inline void nm_log(long unsigned logLevel, const char *_, const char *message) {
     delete temp;
 }
 #endif
-
-#endif // !NEBMODULE_H

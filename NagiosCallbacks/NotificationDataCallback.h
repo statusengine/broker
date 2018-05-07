@@ -1,5 +1,4 @@
-#ifndef NOTIFICATIONDATA_CALLBACK_H
-#define NOTIFICATIONDATA_CALLBACK_H
+#pragma once
 
 #include "nebmodule.h"
 
@@ -13,5 +12,3 @@ namespace statusengine {
         virtual void Callback(int event_type, nebstruct_notification_data *data);
     };
 } // namespace statusengine
-
-#endif // !NOTIFICATIONDATA_CALLBACK_H

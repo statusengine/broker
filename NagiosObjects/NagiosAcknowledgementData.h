@@ -1,5 +1,4 @@
-#ifndef NAGIOS_ACKNOWLEDGEMENTDATA_H
-#define NAGIOS_ACKNOWLEDGEMENTDATA_H
+#pragma once
 
 #include "NagiosObject.h"
 #include "nebmodule.h"
@@ -10,5 +9,3 @@ namespace statusengine {
         explicit NagiosAcknowledgementData(const nebstruct_acknowledgement_data *acknowledgementData);
     };
 } // namespace statusengine
-
-#endif // !NAGIOS_ACKNOWLEDGEMENTDATA_H

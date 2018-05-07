@@ -1,5 +1,4 @@
-#ifndef NAGIOS_CONTACTNOTIFICATIONMETHODDATA_H
-#define NAGIOS_CONTACTNOTIFICATIONMETHODDATA_H
+#pragma once
 
 #include "NagiosObject.h"
 #include "nebmodule.h"
@@ -11,5 +10,3 @@ namespace statusengine {
             const nebstruct_contact_notification_method_data *contactNotificationMethodData);
     };
 } // namespace statusengine
-
-#endif // !NAGIOS_CONTACTNOTIFICATIONMETHODDATA_H

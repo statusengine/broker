@@ -1,5 +1,4 @@
-#ifndef NAGIOS_CONTACTSTATUSDATA_H
-#define NAGIOS_CONTACTSTATUSDATA_H
+#pragma once
 
 #include "NagiosObject.h"
 #include "nebmodule.h"
@@ -10,5 +9,3 @@ namespace statusengine {
         explicit NagiosContactStatusData(const nebstruct_contact_status_data *contactStatusData);
     };
 } // namespace statusengine
-
-#endif // !NAGIOS_CONTACTSTATUSDATA_H

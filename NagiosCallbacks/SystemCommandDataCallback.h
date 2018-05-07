@@ -1,5 +1,4 @@
-#ifndef SYSTEM_COMMAND_DATA_CALLBACK_H
-#define SYSTEM_COMMAND_DATA_CALLBACK_H
+#pragma once
 
 #include "nebmodule.h"
 
@@ -13,5 +12,3 @@ namespace statusengine {
         virtual void Callback(int event_type, nebstruct_system_command_data *data);
     };
 } // namespace statusengine
-
-#endif // !SYSTEM_COMMAND_DATA_CALLBACK_H

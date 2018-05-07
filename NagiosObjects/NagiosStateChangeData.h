@@ -1,5 +1,4 @@
-#ifndef NAGIOS_STATECHANGE_DATA_H
-#define NAGIOS_STATECHANGE_DATA_H
+#pragma once
 
 #include "NagiosObject.h"
 #include "nebmodule.h"
@@ -10,5 +9,3 @@ namespace statusengine {
         explicit NagiosStateChangeData(const nebstruct_statechange_data *serviceStatusData);
     };
 } // namespace statusengine
-
-#endif // !NAGIOS_STATECHANGE_DATA_H

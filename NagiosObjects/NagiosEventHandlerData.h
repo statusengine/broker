@@ -1,5 +1,4 @@
-#ifndef NAGIOS_EVENTHANDLERDATA_H
-#define NAGIOS_EVENTHANDLERDATA_H
+#pragma once
 
 #include "NagiosObject.h"
 #include "nebmodule.h"
@@ -10,5 +9,3 @@ namespace statusengine {
         explicit NagiosEventHandlerData(const nebstruct_event_handler_data *eventHandlerData);
     };
 } // namespace statusengine
-
-#endif // !NAGIOS_EVENTHANDLERDATA_H

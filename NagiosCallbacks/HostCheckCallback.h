@@ -1,5 +1,4 @@
-#ifndef HOSTCHECK_CALLBACK_H
-#define HOSTCHECK_CALLBACK_H
+#pragma once
 
 #include "nebmodule.h"
 
@@ -17,5 +16,3 @@ namespace statusengine {
         bool ocsp;
     };
 } // namespace statusengine
-
-#endif // !HOSTCHECK_CALLBACK_H

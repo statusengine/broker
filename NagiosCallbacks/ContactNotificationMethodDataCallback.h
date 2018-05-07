@@ -1,5 +1,4 @@
-#ifndef CONTACTNOTIFICATIONMETHODDATA_CALLBACK_H
-#define CONTACTNOTIFICATIONMETHODDATA_CALLBACK_H
+#pragma once
 
 #include "nebmodule.h"
 
@@ -13,5 +12,3 @@ namespace statusengine {
         virtual void Callback(int event_type, nebstruct_contact_notification_method_data *data);
     };
 } // namespace statusengine
-
-#endif // !CONTACTNOTIFICATIONMETHODDATA_CALLBACK_H

@@ -1,5 +1,4 @@
-#ifndef NAGIOS_COMMENT_DATA_H
-#define NAGIOS_COMMENT_DATA_H
+#pragma once
 
 #include "NagiosObject.h"
 #include "nebmodule.h"
@@ -10,5 +9,3 @@ namespace statusengine {
         explicit NagiosCommentData(const nebstruct_comment_data *commentData);
     };
 } // namespace statusengine
-
-#endif // !NAGIOS_COMMENT_DATA_H

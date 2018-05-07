@@ -1,5 +1,4 @@
-#ifndef ACKNOWLEDGEMENTDATA_CALLBACK_H
-#define ACKNOWLEDGEMENTDATA_CALLBACK_H
+#pragma once
 
 #include "nebmodule.h"
 
@@ -13,5 +12,3 @@ namespace statusengine {
         virtual void Callback(int event_type, nebstruct_acknowledgement_data *data);
     };
 } // namespace statusengine
-
-#endif // !ACKNOWLEDGEMENTDATA_CALLBACK_H

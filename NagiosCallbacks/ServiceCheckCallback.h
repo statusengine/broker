@@ -1,5 +1,4 @@
-#ifndef SERVICECHECK_CALLBACK_H
-#define SERVICECHECK_CALLBACK_H
+#pragma once
 
 #include "nebmodule.h"
 
@@ -18,5 +17,3 @@ namespace statusengine {
         bool service_perfdata;
     };
 } // namespace statusengine
-
-#endif // !SERVICECHECK_CALLBACK_H

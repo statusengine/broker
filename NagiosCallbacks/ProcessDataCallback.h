@@ -1,5 +1,4 @@
-#ifndef PROCESSDATA_CALLBACK_H
-#define PROCESSDATA_CALLBACK_H
+#pragma once
 
 #include "nebmodule.h"
 
@@ -17,5 +16,3 @@ namespace statusengine {
         bool process_data;
     };
 } // namespace statusengine
-
-#endif // !PROCESSDATA_CALLBACK_H

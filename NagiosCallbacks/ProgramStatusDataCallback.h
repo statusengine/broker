@@ -1,5 +1,4 @@
-#ifndef PROGRAMSTATUSDATA_CALLBACK_H
-#define PROGRAMSTATUSDATA_CALLBACK_H
+#pragma once
 
 #include "nebmodule.h"
 
@@ -13,5 +12,3 @@ namespace statusengine {
         virtual void Callback(int event_type, nebstruct_program_status_data *data);
     };
 } // namespace statusengine
-
-#endif // !PROGRAMSTATUSDATA_CALLBACK_H

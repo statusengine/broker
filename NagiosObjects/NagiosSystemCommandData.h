@@ -1,5 +1,4 @@
-#ifndef NAGIOS_SYSTEM_COMMAND_DATA_H
-#define NAGIOS_SYSTEM_COMMAND_DATA_H
+#pragma once
 
 #include "NagiosObject.h"
 #include "nebmodule.h"
@@ -10,5 +9,3 @@ namespace statusengine {
         explicit NagiosSystemCommandData(const nebstruct_system_command_data *systemCommandData);
     };
 } // namespace statusengine
-
-#endif // !NAGIOS_SYSTEM_COMMAND_DATA_H

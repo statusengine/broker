@@ -1,5 +1,4 @@
-#ifndef LOG_DATA_CALLBACK_H
-#define LOG_DATA_CALLBACK_H
+#pragma once
 
 #include "nebmodule.h"
 
@@ -13,5 +12,3 @@ namespace statusengine {
         virtual void Callback(int event_type, nebstruct_log_data *data);
     };
 } // namespace statusengine
-
-#endif // !LOG_DATA_CALLBACK_H
