@@ -4,8 +4,6 @@
 #include "RabbitmqConfiguration.h"
 #include "Statusengine.h"
 
-#include <iostream>
-
 namespace statusengine {
 
     RabbitmqClient::RabbitmqClient(Statusengine *se, RabbitmqConfiguration *cfg) : MessageHandler(se), cfg(cfg) {
