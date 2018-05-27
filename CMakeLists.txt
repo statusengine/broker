@@ -7,12 +7,20 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(MY_CXX_COMPILE_FEATURES cxx_generic_lambdas cxx_range_for cxx_strong_enums)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
+if(NOT DEFINED WITH_GEARMAN)
+	set(WITH_GEARMAN ON)
+endif(NOT DEFINED WITH_GEARMAN)
+
+if(NOT DEFINED WITH_RABBITMQ)
+	set(WITH_RABBITMQ ON)
+endif(NOT DEFINED WITH_RABBITMQ)
+
 include(FindPkgConfig)
 
 find_package(PkgConfig REQUIRED)
 
 set (SESources
-	nebmodule.cpp Statusengine.cpp Configuration.cpp
+	nebmodule.cpp Statusengine.cpp Configuration.cpp RabbitmqConfiguration.cpp
 	MessageHandler/MessageHandler.cpp MessageHandler/MessageHandlerList.cpp
 	NagiosObjects/NagiosObject.cpp
 	NagiosObjects/NagiosHost.cpp
@@ -59,21 +67,44 @@ set (SESources
 )
 
 pkg_check_modules(GEARMAND gearmand)
+pkg_check_modules(RABBITMQC librabbitmq)
 pkg_check_modules(ICUUC REQUIRED icu-uc)
 pkg_check_modules(JSONC REQUIRED json-c)
 
-if(GEARMAND_FOUND AND NOT WITHOUT_GEARMAN)
+if(WITH_GEARMAN AND NOT GEARMAND_FOUND)
+	message(SEND_ERROR "WITH_GEARMAN is ON, but could not find gearman")
+endif(WITH_GEARMAN AND NOT GEARMAND_FOUND)
+
+if(NOT RABBITMQC_FOUND AND WITH_RABBITMQ)
+	message(SEND_ERROR "WITH_RABBITMQ is ON, but could not find librabbitmq")
+endif(NOT RABBITMQC_FOUND AND WITH_RABBITMQ)
+
+
+if(WITH_GEARMAN)
 	list(APPEND SESources MessageHandler/GearmanClient.cpp)
-endif(GEARMAND_FOUND AND NOT WITHOUT_GEARMAN)
+endif(WITH_GEARMAN)
+
+if(WITH_RABBITMQ)
+	list(APPEND SESources MessageHandler/RabbitmqClient.cpp)
+endif(WITH_RABBITMQ)
+
 
 add_library(statusengine SHARED ${SESources})
 
-if(GEARMAND_FOUND AND NOT WITHOUT_GEARMAN)
+
+if(WITH_GEARMAN)
 	target_include_directories(statusengine PUBLIC ${GEARMAND_INCLUDE_DIRS})
 	target_link_libraries(statusengine PUBLIC ${GEARMAND_LIBRARIES})
 	target_compile_options(statusengine PUBLIC ${GEARMAND_CFLAGS_OTHER})
 	add_definitions(-DWITH_GEARMAN)
-endif(GEARMAND_FOUND AND NOT WITHOUT_GEARMAN)
+endif(WITH_GEARMAN)
+
+if(WITH_RABBITMQ)
+	target_include_directories(statusengine PUBLIC ${RABBITMQC_INCLUDE_DIRS})
+	target_link_libraries(statusengine PUBLIC ${RABBITMQC_LIBRARIES})
+	target_compile_options(statusengine PUBLIC ${RABBITMQC_CFLAGS_OTHER})
+	add_definitions(-DWITH_RABBITMQ)
+endif(WITH_RABBITMQ)
 
 target_include_directories(statusengine PUBLIC ${ICUUC_INCLUDE_DIRS})
 target_link_libraries(statusengine PUBLIC ${ICUUC_LIBRARIES})
@@ -83,6 +114,7 @@ target_include_directories(statusengine PUBLIC ${JSONC_INCLUDE_DIRS})
 target_link_libraries(statusengine PUBLIC ${JSONC_LIBRARIES})
 target_compile_options(statusengine PUBLIC ${JSONC_CFLAGS_OTHER})
 
+
 if(BUILD_NAGIOS)
 	if(NAGIOS_INCLUDE_DIR)
 		target_include_directories(statusengine PUBLIC ${NAGIOS_INCLUDE_DIR})
@@ -90,9 +122,9 @@ if(BUILD_NAGIOS)
 
 	target_link_libraries(statusengine PUBLIC uuid event gearman)
 	add_definitions(-DBUILD_NAGIOS)
-        if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-            target_compile_options(statusengine PUBLIC -Wno-pointer-arith)
-        endif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+	if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+		target_compile_options(statusengine PUBLIC -Wno-pointer-arith)
+	endif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 else(BUILD_NAGIOS)
 	pkg_check_modules(NAEMON REQUIRED naemon)
 	target_include_directories(statusengine PUBLIC ${NAEMON_INCLUDE_DIRS})

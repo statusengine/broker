@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -9,9 +10,12 @@
 #include "Statusengine.h"
 
 namespace statusengine {
+    class RabbitmqConfiguration;
+
     class Configuration {
       public:
         Configuration(Statusengine *se);
+        ~Configuration();
         bool Load(std::string);
 
         bool GetQueueHostStatus() const;
@@ -39,8 +43,8 @@ namespace statusengine {
         bool GetQueueRestartData() const;
 
         std::vector<std::string> GetGearmanList();
+        std::vector<RabbitmqConfiguration *> GetRabbitmqConfiguration();
 
-      private:
         template <typename T> T GetTomlIgnore(const toml::Table &tab, const char *ky, T &&opt) const {
             try {
                 return toml::get_or(tab, ky, opt);
@@ -51,10 +55,13 @@ namespace statusengine {
             return std::move(opt);
         }
 
+      private:
         Statusengine *se;
         toml::Table cfg;
         toml::Table queueTable;
         toml::Table gearmanTable;
         toml::Table amqpTable;
+
+        std::vector<RabbitmqConfiguration *> rabbitmq;
     };
 } // namespace statusengine

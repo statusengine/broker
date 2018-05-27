@@ -10,6 +10,8 @@ namespace statusengine {
         explicit MessageHandler(Statusengine *se);
         ~MessageHandler();
 
+        virtual bool Connect();
+
         virtual void SendMessage(const std::string &queue, const std::string &message) const = 0;
 
       protected:

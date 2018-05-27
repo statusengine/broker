@@ -5,20 +5,25 @@
 
 namespace statusengine {
 
-    GearmanClient::GearmanClient(Statusengine *se, const std::string &url) : MessageHandler(se) {
+    GearmanClient::GearmanClient(Statusengine *se, const std::string &url) : MessageHandler(se), url(url) {
         client = gearman_client_create(nullptr);
-        gearman_return_t ret = gearman_client_add_servers(client, url.c_str());
-        if (gearman_success(ret)) {
-            se->Log() << "Added gearman server connection" << eom;
-        }
-        else {
-            se->Log() << "Could not add gearman server: " << gearman_client_error(client) << eoem;
-        }
     }
 
     GearmanClient::~GearmanClient() {
         se->Log() << "Destroy gearman client" << eom;
         gearman_client_free(client);
+    }
+
+    bool GearmanClient::Connect() {
+        gearman_return_t ret = gearman_client_add_servers(client, url.c_str());
+        if (gearman_success(ret)) {
+            se->Log() << "Added gearman server connection" << eom;
+            return true;
+        }
+        else {
+            se->Log() << "Could not add gearman server: " << gearman_client_error(client) << eoem;
+            return false;
+        }
     }
 
     void GearmanClient::SendMessage(const std::string &queue, const std::string &message) const {

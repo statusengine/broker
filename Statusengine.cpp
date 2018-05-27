@@ -38,6 +38,9 @@ namespace statusengine {
         }
 
         messageHandlers = new MessageHandlerList(this, configuration);
+        if (!messageHandlers->Connect()) {
+            return 1;
+        }
 
         if (configuration->GetQueueHostStatus()) {
             cbHostStatus = new HostStatusCallback(this);

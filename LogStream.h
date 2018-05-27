@@ -7,9 +7,7 @@
 namespace statusengine {
     inline void SendLogMessage(std::ostream &os, int logLevel) {
         std::ostringstream *ss = reinterpret_cast<std::ostringstream *>(&os);
-        nm_log(logLevel, "%s", ss->str().c_str());
-        ss->str("Statusengine: ");
-        ss->clear();
+        nm_log(logLevel, "%s", ("Statusengine: " + ss->str()).c_str());
     }
 
     inline std::ostream &eom(std::ostream &os) {

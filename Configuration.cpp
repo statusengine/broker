@@ -2,11 +2,16 @@
 
 #include <list>
 
+#include "RabbitmqConfiguration.h"
 #include "Statusengine.h"
 
 namespace statusengine {
 
     Configuration::Configuration(Statusengine *se) : se(se) {}
+
+    Configuration::~Configuration() {
+        rabbitmq.clear();
+    }
 
     bool Configuration::Load(std::string configurationPath) {
         try {
@@ -38,6 +43,23 @@ namespace statusengine {
         }
         catch (const toml::type_error &tte) {
             se->Log() << "Invalid configuration: Gearman isn't a table!" << eoem;
+            return false;
+        }
+
+        try {
+            std::vector<toml::Table> rabbits = toml::get<std::vector<toml::Table>>(cfg.at("Rabbitmq"));
+            for (auto it = rabbits.begin(); it != rabbits.end(); ++it) {
+                auto rfg = new RabbitmqConfiguration(se, this);
+                if (!rfg->Load(*it)) {
+                    return false;
+                }
+                rabbitmq.push_back(rfg);
+            }
+        }
+        catch (const std::out_of_range &oor) {
+        }
+        catch (const toml::type_error &tte) {
+            se->Log() << "Invalid configuration: Rabbitmq isn't an Array!" << eoem;
             return false;
         }
 
@@ -149,5 +171,9 @@ namespace statusengine {
         }
         std::vector<std::string> emptyResult;
         return emptyResult;
+    }
+
+    std::vector<RabbitmqConfiguration *> Configuration::GetRabbitmqConfiguration() {
+        return rabbitmq;
     }
 } // namespace statusengine

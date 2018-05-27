@@ -14,7 +14,9 @@ namespace statusengine {
         MessageHandlerList(Statusengine *se, Configuration *cfg);
         ~MessageHandlerList();
 
-        void SendMessage(const std::string &queue, const std::string &message);
+        virtual bool Connect();
+
+        virtual void SendMessage(const std::string &queue, const std::string &message);
 
       private:
         Statusengine *se;
