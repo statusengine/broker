@@ -70,6 +70,7 @@ pkg_check_modules(GEARMAND gearmand)
 pkg_check_modules(RABBITMQC librabbitmq)
 pkg_check_modules(ICUUC REQUIRED icu-uc)
 pkg_check_modules(JSONC REQUIRED json-c)
+pkg_check_modules(GLIB REQUIRED glib-2.0)
 
 if(WITH_GEARMAN AND NOT GEARMAND_FOUND)
 	message(SEND_ERROR "WITH_GEARMAN is ON, but could not find gearman")
@@ -114,6 +115,9 @@ target_include_directories(statusengine PUBLIC ${JSONC_INCLUDE_DIRS})
 target_link_libraries(statusengine PUBLIC ${JSONC_LIBRARIES})
 target_compile_options(statusengine PUBLIC ${JSONC_CFLAGS_OTHER})
 
+target_include_directories(statusengine PUBLIC ${GLIB_INCLUDE_DIRS})
+target_link_libraries(statusengine PUBLIC ${GLIB_LIBRARIES})
+target_compile_options(statusengine PUBLIC ${GLIB_CFLAGS_OTHER})
 
 if(BUILD_NAGIOS)
 	if(NAGIOS_INCLUDE_DIR)
