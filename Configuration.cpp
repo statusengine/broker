@@ -1,7 +1,5 @@
 #include "Configuration.h"
 
-#include <list>
-
 #include "RabbitmqConfiguration.h"
 #include "Statusengine.h"
 
@@ -37,12 +35,35 @@ namespace statusengine {
         }
 
         try {
-            gearmanTable = cfg.at("Gearman").cast<toml::value_t::Table>();
+            schedulerTable = cfg.at("Scheduler").cast<toml::value_t::Table>();
+        }
+        catch (std::out_of_range &oor) {
+        }
+        catch (const toml::type_error &tte) {
+            se->Log() << "Invalid configuration: Scheduler isn't a table!" << eoem;
+            return false;
+        }
+
+        try {
+            std::vector<toml::Table> gearmanTables = toml::get<std::vector<toml::Table>>(cfg.at("Gearman"));
+            for (auto it = gearmanTables.begin(); it != gearmanTables.end(); ++it) {
+                try {
+                    gearmanUrls.push_back((*it).at("URL").cast<toml::value_t::String>());
+                }
+                catch (std::out_of_range &oor) {
+                    se->Log() << "Invalid configuration: The gearman section doesn't contain an URL!" << eoem;
+                    return false;
+                }
+                catch (const toml::type_error &tte) {
+                    se->Log() << "Invalid configuration: The gearman URL must be a string!" << eoem;
+                    return false;
+                }
+            }
         }
         catch (const std::out_of_range &oor) {
         }
         catch (const toml::type_error &tte) {
-            se->Log() << "Invalid configuration: Gearman isn't a table!" << eoem;
+            se->Log() << "Invalid configuration: Gearman isn't an Array of Tables!" << eoem;
             return false;
         }
 
@@ -59,7 +80,7 @@ namespace statusengine {
         catch (const std::out_of_range &oor) {
         }
         catch (const toml::type_error &tte) {
-            se->Log() << "Invalid configuration: Rabbitmq isn't an Array!" << eoem;
+            se->Log() << "Invalid configuration: Rabbitmq isn't an Array of Tables!" << eoem;
             return false;
         }
 
@@ -158,19 +179,12 @@ namespace statusengine {
         return GetTomlIgnore<>(queueTable, "RestartData", false);
     }
 
+    time_t Configuration::GetStartupScheduleMax() const {
+        return GetTomlIgnore<>(schedulerTable, "StartupScheduleMax", 0);
+    }
+
     std::vector<std::string> Configuration::GetGearmanList() {
-        try {
-            return toml::get<std::vector<std::string>>(gearmanTable.at("Servers"));
-        }
-        catch (std::out_of_range &oor) {
-        }
-        catch (const toml::type_error &tte) {
-            se->Log() << "Invalid configuration: Gearman::Servers isn't an array! "
-                         "Ignoring for now..."
-                      << eoem;
-        }
-        std::vector<std::string> emptyResult;
-        return emptyResult;
+        return gearmanUrls;
     }
 
     std::vector<RabbitmqConfiguration *> Configuration::GetRabbitmqConfiguration() {

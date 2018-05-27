@@ -136,9 +136,11 @@ namespace statusengine {
             RegisterCallback(cbEventHandlerData);
         }
 
-        if (configuration->GetQueueRestartData() || configuration->GetQueueProcessData()) {
-            cbProcessData = new ProcessDataCallback(this, configuration->GetQueueRestartData(),
-                                                    configuration->GetQueueProcessData());
+        if (configuration->GetQueueRestartData() || configuration->GetQueueProcessData() ||
+            configuration->GetStartupScheduleMax() > 0) {
+            cbProcessData =
+                new ProcessDataCallback(this, configuration->GetQueueRestartData(),
+                                        configuration->GetQueueProcessData(), configuration->GetStartupScheduleMax());
             RegisterCallback(cbProcessData);
         }
 

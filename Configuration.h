@@ -1,5 +1,6 @@
 #pragma once
 
+#include <ctime>
 #include <memory>
 #include <string>
 #include <vector>
@@ -41,6 +42,7 @@ namespace statusengine {
         bool GetQueueEventHandlerData() const;
         bool GetQueueProcessData() const;
         bool GetQueueRestartData() const;
+        time_t GetStartupScheduleMax() const;
 
         std::vector<std::string> GetGearmanList();
         std::vector<RabbitmqConfiguration *> GetRabbitmqConfiguration();
@@ -59,9 +61,10 @@ namespace statusengine {
         Statusengine *se;
         toml::Table cfg;
         toml::Table queueTable;
-        toml::Table gearmanTable;
         toml::Table amqpTable;
+        toml::Table schedulerTable;
 
         std::vector<RabbitmqConfiguration *> rabbitmq;
+        std::vector<std::string> gearmanUrls;
     };
 } // namespace statusengine
