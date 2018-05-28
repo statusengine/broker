@@ -32,7 +32,11 @@ namespace statusengine {
                 else {
                     delay = check_interval - (now - temp_host->last_check);
                 }
+#ifndef BUILD_NAGIOS
                 schedule_next_host_check(temp_host, delay, CHECK_OPTION_NONE);
+#else
+                schedule_host_check(temp_host, now + delay, CHECK_OPTION_NONE);
+#endif // BUILD_NAGIOS
             }
 
             for (auto temp_service = service_list; temp_service != NULL; temp_service = temp_service->next) {
@@ -45,7 +49,11 @@ namespace statusengine {
                 else {
                     delay = check_interval - (now - temp_service->last_check);
                 }
+#ifndef BUILD_NAGIOS
                 schedule_next_service_check(temp_service, delay, CHECK_OPTION_NONE);
+#else
+                schedule_service_check(temp_service, now + delay, CHECK_OPTION_NONE);
+#endif // BUILD_NAGIOS
             }
             se->Log() << "Reschedule complete" << eom;
         }
