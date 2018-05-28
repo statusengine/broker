@@ -117,9 +117,8 @@ build:nagios:trusty:
     - apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -y install cmake3 gcc-7 g++-7 libstdc++6 build-essential libgearman-dev uuid-dev libicu-dev libjson-c-dev pkg-config libssl-dev libglib2.0-dev
     - |
       set -e
-      mkdir -p /usr/local/lib/pkgconfig /opt/naemon/include
-      ln -s $(readlink -f .ci/naemon) /opt/naemon/include/naemon
-      ln -s $(readlink -f .ci/naemon.pc) /usr/local/lib/pkgconfig/naemon.pc
+      mkdir -p /opt/nagios/include
+      ln -s $(readlink -f .ci/nagios) /opt/nagios/include/nagios
     - |
       mkdir build
       cd build
