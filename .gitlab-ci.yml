@@ -123,7 +123,7 @@ build:nagios:trusty:
     - |
       mkdir build
       cd build
-      cmake -DCMAKE_C_COMPILER=/usr/bin/gcc-7 -DCMAKE_CXX_COMPILER=/usr/bin/g++-7 -DWITH_RABBITMQ=OFF ..
+      cmake -DCMAKE_C_COMPILER=/usr/bin/gcc-7 -DCMAKE_CXX_COMPILER=/usr/bin/g++-7 -DWITH_RABBITMQ=OFF -DBUILD_NAGIOS=ON -DNAGIOS_INCLUDE_DIR=/opt/nagios/include ..
       make -j5
       mv libstatusengine.so ..
   artifacts:

@@ -24,7 +24,7 @@ namespace statusengine {
             se->Log() << "Reschedule all hosts and services" << eom;
             for (auto temp_host = host_list; temp_host != NULL; temp_host = temp_host->next) {
                 auto now = std::time(nullptr);
-                auto check_interval = get_host_check_interval_s(temp_host);
+                time_t check_interval = temp_host->check_interval * interval_length;
                 time_t delay;
                 if ((now - temp_host->last_check) > check_interval) {
                     delay = ranged_urand(0, std::min(startupSchedulerMax, check_interval));
@@ -37,7 +37,7 @@ namespace statusengine {
 
             for (auto temp_service = service_list; temp_service != NULL; temp_service = temp_service->next) {
                 auto now = std::time(nullptr);
-                auto check_interval = get_service_check_interval_s(temp_service);
+                time_t check_interval = temp_service->check_interval * interval_length;
                 time_t delay;
                 if ((now - temp_service->last_check) > check_interval) {
                     delay = ranged_urand(0, std::min(startupSchedulerMax, check_interval));
