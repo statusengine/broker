@@ -65,7 +65,7 @@ namespace statusengine {
 
         for (auto it = queues.begin(); it != queues.end(); ++it) {
             auto queueString = amqp_cstring_bytes((*it).c_str());
-            auto queueStatus = amqp_queue_declare(conn, 1, queueString, 0, 0, 0, 0, amqp_empty_table);
+            auto queueStatus = amqp_queue_declare(conn, 1, queueString, 0, cfg->durable_queues, 0, 0, amqp_empty_table);
             if (queueStatus == nullptr) {
                 se->Log() << "Could not declare rabbitmq queue \"" << *it << "\": " << queueStatus << eoem;
                 return false;

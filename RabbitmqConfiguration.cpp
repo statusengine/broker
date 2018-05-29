@@ -37,6 +37,7 @@ namespace statusengine {
         exchange = cfg->GetTomlIgnore<>(tbl, "Exchange", std::string("statusengine"));
 
         durable_exchange = cfg->GetTomlIgnore<>(tbl, "DurableExchange", false);
+        durable_queues = cfg->GetTomlIgnore<>(tbl, "DurableQueues", false);
 
         ssl = cfg->GetTomlIgnore<>(tbl, "SSL", false);
 

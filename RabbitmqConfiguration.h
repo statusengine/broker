@@ -22,6 +22,7 @@ namespace statusengine {
         std::string password;
         std::string exchange;
         bool durable_exchange;
+        bool durable_queues;
         bool ssl;
         bool ssl_verify_peer;
         bool ssl_verify_hostname;
