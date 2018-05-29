@@ -74,6 +74,26 @@ build:bionic:
     paths:
       - libstatusengine.so
 
+build:jessie:
+  image: debian:jessie
+  stage: build
+  script:
+    - apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -y install cmake gcc g++ build-essential libglib2.0-dev libgearman-dev uuid-dev libicu-dev libjson-c-dev pkg-config libssl-dev librabbitmq-dev
+    - |
+      set -e
+      mkdir -p /usr/local/lib/pkgconfig /opt/naemon/include
+      ln -s $(readlink -f .ci/naemon) /opt/naemon/include/naemon
+      ln -s $(readlink -f .ci/naemon.pc) /usr/local/lib/pkgconfig/naemon.pc
+    - |
+      mkdir build
+      cd build
+      cmake -DCMAKE_C_COMPILER=/usr/bin/gcc -DCMAKE_CXX_COMPILER=/usr/bin/g++ ..
+      make -j5
+      mv libstatusengine.so ..
+  artifacts:
+    paths:
+      - libstatusengine.so
+
 build:stretch:
   image: debian:stretch
   stage: build
@@ -150,6 +170,25 @@ build:nagios:xenial:
 
 build:nagios:bionic:
   image: ubuntu:bionic
+  stage: build
+  script:
+    - apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -y install cmake gcc g++ build-essential libgearman-dev uuid-dev libicu-dev libjson-c-dev pkg-config libssl-dev librabbitmq-dev libglib2.0-dev
+    - |
+      set -e
+      mkdir -p /opt/nagios/include
+      ln -s $(readlink -f .ci/nagios) /opt/nagios/include/nagios
+    - |
+      mkdir build
+      cd build
+      cmake -DCMAKE_C_COMPILER=/usr/bin/gcc -DCMAKE_CXX_COMPILER=/usr/bin/g++ -DBUILD_NAGIOS=ON -DNAGIOS_INCLUDE_DIR=/opt/nagios/include ..
+      make -j5
+      mv libstatusengine.so ..
+  artifacts:
+    paths:
+      - libstatusengine.so
+
+build:nagios:jessie:
+  image: debian:jessie
   stage: build
   script:
     - apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -y install cmake gcc g++ build-essential libgearman-dev uuid-dev libicu-dev libjson-c-dev pkg-config libssl-dev librabbitmq-dev libglib2.0-dev
