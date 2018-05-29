@@ -4,7 +4,6 @@ project(statusengine-broker)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-set(MY_CXX_COMPILE_FEATURES cxx_generic_lambdas cxx_range_for cxx_strong_enums)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 if(NOT DEFINED WITH_GEARMAN)
@@ -134,7 +133,5 @@ else(BUILD_NAGIOS)
 	target_include_directories(statusengine PUBLIC ${NAEMON_INCLUDE_DIRS})
 	target_compile_options(statusengine PUBLIC ${NAEMON_CFLAGS_OTHER})
 endif(BUILD_NAGIOS)
-
-target_compile_features(statusengine INTERFACE ${MY_CXX_COMPILE_FEATURES})
 
 install(TARGETS statusengine LIBRARY DESTINATION lib)
