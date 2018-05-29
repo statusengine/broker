@@ -78,7 +78,8 @@ build:jessie:
   image: debian:jessie
   stage: build
   script:
-    - apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -y install cmake clang build-essential libglib2.0-dev libgearman-dev uuid-dev libicu-dev libjson-c-dev pkg-config libssl-dev librabbitmq-dev
+    - echo "deb http://ftp.debian.org/debian jessie-backports main" > /etc/apt/sources.list.d/backports.list
+    - apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -y -t jessie-backports install cmake clang build-essential libglib2.0-dev libgearman-dev uuid-dev libicu-dev libjson-c-dev pkg-config libssl-dev librabbitmq-dev
     - |
       set -e
       mkdir -p /usr/local/lib/pkgconfig /opt/naemon/include
@@ -191,7 +192,8 @@ build:nagios:jessie:
   image: debian:jessie
   stage: build
   script:
-    - apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -y install cmake clang build-essential libgearman-dev uuid-dev libicu-dev libjson-c-dev pkg-config libssl-dev librabbitmq-dev libglib2.0-dev
+    - echo "deb http://ftp.debian.org/debian jessie-backports main" > /etc/apt/sources.list.d/backports.list
+    - apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -y -t jessie-backports install cmake clang build-essential libgearman-dev uuid-dev libicu-dev libjson-c-dev pkg-config libssl-dev librabbitmq-dev libglib2.0-dev
     - |
       set -e
       mkdir -p /opt/nagios/include
