@@ -24,8 +24,7 @@ namespace statusengine {
         bool durable_exchange;
         bool durable_queues;
         bool ssl;
-        bool ssl_verify_peer;
-        bool ssl_verify_hostname;
+        bool ssl_verify;
         std::string ssl_cacert;
         std::string ssl_cert;
         std::string ssl_key;

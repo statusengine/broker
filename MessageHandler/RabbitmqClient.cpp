@@ -15,6 +15,27 @@ namespace statusengine {
     bool RabbitmqClient::Connect() {
         if (cfg->ssl) {
             socket = amqp_ssl_socket_new(conn);
+            amqp_ssl_socket_set_verify(socket, cfg->ssl_verify);
+            if (cfg->ssl_cacert != "") {
+                if (!amqp_ssl_socket_set_cacert(socket, cfg->ssl_cacert.c_str())) {
+                    se->Log() << "Could not set ssl ca for rabbitmq connection" << eoem;
+                    return false;
+                }
+            }
+            if (cfg->ssl_cert != "") {
+                if (cfg->ssl_key == "") {
+                    se->Log() << "Please specify an ssl key for rabbitmq connection" << eoem;
+                    return false;
+                }
+                if (!amqp_ssl_socket_set_key(socket, cfg->ssl_cert.c_str(), cfg->ssl_key.c_str())) {
+                    se->Log() << "Could not set ssl cert and key for rabbitmq connection" << eoem;
+                    return false;
+                }
+            }
+            else if (cfg->ssl_key != "") {
+                se->Log() << "Please specify an ssl cert for rabbitmq connection" << eoem;
+                return false;
+            }
         }
         else {
             socket = amqp_tcp_socket_new(conn);

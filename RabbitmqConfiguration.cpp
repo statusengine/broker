@@ -5,8 +5,7 @@
 
 namespace statusengine {
     RabbitmqConfiguration::RabbitmqConfiguration(Statusengine *se, Configuration *cfg)
-        : port(5673), timeout(nullptr), ssl(false), ssl_verify_hostname(true), ssl_verify_peer(true),
-          exchange("statusengine"), se(se), cfg(cfg) {}
+        : port(5673), timeout(nullptr), ssl(false), ssl_verify(true), exchange("statusengine"), se(se), cfg(cfg) {}
 
     RabbitmqConfiguration::~RabbitmqConfiguration() {
         delete timeout;
@@ -41,8 +40,7 @@ namespace statusengine {
 
         ssl = cfg->GetTomlIgnore<>(tbl, "SSL", false);
 
-        ssl_verify_peer = cfg->GetTomlIgnore<>(tbl, "SSL_verify_peer", true);
-        ssl_verify_hostname = cfg->GetTomlIgnore<>(tbl, "SSL_verify_hostname", true);
+        ssl_verify = cfg->GetTomlIgnore<>(tbl, "SSL_verify", true);
         ssl_cacert = cfg->GetTomlIgnore<>(tbl, "SSL_cacert", std::string(""));
         ssl_cert = cfg->GetTomlIgnore<>(tbl, "SSL_cert", std::string(""));
         ssl_key = cfg->GetTomlIgnore<>(tbl, "SSL_key", std::string(""));
