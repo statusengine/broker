@@ -21,6 +21,5 @@ namespace statusengine {
 
         amqp_socket_t *socket;
         amqp_connection_state_t conn;
-        amqp_table_t *amqpEmptyTable;
     };
 } // namespace statusengine

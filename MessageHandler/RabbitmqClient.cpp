@@ -8,15 +8,9 @@ namespace statusengine {
 
     RabbitmqClient::RabbitmqClient(Statusengine *se, RabbitmqConfiguration *cfg) : MessageHandler(se), cfg(cfg) {
         conn = amqp_new_connection();
-        // trusty compatiblity
-        amqpEmptyTable = new amqp_table_t;
-        amqpEmptyTable->num_entries = 0;
-        amqpEmptyTable->entries = nullptr;
     }
 
-    RabbitmqClient::~RabbitmqClient() {
-        delete amqpEmptyTable;
-    }
+    RabbitmqClient::~RabbitmqClient() {}
 
     bool RabbitmqClient::Connect() {
         if (cfg->ssl) {
@@ -46,8 +40,9 @@ namespace statusengine {
             return false;
         }
 
-        auto exchangeStatus = amqp_exchange_declare(conn, 1, amqp_cstring_bytes(cfg->exchange.c_str()),
-                                                    amqp_cstring_bytes("direct"), 0, 0, 0, 0, *amqpEmptyTable);
+        auto exchangeStatus =
+            amqp_exchange_declare(conn, 1, amqp_cstring_bytes(cfg->exchange.c_str()), amqp_cstring_bytes("direct"), 0,
+                                  cfg->durable_exchange, 0, 0, amqp_empty_table);
         if (exchangeStatus == nullptr) {
             se->Log() << "Could not declare rabbitmq exchange: " << exchangeStatus << eoem;
         }
@@ -70,13 +65,13 @@ namespace statusengine {
 
         for (auto it = queues.begin(); it != queues.end(); ++it) {
             auto queueString = amqp_cstring_bytes((*it).c_str());
-            auto queueStatus = amqp_queue_declare(conn, 1, queueString, 0, 0, 0, 0, *amqpEmptyTable);
+            auto queueStatus = amqp_queue_declare(conn, 1, queueString, 0, 0, 0, 0, amqp_empty_table);
             if (queueStatus == nullptr) {
                 se->Log() << "Could not declare rabbitmq queue \"" << *it << "\": " << queueStatus << eoem;
                 return false;
             }
             auto bindStatus = amqp_queue_bind(conn, 1, queueString, amqp_cstring_bytes(cfg->exchange.c_str()),
-                                              queueString, *amqpEmptyTable);
+                                              queueString, amqp_empty_table);
             if (bindStatus == nullptr) {
                 se->Log() << "Could not bind rabbitmq queue \"" << *it << "\": " << bindStatus << eoem;
                 return false;
