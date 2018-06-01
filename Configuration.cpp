@@ -16,11 +16,11 @@ namespace statusengine {
             cfg = toml::parse(configurationPath);
         }
         catch (std::runtime_error &rte) {
-            se->Log() << "Could not read file: " << rte.what() << eoem;
+            se->Log() << "Could not read file: " << rte.what() << LogLevel::Error;
             return false;
         }
         catch (toml::syntax_error &ste) {
-            se->Log() << "configuration syntax error: " << ste.what() << eoem;
+            se->Log() << "configuration syntax error: " << ste.what() << LogLevel::Error;
             return false;
         }
 
@@ -30,7 +30,7 @@ namespace statusengine {
         catch (std::out_of_range &oor) {
         }
         catch (const toml::type_error &tte) {
-            se->Log() << "Invalid configuration: Queues isn't a table!" << eoem;
+            se->Log() << "Invalid configuration: Queues isn't a table!" << LogLevel::Error;
             return false;
         }
 
@@ -40,7 +40,7 @@ namespace statusengine {
         catch (std::out_of_range &oor) {
         }
         catch (const toml::type_error &tte) {
-            se->Log() << "Invalid configuration: Scheduler isn't a table!" << eoem;
+            se->Log() << "Invalid configuration: Scheduler isn't a table!" << LogLevel::Error;
             return false;
         }
 
@@ -51,11 +51,11 @@ namespace statusengine {
                     gearmanUrls.push_back((*it).at("URL").cast<toml::value_t::String>());
                 }
                 catch (std::out_of_range &oor) {
-                    se->Log() << "Invalid configuration: The gearman section doesn't contain an URL!" << eoem;
+                    se->Log() << "Invalid configuration: The gearman section doesn't contain an URL!" << LogLevel::Error;
                     return false;
                 }
                 catch (const toml::type_error &tte) {
-                    se->Log() << "Invalid configuration: The gearman URL must be a string!" << eoem;
+                    se->Log() << "Invalid configuration: The gearman URL must be a string!" << LogLevel::Error;
                     return false;
                 }
             }
@@ -63,7 +63,7 @@ namespace statusengine {
         catch (const std::out_of_range &oor) {
         }
         catch (const toml::type_error &tte) {
-            se->Log() << "Invalid configuration: Gearman isn't an Array of Tables!" << eoem;
+            se->Log() << "Invalid configuration: Gearman isn't an Array of Tables!" << LogLevel::Error;
             return false;
         }
 
@@ -80,7 +80,7 @@ namespace statusengine {
         catch (const std::out_of_range &oor) {
         }
         catch (const toml::type_error &tte) {
-            se->Log() << "Invalid configuration: Rabbitmq isn't an Array of Tables!" << eoem;
+            se->Log() << "Invalid configuration: Rabbitmq isn't an Array of Tables!" << LogLevel::Error;
             return false;
         }
 

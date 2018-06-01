@@ -21,7 +21,7 @@ namespace statusengine {
         }
 
         if (startupSchedulerMax > 0 && data->type == NEBTYPE_PROCESS_EVENTLOOPSTART) {
-            se->Log() << "Reschedule all hosts and services" << eom;
+            se->Log() << "Reschedule all hosts and services" << LogLevel::Info;
             for (auto temp_host = host_list; temp_host != NULL; temp_host = temp_host->next) {
                 auto now = std::time(nullptr);
                 time_t check_interval = temp_host->check_interval * interval_length;
@@ -55,7 +55,7 @@ namespace statusengine {
                 schedule_service_check(temp_service, now + delay, CHECK_OPTION_NONE);
 #endif // BUILD_NAGIOS
             }
-            se->Log() << "Reschedule complete" << eom;
+            se->Log() << "Reschedule complete" << LogLevel::Info;
         }
 
         if (processData) {

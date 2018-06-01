@@ -16,7 +16,6 @@ namespace statusengine {
 
       private:
         std::string url;
-        Statusengine *se;
         gearman_client_st *client;
     };
 } // namespace statusengine

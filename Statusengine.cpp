@@ -10,6 +10,8 @@
 #include "Configuration.h"
 #include "LogStream.h"
 
+#include <iostream>
+
 namespace statusengine {
 
     Statusengine::Statusengine(nebmodule *handle, std::string configurationPath)
@@ -18,7 +20,8 @@ namespace statusengine {
           cbSystemCommandData(nullptr), cbCommentData(nullptr), cbExternalCommandData(nullptr),
           cbAcknowledgementData(nullptr), cbFlappingData(nullptr), cbDowntimeData(nullptr), cbNotificationData(nullptr),
           cbProgramStatusData(nullptr), cbContactStatusData(nullptr), cbContactNotificationData(nullptr),
-          cbContactNotificationMethodData(nullptr), cbEventHandlerData(nullptr), cbProcessData(nullptr) {
+          cbContactNotificationMethodData(nullptr), cbEventHandlerData(nullptr), cbProcessData(nullptr), ls(nullptr) {
+        ls = new LogStream(this);
         configuration = new Configuration(this);
     }
 
@@ -30,8 +33,8 @@ namespace statusengine {
         SetModuleInfo(NEBMODULE_MODINFO_LICENSE, "GPL v2");
         SetModuleInfo(NEBMODULE_MODINFO_DESC, "A powerful and flexible event broker");
 
-        Log() << "the missing event broker" << eom;
-        Log() << "This is the c++ version of statusengine event broker" << eom;
+        Log() << "the missing event broker" << LogLevel::Info;
+        Log() << "This is the c++ version of statusengine event broker" << LogLevel::Info;
 
         if (!configuration->Load(configurationPath)) {
             return 1;
@@ -148,7 +151,7 @@ namespace statusengine {
     }
 
     Statusengine::~Statusengine() {
-        Log() << "unloading..." << eom;
+        Log() << "unloading..." << LogLevel::Info;
         neb_deregister_module_callbacks(nebhandle);
 
         delete cbHostStatus;
@@ -173,11 +176,12 @@ namespace statusengine {
         delete configuration;
         delete messageHandlers;
 
-        Log() << "unloading finished" << eom;
+        Log() << "unloading finished" << LogLevel::Info;
+        delete ls;
     }
 
-    std::stringstream Statusengine::Log() {
-        return std::stringstream();
+    LogStream &Statusengine::Log() {
+        return *ls;
     }
 
     void Statusengine::SendMessage(const std::string queue, const std::string message) const {
@@ -192,10 +196,10 @@ namespace statusengine {
         auto result = neb_register_callback(type, nebhandle, priority, callback);
 
         if (result != 0) {
-            Log() << "Could not register callback: " << result << eoem;
+            Log() << "Could not register callback: " << result << LogLevel::Error;
         }
         else {
-            Log() << "Register Callback successful" << eom;
+            Log() << "Register Callback successful" << LogLevel::Info;
         }
     }
 } // namespace statusengine

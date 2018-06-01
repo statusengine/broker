@@ -15,7 +15,7 @@ namespace statusengine {
         hostname = cfg->GetTomlIgnore<>(tbl, "Hostname", std::string(""));
 
         if (hostname.empty()) {
-            se->Log() << "Please specify a hostname in rabbitmq configuration" << eoem;
+            se->Log() << "Please specify a hostname in rabbitmq configuration" << LogLevel::Error;
             return false;
         }
 
@@ -25,7 +25,7 @@ namespace statusengine {
         username = cfg->GetTomlIgnore<>(tbl, "Username", std::string("statusengine"));
         password = cfg->GetTomlIgnore<>(tbl, "Password", std::string(""));
         if (password.empty()) {
-            se->Log() << "Warning, no password specified" << eowm;
+            se->Log() << "Warning, no password specified" << LogLevel::Warning;
         }
 
         int tov = cfg->GetTomlIgnore<>(tbl, "Timeout", 30);

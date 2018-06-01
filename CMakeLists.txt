@@ -19,7 +19,8 @@ include(FindPkgConfig)
 find_package(PkgConfig REQUIRED)
 
 set (SESources
-	nebmodule.cpp Statusengine.cpp Configuration.cpp RabbitmqConfiguration.cpp
+	nebmodule.cpp Statusengine.cpp LogStream.cpp
+	Configuration.cpp RabbitmqConfiguration.cpp
 	MessageHandler/MessageHandler.cpp MessageHandler/MessageHandlerList.cpp
 	NagiosObjects/NagiosObject.cpp
 	NagiosObjects/NagiosHost.cpp

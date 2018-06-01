@@ -5,26 +5,38 @@
 #include "nebmodule.h"
 
 namespace statusengine {
-    inline void SendLogMessage(std::ostream &os, int logLevel) {
-        std::ostringstream *ss = reinterpret_cast<std::ostringstream *>(&os);
-        nm_log(logLevel, "%s", ("Statusengine: " + ss->str()).c_str());
-    }
+    class Statusengine;
 
-    inline std::ostream &eom(std::ostream &os) {
-        SendLogMessage(os, NSLOG_INFO_MESSAGE);
+    enum class LogLevel { Info, Warning, Error };
 
-        return os;
-    }
+    class LogStream {
+      public:
+        LogStream(Statusengine *se);
+        ~LogStream();
 
-    inline std::ostream &eoem(std::ostream &os) {
-        SendLogMessage(os, NSLOG_RUNTIME_ERROR);
+        LogStream &operator<<(const char *o);
+        LogStream &operator<<(const bool o);
+        LogStream &operator<<(const short o);
+        LogStream &operator<<(const unsigned short o);
+        LogStream &operator<<(const int o);
+        LogStream &operator<<(const unsigned int o);
+        LogStream &operator<<(const long o);
+        LogStream &operator<<(const unsigned long o);
+        LogStream &operator<<(const long long o);
+        LogStream &operator<<(const unsigned long long o);
+        LogStream &operator<<(const float o);
+        LogStream &operator<<(const double o);
+        LogStream &operator<<(const long double o);
+        LogStream &operator<<(const std::string o);
+        LogStream &operator<<(const LogLevel o);
 
-        return os;
-    }
+      private:
+        LogStream(const LogStream &LogStream) = delete;
+        LogStream(LogStream &&LogStream) = delete;
+        LogStream &operator=(const LogStream &) = delete;
 
-    inline std::ostream &eowm(std::ostream &os) {
-        SendLogMessage(os, NSLOG_RUNTIME_WARNING);
+        std::stringstream *ss;
 
-        return os;
-    }
+        Statusengine *se;
+    };
 } // namespace statusengine

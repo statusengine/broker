@@ -1,8 +1,8 @@
 #pragma once
 
-#include <sstream>
 #include <string>
 
+#include "LogStream.h"
 #include "nebmodule.h"
 
 #include "MessageHandler/MessageHandlerList.h"
@@ -16,10 +16,13 @@ namespace statusengine {
       public:
         Statusengine(nebmodule *handle, std::string configurationPath);
         ~Statusengine();
+        Statusengine(const Statusengine &Statusengine) = delete;
+        Statusengine(Statusengine &&Statusengine) = delete;
+        Statusengine &operator=(const Statusengine &) = delete;
 
         int Init();
 
-        std::stringstream Log();
+        LogStream &Log();
         void SendMessage(const std::string queue, const std::string message) const;
 
         template <typename T> void RegisterCallback(NebmoduleCallback<T> *cb) {
@@ -36,6 +39,7 @@ namespace statusengine {
         std::string configurationPath;
         Configuration *configuration;
         MessageHandlerList *messageHandlers;
+        LogStream *ls;
 
         HostStatusCallback *cbHostStatus;
         HostCheckCallback *cbHostCheck;

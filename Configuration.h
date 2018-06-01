@@ -52,7 +52,7 @@ namespace statusengine {
                 return toml::get_or(tab, ky, opt);
             }
             catch (const toml::type_error &tte) {
-                se->Log() << "Invalid configuration: Invalid value for key " << ky << eoem;
+                se->Log() << "Invalid configuration: Invalid value for key " << ky << LogLevel::Error;
             }
             return std::move(opt);
         }
