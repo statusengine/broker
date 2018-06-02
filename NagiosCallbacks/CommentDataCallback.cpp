@@ -6,7 +6,9 @@
 namespace statusengine {
     CommentDataCallback::CommentDataCallback(Statusengine *se) : NebmoduleCallback(NEBCALLBACK_COMMENT_DATA, se) {}
 
-    void CommentDataCallback::Callback(int event_type, nebstruct_comment_data *data) {
+    void CommentDataCallback::Callback(int event_type, void *vdata) {
+        auto data = reinterpret_cast<nebstruct_comment_data *>(vdata);
+
         auto statusData = NagiosCommentData(data);
         se->SendMessage("statusngin_comments", statusData.ToString());
     }

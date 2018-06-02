@@ -7,7 +7,9 @@ namespace statusengine {
     HostCheckCallback::HostCheckCallback(Statusengine *se, bool hostchecks, bool ocsp)
         : NebmoduleCallback(NEBCALLBACK_HOST_CHECK_DATA, se), hostchecks(hostchecks), ocsp(ocsp) {}
 
-    void HostCheckCallback::Callback(int event_type, nebstruct_host_check_data *data) {
+    void HostCheckCallback::Callback(int event_type, void *vdata) {
+        auto data = reinterpret_cast<nebstruct_host_check_data *>(vdata);
+
         if (data->type == NEBTYPE_HOSTCHECK_PROCESSED) {
             auto checkData = NagiosHostCheckData(data);
             if (hostchecks) {

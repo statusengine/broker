@@ -1,7 +1,7 @@
 #pragma once
 
 #include "NagiosObject.h"
-#include "nebmodule.h"
+#include "Nebmodule.h"
 
 namespace statusengine {
     class NagiosServiceCheckPerfData : public NagiosObject {

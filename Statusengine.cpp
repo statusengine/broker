@@ -1,27 +1,19 @@
 #include "Statusengine.h"
 
-#include <exception>
-#include <fstream>
-#include <memory>
-#include <sstream>
+#include <utility>
 
 #include "vendor/toml.hpp"
 
 #include "Configuration.h"
 #include "LogStream.h"
-
-#include <iostream>
+#include "Nebmodule.h"
 
 namespace statusengine {
 
     Statusengine::Statusengine(nebmodule *handle, std::string configurationPath)
-        : nebhandle(handle), configurationPath(configurationPath), cbHostStatus(nullptr), cbHostCheck(nullptr),
-          cbServiceStatus(nullptr), cbServiceCheck(nullptr), cbStateChange(nullptr), cbLogData(nullptr),
-          cbSystemCommandData(nullptr), cbCommentData(nullptr), cbExternalCommandData(nullptr),
-          cbAcknowledgementData(nullptr), cbFlappingData(nullptr), cbDowntimeData(nullptr), cbNotificationData(nullptr),
-          cbProgramStatusData(nullptr), cbContactStatusData(nullptr), cbContactNotificationData(nullptr),
-          cbContactNotificationMethodData(nullptr), cbEventHandlerData(nullptr), cbProcessData(nullptr), ls(nullptr) {
+        : nebhandle(handle), configurationPath(configurationPath), ls(nullptr) {
         ls = new LogStream(this);
+        callbacks = new std::map<NEBCallbackType, std::vector<NebmoduleCallback *> *>();
         configuration = new Configuration(this);
     }
 
@@ -46,105 +38,86 @@ namespace statusengine {
         }
 
         if (configuration->GetQueueHostStatus()) {
-            cbHostStatus = new HostStatusCallback(this);
-            RegisterCallback(cbHostStatus);
+            RegisterCallback(new HostStatusCallback(this));
         }
 
         if (configuration->GetQueueHostCheck() || configuration->GetQueueOCHP()) {
-            cbHostCheck =
-                new HostCheckCallback(this, configuration->GetQueueHostCheck(), configuration->GetQueueOCHP());
-            RegisterCallback(cbHostCheck);
+            RegisterCallback(
+                new HostCheckCallback(this, configuration->GetQueueHostCheck(), configuration->GetQueueOCHP()));
         }
 
         if (configuration->GetQueueServiceStatus()) {
-            cbServiceStatus = new ServiceStatusCallback(this);
-            RegisterCallback(cbServiceStatus);
+            RegisterCallback(new ServiceStatusCallback(this));
         }
 
         if (configuration->GetQueueServiceCheck() || configuration->GetQueueOCSP() ||
             configuration->GetQueueServicePerfData()) {
-            cbServiceCheck =
-                new ServiceCheckCallback(this, configuration->GetQueueServiceCheck(), configuration->GetQueueOCSP(),
-                                         configuration->GetQueueServicePerfData());
-            RegisterCallback(cbServiceCheck);
+            RegisterCallback(new ServiceCheckCallback(this, configuration->GetQueueServiceCheck(),
+                                                      configuration->GetQueueOCSP(),
+                                                      configuration->GetQueueServicePerfData()));
         }
 
         if (configuration->GetQueueStateChange()) {
-            cbStateChange = new StateChangeCallback(this);
-            RegisterCallback(cbStateChange);
+            RegisterCallback(new StateChangeCallback(this));
         }
 
         if (configuration->GetQueueLogData()) {
-            cbLogData = new LogDataCallback(this);
-            RegisterCallback(cbLogData);
+            RegisterCallback(new LogDataCallback(this));
         }
 
         if (configuration->GetQueueSystemCommandData()) {
-            cbSystemCommandData = new SystemCommandDataCallback(this);
-            RegisterCallback(cbSystemCommandData);
+            RegisterCallback(new SystemCommandDataCallback(this));
         }
 
         if (configuration->GetQueueCommentData()) {
-            cbCommentData = new CommentDataCallback(this);
-            RegisterCallback(cbCommentData);
+            RegisterCallback(new CommentDataCallback(this));
         }
 
         if (configuration->GetQueueExternalCommandData()) {
-            cbExternalCommandData = new ExternalCommandDataCallback(this);
-            RegisterCallback(cbExternalCommandData);
+            RegisterCallback(new ExternalCommandDataCallback(this));
         }
 
         if (configuration->GetQueueAcknowledgementData()) {
-            cbAcknowledgementData = new AcknowledgementDataCallback(this);
-            RegisterCallback(cbAcknowledgementData);
+            RegisterCallback(new AcknowledgementDataCallback(this));
         }
 
         if (configuration->GetQueueFlappingData()) {
-            cbFlappingData = new FlappingDataCallback(this);
-            RegisterCallback(cbFlappingData);
+            RegisterCallback(new FlappingDataCallback(this));
         }
 
         if (configuration->GetQueueDowntimeData()) {
-            cbDowntimeData = new DowntimeDataCallback(this);
-            RegisterCallback(cbDowntimeData);
+            RegisterCallback(new DowntimeDataCallback(this));
         }
 
         if (configuration->GetQueueNotificationData()) {
-            cbNotificationData = new NotificationDataCallback(this);
-            RegisterCallback(cbNotificationData);
+            RegisterCallback(new NotificationDataCallback(this));
         }
 
         if (configuration->GetQueueProgramStatusData()) {
-            cbProgramStatusData = new ProgramStatusDataCallback(this);
-            RegisterCallback(cbProgramStatusData);
+            RegisterCallback(new ProgramStatusDataCallback(this));
         }
 
         if (configuration->GetQueueContactStatusData()) {
-            cbContactStatusData = new ContactStatusDataCallback(this);
-            RegisterCallback(cbContactStatusData);
+            RegisterCallback(new ContactStatusDataCallback(this));
         }
 
         if (configuration->GetQueueContactNotificationData()) {
-            cbContactNotificationData = new ContactNotificationDataCallback(this);
-            RegisterCallback(cbContactNotificationData);
+            RegisterCallback(new ContactNotificationDataCallback(this));
         }
 
         if (configuration->GetQueueContactNotificationMethodData()) {
-            cbContactNotificationMethodData = new ContactNotificationMethodDataCallback(this);
-            RegisterCallback(cbContactNotificationMethodData);
+            RegisterCallback(new ContactNotificationMethodDataCallback(this));
         }
 
         if (configuration->GetQueueEventHandlerData()) {
-            cbEventHandlerData = new EventHandlerDataCallback(this);
-            RegisterCallback(cbEventHandlerData);
+            RegisterCallback(new EventHandlerDataCallback(this));
         }
 
         if (configuration->GetQueueRestartData() || configuration->GetQueueProcessData() ||
             configuration->GetStartupScheduleMax() > 0) {
-            cbProcessData =
-                new ProcessDataCallback(this, configuration->GetQueueRestartData(),
-                                        configuration->GetQueueProcessData(), configuration->GetStartupScheduleMax());
-            RegisterCallback(cbProcessData);
+            RegisterCallback(new ProcessDataCallback(this, configuration->GetQueueRestartData(),
+                                                     configuration->GetQueueProcessData(),
+                                                     configuration->GetStartupScheduleMax()));
         }
 
         return 0;
@@ -154,25 +127,11 @@ namespace statusengine {
         Log() << "unloading..." << LogLevel::Info;
         neb_deregister_module_callbacks(nebhandle);
 
-        delete cbHostStatus;
-        delete cbHostCheck;
-        delete cbServiceStatus;
-        delete cbServiceCheck;
-        delete cbStateChange;
-        delete cbLogData;
-        delete cbSystemCommandData;
-        delete cbCommentData;
-        delete cbExternalCommandData;
-        delete cbAcknowledgementData;
-        delete cbFlappingData;
-        delete cbDowntimeData;
-        delete cbNotificationData;
-        delete cbProgramStatusData;
-        delete cbContactStatusData;
-        delete cbContactNotificationData;
-        delete cbContactNotificationMethodData;
-        delete cbEventHandlerData;
-        delete cbProcessData;
+        for (auto const &x : *callbacks) {
+            x.second->clear();
+        }
+        callbacks->clear();
+        delete callbacks;
         delete configuration;
         delete messageHandlers;
 
@@ -192,14 +151,30 @@ namespace statusengine {
         neb_set_module_info(nebhandle, modinfo, const_cast<char *>(text.c_str()));
     }
 
-    void Statusengine::RegisterCallback(NEBCallbackType type, int callback(int, void *), int priority) {
-        auto result = neb_register_callback(type, nebhandle, priority, callback);
+    void Statusengine::RegisterCallback(NebmoduleCallback *cb) {
+        std::vector<NebmoduleCallback *> *tpcb;
+        try {
+            tpcb = callbacks->at(cb->GetCallbackType());
+        }
+        catch (std::out_of_range &oor) {
+            tpcb = new std::vector<NebmoduleCallback *>();
+            callbacks->insert(std::make_pair(cb->GetCallbackType(), tpcb));
+            Nebmodule::RegisterCallback(cb->GetCallbackType());
+        }
+        tpcb->push_back(cb);
+    }
 
-        if (result != 0) {
-            Log() << "Could not register callback: " << result << LogLevel::Error;
+    int Statusengine::Callback(int event_type, void *data) {
+        NEBCallbackType cbType = static_cast<NEBCallbackType>(event_type);
+        try {
+            std::vector<NebmoduleCallback *> *tpcb = callbacks->at(cbType);
+            for (auto &x : *tpcb) {
+                x->Callback(event_type, data);
+            }
         }
-        else {
-            Log() << "Register Callback successful" << LogLevel::Info;
+        catch (std::out_of_range &oor) {
+            Log() << "Could not find callback for " << event_type << LogLevel::Warning;
         }
+        return 0;
     }
 } // namespace statusengine

@@ -1,15 +1,15 @@
 #pragma once
 
-#include "nebmodule.h"
+#include "Nebmodule.h"
 
 #include "NebmoduleCallback.h"
 
 namespace statusengine {
-    class HostCheckCallback : public NebmoduleCallback<nebstruct_host_check_data> {
+    class HostCheckCallback : public NebmoduleCallback {
       public:
         explicit HostCheckCallback(Statusengine *se, bool hostchecks, bool ocsp);
 
-        virtual void Callback(int event_type, nebstruct_host_check_data *data);
+        virtual void Callback(int event_type, void *vdata);
 
       private:
         bool hostchecks;

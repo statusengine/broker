@@ -2,7 +2,7 @@
 
 #include <sstream>
 
-#include "nebmodule.h"
+#include "Nebmodule.h"
 
 namespace statusengine {
     class Statusengine;

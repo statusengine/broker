@@ -2,16 +2,16 @@
 
 #include <ctime>
 
-#include "nebmodule.h"
+#include "Nebmodule.h"
 
 #include "NebmoduleCallback.h"
 
 namespace statusengine {
-    class ProcessDataCallback : public NebmoduleCallback<nebstruct_process_data> {
+    class ProcessDataCallback : public NebmoduleCallback {
       public:
         explicit ProcessDataCallback(Statusengine *se, bool restartData, bool processData, time_t startupSchedulerMax);
 
-        virtual void Callback(int event_type, nebstruct_process_data *data);
+        virtual void Callback(int event_type, void *vdata);
 
       private:
         bool restartData;

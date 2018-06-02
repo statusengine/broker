@@ -4,7 +4,7 @@
 
 #include <json.h>
 
-#include "nebmodule.h"
+#include "Nebmodule.h"
 
 namespace statusengine {
     class NagiosObject {

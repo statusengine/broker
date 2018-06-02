@@ -7,7 +7,9 @@ namespace statusengine {
     ProgramStatusDataCallback::ProgramStatusDataCallback(Statusengine *se)
         : NebmoduleCallback(NEBCALLBACK_PROGRAM_STATUS_DATA, se) {}
 
-    void ProgramStatusDataCallback::Callback(int event_type, nebstruct_program_status_data *data) {
+    void ProgramStatusDataCallback::Callback(int event_type, void *vdata) {
+        auto data = reinterpret_cast<nebstruct_program_status_data *>(vdata);
+
         NagiosProgramStatusData myData(data);
         se->SendMessage("statusngin_programmstatus", myData.ToString());
     }

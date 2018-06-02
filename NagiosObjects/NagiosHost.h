@@ -1,6 +1,6 @@
 #pragma once
 
-#include "nebmodule.h"
+#include "Nebmodule.h"
 
 #include "NagiosObject.h"
 

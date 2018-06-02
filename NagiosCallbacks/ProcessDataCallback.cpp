@@ -12,7 +12,9 @@ namespace statusengine {
         : NebmoduleCallback(NEBCALLBACK_PROCESS_DATA, se), restartData(restartData), processData(processData),
           startupSchedulerMax(startupSchedulerMax) {}
 
-    void ProcessDataCallback::Callback(int event_type, nebstruct_process_data *data) {
+    void ProcessDataCallback::Callback(int event_type, void *vdata) {
+        auto data = reinterpret_cast<nebstruct_process_data *>(vdata);
+
         if (restartData && data->type == NEBTYPE_PROCESS_START) {
             json_object *restartData = json_object_new_object();
             json_object_object_add(restartData, "object_type", json_object_new_int(NEBTYPE_PROCESS_RESTART));

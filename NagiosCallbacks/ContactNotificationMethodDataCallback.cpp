@@ -7,8 +7,9 @@ namespace statusengine {
     ContactNotificationMethodDataCallback::ContactNotificationMethodDataCallback(Statusengine *se)
         : NebmoduleCallback(NEBCALLBACK_CONTACT_NOTIFICATION_METHOD_DATA, se) {}
 
-    void ContactNotificationMethodDataCallback::Callback(int event_type,
-                                                         nebstruct_contact_notification_method_data *data) {
+    void ContactNotificationMethodDataCallback::Callback(int event_type, void *vdata) {
+        auto data = reinterpret_cast<nebstruct_contact_notification_method_data *>(vdata);
+
         auto myData = NagiosContactNotificationMethodData(data);
         se->SendMessage("statusngin_contactnotificationmethod", myData.ToString());
     }

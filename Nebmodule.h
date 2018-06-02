@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 #ifndef BUILD_NAGIOS
 extern "C" {
 #include "naemon/naemon.h"
@@ -27,3 +29,23 @@ inline void nm_log(long unsigned logLevel, const char *_, const char *message) {
     delete temp;
 }
 #endif
+
+namespace statusengine {
+    class Statusengine;
+
+    class Nebmodule {
+      public:
+        static int Init(nebmodule *handle, std::string args);
+
+        static int Deinit(int reason);
+
+        static int Callback(int event_type, void *data);
+
+        static bool RegisterCallback(NEBCallbackType cbType);
+
+      private:
+        static Statusengine *se;
+    };
+} // namespace statusengine
+
+int nebmodule_callback(int event_type, void *data);

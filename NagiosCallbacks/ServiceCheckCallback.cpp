@@ -9,7 +9,9 @@ namespace statusengine {
         : NebmoduleCallback(NEBCALLBACK_SERVICE_CHECK_DATA, se), servicechecks(servicechecks), ocsp(ocsp),
           service_perfdata(service_perfdata) {}
 
-    void ServiceCheckCallback::Callback(int event_type, nebstruct_service_check_data *data) {
+    void ServiceCheckCallback::Callback(int event_type, void *vdata) {
+        auto data = reinterpret_cast<nebstruct_service_check_data *>(vdata);
+
         if (data->type == NEBTYPE_SERVICECHECK_PROCESSED) {
             if (servicechecks || ocsp) {
                 auto checkData = NagiosServiceCheckData(data);

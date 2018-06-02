@@ -1,14 +1,14 @@
 #pragma once
 
-#include "nebmodule.h"
+#include "Nebmodule.h"
 
 #include "NebmoduleCallback.h"
 
 namespace statusengine {
-    class LogDataCallback : public NebmoduleCallback<nebstruct_log_data> {
+    class LogDataCallback : public NebmoduleCallback {
       public:
         explicit LogDataCallback(Statusengine *se);
 
-        virtual void Callback(int event_type, nebstruct_log_data *data);
+        virtual void Callback(int event_type, void *vdata);
     };
 } // namespace statusengine
