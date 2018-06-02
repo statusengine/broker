@@ -88,7 +88,7 @@ build:jessie:
     - |
       mkdir build
       cd build
-      cmake -DCMAKE_C_COMPILER=/usr/bin/clang -DCMAKE_CXX_COMPILER=/usr/bin/clang++ ..
+      cmake -DCMAKE_C_COMPILER=/usr/bin/clang -DCMAKE_CXX_COMPILER=/usr/bin/clang++ -DWITH_RABBITMQ=OFF ..
       make -j5
       mv libstatusengine.so ..
   artifacts:
@@ -201,7 +201,7 @@ build:nagios:jessie:
     - |
       mkdir build
       cd build
-      cmake -DCMAKE_C_COMPILER=/usr/bin/clang -DCMAKE_CXX_COMPILER=/usr/bin/clang++ -DBUILD_NAGIOS=ON -DNAGIOS_INCLUDE_DIR=/opt/nagios/include ..
+      cmake -DCMAKE_C_COMPILER=/usr/bin/clang -DCMAKE_CXX_COMPILER=/usr/bin/clang++ -DBUILD_NAGIOS=ON -DWITH_RABBITMQ=OFF -DNAGIOS_INCLUDE_DIR=/opt/nagios/include ..
       make -j5
       mv libstatusengine.so ..
   artifacts:
