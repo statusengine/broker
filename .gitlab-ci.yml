@@ -11,7 +11,7 @@ build:trusty:
     - |
       mkdir build
       cd build
-      cmake -DCMAKE_C_COMPILER=/usr/bin/gcc -DCMAKE_CXX_COMPILER=/usr/bin/g++ -DWITH_RABBITMQ=OFF ..
+      cmake -DCMAKE_C_COMPILER=/usr/bin/gcc -DCMAKE_CXX_COMPILER=/usr/bin/g++ ..
       make -j5
       mv libstatusengine.so ..
   artifacts:
@@ -72,7 +72,7 @@ build:jessie:
     - |
       mkdir build
       cd build
-      cmake -DCMAKE_C_COMPILER=/usr/bin/gcc -DCMAKE_CXX_COMPILER=/usr/bin/g++ -DWITH_RABBITMQ=OFF ..
+      cmake -DCMAKE_C_COMPILER=/usr/bin/gcc -DCMAKE_CXX_COMPILER=/usr/bin/g++ ..
       make -j5
       mv libstatusengine.so ..
   artifacts:

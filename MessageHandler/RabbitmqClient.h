@@ -23,3 +23,13 @@ namespace statusengine {
         amqp_connection_state_t conn;
     };
 } // namespace statusengine
+
+#ifdef WITH_RABBITMQ_CX060
+inline amqp_exchange_declare_ok_t *amqp_exchange_declare(amqp_connection_state_t state, amqp_channel_t channel,
+                                                         amqp_bytes_t exchange, amqp_bytes_t type,
+                                                         amqp_boolean_t passive, amqp_boolean_t durable,
+                                                         amqp_boolean_t auto_delete, amqp_boolean_t internal,
+                                                         amqp_table_t arguments) {
+    return amqp_exchange_declare(state, channel, exchange, type, passive, durable, arguments);
+}
+#endif // WITH_RABBITMQ_CX060
