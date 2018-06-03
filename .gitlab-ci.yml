@@ -111,7 +111,7 @@ build:nagios:trusty:
     - |
       mkdir build
       cd build
-      cmake -DCMAKE_C_COMPILER=/usr/bin/gcc -DCMAKE_CXX_COMPILER=/usr/bin/g++ -DWITH_RABBITMQ=OFF -DBUILD_NAGIOS=ON -DNAGIOS_INCLUDE_DIR=/opt/nagios/include ..
+      cmake -DCMAKE_C_COMPILER=/usr/bin/gcc -DCMAKE_CXX_COMPILER=/usr/bin/g++ -DBUILD_NAGIOS=ON -DNAGIOS_INCLUDE_DIR=/opt/nagios/include ..
       make -j5
       mv libstatusengine.so ..
   artifacts:
@@ -169,7 +169,7 @@ build:nagios:jessie:
     - |
       mkdir build
       cd build
-      cmake -DCMAKE_C_COMPILER=/usr/bin/gcc -DCMAKE_CXX_COMPILER=/usr/bin/g++ -DBUILD_NAGIOS=ON -DWITH_RABBITMQ=OFF -DNAGIOS_INCLUDE_DIR=/opt/nagios/include ..
+      cmake -DCMAKE_C_COMPILER=/usr/bin/gcc -DCMAKE_CXX_COMPILER=/usr/bin/g++ -DBUILD_NAGIOS=ON -DNAGIOS_INCLUDE_DIR=/opt/nagios/include ..
       make -j5
       mv libstatusengine.so ..
   artifacts:
