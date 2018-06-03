@@ -79,7 +79,7 @@ build:jessie:
   stage: build
   script:
     - echo "deb http://ftp.debian.org/debian jessie-backports main" > /etc/apt/sources.list.d/backports.list
-    - apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -y -t jessie-backports install cmake clang build-essential libglib2.0-dev libgearman-dev uuid-dev libicu-dev libjson-c-dev pkg-config libssl-dev librabbitmq-dev
+    - apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -y -t jessie-backports install cmake gcc g++ build-essential libglib2.0-dev libgearman-dev uuid-dev libicu-dev libjson-c-dev pkg-config libssl-dev librabbitmq-dev
     - |
       set -e
       mkdir -p /usr/local/lib/pkgconfig /opt/naemon/include
@@ -88,7 +88,7 @@ build:jessie:
     - |
       mkdir build
       cd build
-      cmake -DCMAKE_C_COMPILER=/usr/bin/clang -DCMAKE_CXX_COMPILER=/usr/bin/clang++ -DWITH_RABBITMQ=OFF ..
+      cmake -DCMAKE_C_COMPILER=/usr/bin/gcc -DCMAKE_CXX_COMPILER=/usr/bin/g++ -DWITH_RABBITMQ=OFF ..
       make -j5
       mv libstatusengine.so ..
   artifacts:
@@ -193,7 +193,7 @@ build:nagios:jessie:
   stage: build
   script:
     - echo "deb http://ftp.debian.org/debian jessie-backports main" > /etc/apt/sources.list.d/backports.list
-    - apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -y -t jessie-backports install cmake clang build-essential libgearman-dev uuid-dev libicu-dev libjson-c-dev pkg-config libssl-dev librabbitmq-dev libglib2.0-dev
+    - apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -y -t jessie-backports install cmake gcc g++ build-essential libgearman-dev uuid-dev libicu-dev libjson-c-dev pkg-config libssl-dev librabbitmq-dev libglib2.0-dev
     - |
       set -e
       mkdir -p /opt/nagios/include
@@ -201,7 +201,7 @@ build:nagios:jessie:
     - |
       mkdir build
       cd build
-      cmake -DCMAKE_C_COMPILER=/usr/bin/clang -DCMAKE_CXX_COMPILER=/usr/bin/clang++ -DBUILD_NAGIOS=ON -DWITH_RABBITMQ=OFF -DNAGIOS_INCLUDE_DIR=/opt/nagios/include ..
+      cmake -DCMAKE_C_COMPILER=/usr/bin/gcc -DCMAKE_CXX_COMPILER=/usr/bin/g++ -DBUILD_NAGIOS=ON -DWITH_RABBITMQ=OFF -DNAGIOS_INCLUDE_DIR=/opt/nagios/include ..
       make -j5
       mv libstatusengine.so ..
   artifacts:
