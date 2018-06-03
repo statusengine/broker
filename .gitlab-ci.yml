@@ -2,7 +2,7 @@ build:trusty:
   image: ubuntu:trusty
   stage: build
   script: 
-    - apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -y install cmake3 gcc g++ build-essential libglib2.0-dev libgearman-dev uuid-dev libicu-dev libjson-c-dev libssl-dev pkg-config
+    - apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -y install cmake3 gcc g++ build-essential libglib2.0-dev libgearman-dev uuid-dev libicu-dev libjson-c-dev libssl-dev pkg-config librabbitmq-dev
     - |
       set -e
       mkdir -p /usr/local/lib/pkgconfig /opt/naemon/include
@@ -103,7 +103,7 @@ build:nagios:trusty:
   image: ubuntu:trusty
   stage: build
   script: 
-    - apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -y install cmake3 gcc g++ build-essential libgearman-dev uuid-dev libicu-dev libjson-c-dev pkg-config libssl-dev libglib2.0-dev
+    - apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -y install cmake3 gcc g++ build-essential libgearman-dev uuid-dev libicu-dev libjson-c-dev pkg-config libssl-dev libglib2.0-dev librabbitmq-dev
     - |
       set -e
       mkdir -p /opt/nagios/include
