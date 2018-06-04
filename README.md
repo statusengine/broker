@@ -1,4 +1,6 @@
-# statusengine naemon/nagios broker module
+# statusengine naemon/nagios broker module (alpha)
+
+For a production ready broker module [click here](https://github.com/statusengine/module).
 
 The Statusengine Broker Module is a small c++ library that gets loaded into your Naemon or Nagios Core.
 
