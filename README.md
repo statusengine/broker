@@ -60,7 +60,7 @@ make install
 
 ### Installation path
 
-The default installation path for the library is /usr/local, which means that the so file will be placed under /usr/local/lib/statusengine.so.
+The default installation path for the library is /usr/local, which means that the so file will be placed under /usr/local/lib/libstatusengine.so.
 
 You can specify -DCMAKE_INSTALL_PREFIX:PATH=/opt/naemon as cmake argument to change the path.
 
