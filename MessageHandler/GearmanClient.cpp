@@ -28,7 +28,7 @@ namespace statusengine {
         }
     }
 
-    void GearmanClient::SendMessage(const std::string &queue, const std::string &message) const {
+    void GearmanClient::SendMessage(const std::string &queue, const std::string &message) {
         auto ret =
             gearman_client_do_background(client, queue.c_str(), nullptr, message.c_str(), message.length(), nullptr);
         if (!gearman_success(ret)) {

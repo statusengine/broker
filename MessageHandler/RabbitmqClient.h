@@ -14,13 +14,19 @@ namespace statusengine {
         ~RabbitmqClient();
 
         virtual bool Connect();
-        virtual void SendMessage(const std::string &queue, const std::string &message) const;
+        virtual bool Connect(bool quiet);
+        virtual void SendMessage(const std::string &queue, const std::string &message);
 
       private:
+        virtual bool CheckAMQPReply(char const *context, bool quiet = false);
+        virtual bool CheckAMQPReply(amqp_rpc_reply_t x, char const *context, bool quiet = false);
+
         RabbitmqConfiguration *cfg;
 
         amqp_socket_t *socket;
         amqp_connection_state_t conn;
+
+        bool connected;
     };
 } // namespace statusengine
 

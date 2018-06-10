@@ -14,7 +14,7 @@ namespace statusengine {
 
         virtual bool Connect() = 0;
 
-        virtual void SendMessage(const std::string &queue, const std::string &message) const = 0;
+        virtual void SendMessage(const std::string &queue, const std::string &message) = 0;
 
       protected:
         Statusengine *se;

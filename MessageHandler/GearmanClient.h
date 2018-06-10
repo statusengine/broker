@@ -12,7 +12,7 @@ namespace statusengine {
 
         virtual bool Connect();
 
-        virtual void SendMessage(const std::string &queue, const std::string &message) const;
+        virtual void SendMessage(const std::string &queue, const std::string &message);
 
       private:
         std::string url;
