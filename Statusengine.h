@@ -28,7 +28,9 @@ namespace statusengine {
         void InitEventCallbacks();
 
         LogStream &Log();
-        void SendMessage(const std::string queue, const std::string message) const;
+        void SendMessage(const std::string &queue, const std::string &message) const;
+        void SendBulkMessage(const std::string &queue, const std::string &message);
+        void FlushBulkQueue();
         void RegisterCallback(NebmoduleCallback *cb);
         void RegisterEventCallback(EventCallback *ecb);
 

@@ -6,4 +6,5 @@ namespace statusengine {
 
     MessageHandler::MessageHandler(Statusengine *se) : se(se) {}
     MessageHandler::~MessageHandler(){};
+
 } // namespace statusengine

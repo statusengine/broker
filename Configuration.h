@@ -22,10 +22,12 @@ namespace statusengine {
         bool GetQueueHostStatus() const;
         bool GetQueueHostCheck() const;
         bool GetQueueOCHP() const;
+        bool GetQueueBulkOCHP() const;
         bool GetQueueServiceStatus() const;
         bool GetQueueServiceCheck() const;
         bool GetQueueServicePerfData() const;
         bool GetQueueOCSP() const;
+        bool GetQueueBulkOCSP() const;
         bool GetQueueStateChange() const;
         bool GetQueueLogData() const;
         bool GetQueueSystemCommandData() const;
@@ -42,6 +44,8 @@ namespace statusengine {
         bool GetQueueEventHandlerData() const;
         bool GetQueueProcessData() const;
         bool GetQueueRestartData() const;
+        time_t GetBulkFlushInterval() const;
+        unsigned long GetBulkMaximum() const;
         time_t GetStartupScheduleMax() const;
 
         std::vector<std::string> GetGearmanList();
@@ -61,6 +65,7 @@ namespace statusengine {
         Statusengine *se;
         toml::Table cfg;
         toml::Table queueTable;
+        toml::Table bulkTable;
         toml::Table amqpTable;
         toml::Table schedulerTable;
 

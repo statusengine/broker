@@ -7,12 +7,13 @@
 namespace statusengine {
     class HostCheckCallback : public NebmoduleCallback {
       public:
-        explicit HostCheckCallback(Statusengine *se, bool hostchecks, bool ocsp);
+        explicit HostCheckCallback(Statusengine *se, bool hostchecks, bool ochp, bool ochpBulk);
 
         virtual void Callback(int event_type, void *vdata);
 
       private:
         bool hostchecks;
-        bool ocsp;
+        bool ochp;
+        bool ochpBulk;
     };
 } // namespace statusengine

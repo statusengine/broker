@@ -3,12 +3,13 @@
 #include "Statusengine.h"
 
 namespace statusengine {
-    BulkMessageCallback::BulkMessageCallback(Statusengine *se) : EventCallback(se) {}
+    BulkMessageCallback::BulkMessageCallback(Statusengine *se, double interval)
+        : EventCallback(se), interval(interval) {}
 
     double BulkMessageCallback::Interval() {
-        return 5.0;
+        return interval;
     }
     void BulkMessageCallback::Callback() {
-        se->Log() << "BulkMessageCallback" << LogLevel::Info;
+        se->FlushBulkQueue();
     }
 } // namespace statusengine

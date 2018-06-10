@@ -1,6 +1,7 @@
 #include "MessageHandlerList.h"
 
 #include "Configuration.h"
+#include "NagiosObjects/NagiosObject.h"
 #include "RabbitmqConfiguration.h"
 
 #ifdef WITH_GEARMAN
@@ -12,7 +13,9 @@
 #endif
 
 namespace statusengine {
-    MessageHandlerList::MessageHandlerList(Statusengine *se, Configuration *cfg) : se(se) {
+    MessageHandlerList::MessageHandlerList(Statusengine *se, Configuration *cfg)
+        : se(se), maxBulkSize(0), globalBulkCounter(0) {
+        maxBulkSize = cfg->GetBulkMaximum();
 #ifdef WITH_GEARMAN
         std::vector<std::string> gearmanUrls = cfg->GetGearmanList();
         for (auto it = gearmanUrls.begin(); it != gearmanUrls.end(); ++it) {
@@ -43,6 +46,41 @@ namespace statusengine {
         for (auto it = handlers.begin(); it != handlers.end(); ++it) {
             (*it)->SendMessage(queue, message);
         }
+    }
+
+    void MessageHandlerList::SendBulkMessage(std::string queue, std::string message) {
+        std::vector<std::string> *qmsg;
+        try {
+            qmsg = bulkMessages.at(queue);
+        }
+        catch (std::out_of_range &oor) {
+            qmsg = new std::vector<std::string>();
+            bulkMessages[queue] = qmsg;
+        }
+        qmsg->push_back(message);
+        if (++globalBulkCounter >= maxBulkSize) {
+            FlushBulkQueue();
+        }
+    } // namespace statusengine
+
+    void MessageHandlerList::FlushBulkQueue() {
+        for (auto &x : bulkMessages) {
+            std::string queue = x.first;
+            std::vector<std::string> *qmsg = x.second;
+            if (qmsg->size() > 0) {
+                NagiosObject obj;
+                json_object *arr = json_object_new_array();
+                for (auto &message : *qmsg) {
+                    json_object_array_add(arr, json_object_new_string(message.c_str()));
+                }
+                obj.SetData<>("Messages", arr);
+                obj.SetData<>("Compression", "plain");
+                se->Log() << "Send bulk message (" << qmsg->size() << ") for queue " << queue << LogLevel::Info;
+                SendMessage(queue, obj.ToString());
+                qmsg->clear();
+            }
+        }
+        globalBulkCounter = 0;
     }
 
 } // namespace statusengine

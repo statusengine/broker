@@ -35,6 +35,16 @@ namespace statusengine {
         }
 
         try {
+            bulkTable = cfg.at("Bulk").cast<toml::value_t::Table>();
+        }
+        catch (std::out_of_range &oor) {
+        }
+        catch (const toml::type_error &tte) {
+            se->Log() << "Invalid configuration: Bulk isn't a table!" << LogLevel::Error;
+            return false;
+        }
+
+        try {
             schedulerTable = cfg.at("Scheduler").cast<toml::value_t::Table>();
         }
         catch (std::out_of_range &oor) {
@@ -51,7 +61,8 @@ namespace statusengine {
                     gearmanUrls.push_back((*it).at("URL").cast<toml::value_t::String>());
                 }
                 catch (std::out_of_range &oor) {
-                    se->Log() << "Invalid configuration: The gearman section doesn't contain an URL!" << LogLevel::Error;
+                    se->Log() << "Invalid configuration: The gearman section doesn't contain an URL!"
+                              << LogLevel::Error;
                     return false;
                 }
                 catch (const toml::type_error &tte) {
@@ -99,6 +110,10 @@ namespace statusengine {
         return GetTomlIgnore<>(queueTable, "OCHP", false);
     }
 
+    bool Configuration::GetQueueBulkOCHP() const {
+        return GetTomlIgnore<>(queueTable, "BulkOCHP", false);
+    }
+
     bool Configuration::GetQueueServiceStatus() const {
         return GetTomlIgnore<>(queueTable, "ServiceStatus", false);
     }
@@ -113,6 +128,10 @@ namespace statusengine {
 
     bool Configuration::GetQueueOCSP() const {
         return GetTomlIgnore<>(queueTable, "OCSP", false);
+    }
+
+    bool Configuration::GetQueueBulkOCSP() const {
+        return GetTomlIgnore<>(queueTable, "BulkOCSP", false);
     }
 
     bool Configuration::GetQueueStateChange() const {
@@ -177,6 +196,14 @@ namespace statusengine {
 
     bool Configuration::GetQueueRestartData() const {
         return GetTomlIgnore<>(queueTable, "RestartData", false);
+    }
+
+    time_t Configuration::GetBulkFlushInterval() const {
+        return GetTomlIgnore<>(bulkTable, "FlushInterval", static_cast<time_t>(10));
+    }
+
+    unsigned long Configuration::GetBulkMaximum() const {
+        return GetTomlIgnore<>(bulkTable, "Maximum", 200ul);
     }
 
     time_t Configuration::GetStartupScheduleMax() const {

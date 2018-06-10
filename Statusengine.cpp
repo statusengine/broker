@@ -44,8 +44,8 @@ namespace statusengine {
         }
 
         if (configuration->GetQueueHostCheck() || configuration->GetQueueOCHP()) {
-            RegisterCallback(
-                new HostCheckCallback(this, configuration->GetQueueHostCheck(), configuration->GetQueueOCHP()));
+            RegisterCallback(new HostCheckCallback(this, configuration->GetQueueHostCheck(),
+                                                   configuration->GetQueueOCHP(), configuration->GetQueueBulkOCHP()));
         }
 
         if (configuration->GetQueueServiceStatus()) {
@@ -55,7 +55,7 @@ namespace statusengine {
         if (configuration->GetQueueServiceCheck() || configuration->GetQueueOCSP() ||
             configuration->GetQueueServicePerfData()) {
             RegisterCallback(new ServiceCheckCallback(this, configuration->GetQueueServiceCheck(),
-                                                      configuration->GetQueueOCSP(),
+                                                      configuration->GetQueueOCSP(), configuration->GetQueueBulkOCSP(),
                                                       configuration->GetQueueServicePerfData()));
         }
 
@@ -141,7 +141,7 @@ namespace statusengine {
 
     void Statusengine::InitEventCallbacks() {
         Log() << "Initialize event callbacks" << LogLevel::Info;
-        testCB = new BulkMessageCallback(this);
+        testCB = new BulkMessageCallback(this, configuration->GetBulkFlushInterval());
         RegisterEventCallback(testCB);
     }
 
@@ -149,8 +149,16 @@ namespace statusengine {
         return *ls;
     }
 
-    void Statusengine::SendMessage(const std::string queue, const std::string message) const {
+    void Statusengine::SendMessage(const std::string &queue, const std::string &message) const {
         messageHandlers->SendMessage(queue, message);
+    }
+
+    void Statusengine::SendBulkMessage(const std::string &queue, const std::string &message) {
+        messageHandlers->SendBulkMessage(queue, message);
+    }
+
+    void Statusengine::FlushBulkQueue() {
+        messageHandlers->FlushBulkQueue();
     }
 
     void Statusengine::SetModuleInfo(int modinfo, std::string text) {

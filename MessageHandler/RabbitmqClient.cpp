@@ -82,7 +82,9 @@ namespace statusengine {
                                            "statusngin_processdata",
                                            "statusngin_hostchecks",
                                            "statusngin_programmstatus",
-                                           "statusngin_logentries"};
+                                           "statusngin_logentries",
+                                           "BulkOCSP",
+                                           "BulkOCHP"};
 
         for (auto it = queues.begin(); it != queues.end(); ++it) {
             auto queueString = amqp_cstring_bytes((*it).c_str());

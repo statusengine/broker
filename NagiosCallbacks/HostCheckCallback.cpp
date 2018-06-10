@@ -4,19 +4,23 @@
 #include "Statusengine.h"
 
 namespace statusengine {
-    HostCheckCallback::HostCheckCallback(Statusengine *se, bool hostchecks, bool ocsp)
-        : NebmoduleCallback(NEBCALLBACK_HOST_CHECK_DATA, se), hostchecks(hostchecks), ocsp(ocsp) {}
+    HostCheckCallback::HostCheckCallback(Statusengine *se, bool hostchecks, bool ocsp, bool ocspBulk)
+        : NebmoduleCallback(NEBCALLBACK_HOST_CHECK_DATA, se), hostchecks(hostchecks), ochp(ochp), ochpBulk(ochpBulk) {}
 
     void HostCheckCallback::Callback(int event_type, void *vdata) {
         auto data = reinterpret_cast<nebstruct_host_check_data *>(vdata);
 
         if (data->type == NEBTYPE_HOSTCHECK_PROCESSED) {
             auto checkData = NagiosHostCheckData(data);
+            auto msg = checkData.ToString();
             if (hostchecks) {
-                se->SendMessage("statusngin_hostchecks", checkData.ToString());
+                se->SendMessage("statusngin_hostchecks", msg);
             }
-            if (ocsp) {
-                se->SendMessage("statusngin_ochp", checkData.ToString());
+            if (ochp) {
+                se->SendMessage("statusngin_ochp", msg);
+            }
+            if (ochpBulk) {
+                se->SendBulkMessage("BulkOCHP", msg);
             }
         }
     }
