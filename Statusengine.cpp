@@ -43,7 +43,7 @@ namespace statusengine {
             RegisterCallback(new HostStatusCallback(this));
         }
 
-        if (configuration->GetQueueHostCheck() || configuration->GetQueueOCHP()) {
+        if (configuration->GetQueueHostCheck() || configuration->GetQueueOCHP() || configuration->GetQueueBulkOCHP()) {
             RegisterCallback(new HostCheckCallback(this, configuration->GetQueueHostCheck(),
                                                    configuration->GetQueueOCHP(), configuration->GetQueueBulkOCHP()));
         }
@@ -53,7 +53,7 @@ namespace statusengine {
         }
 
         if (configuration->GetQueueServiceCheck() || configuration->GetQueueOCSP() ||
-            configuration->GetQueueServicePerfData()) {
+            configuration->GetQueueBulkOCSP() || configuration->GetQueueServicePerfData()) {
             RegisterCallback(new ServiceCheckCallback(this, configuration->GetQueueServiceCheck(),
                                                       configuration->GetQueueOCSP(), configuration->GetQueueBulkOCSP(),
                                                       configuration->GetQueueServicePerfData()));
