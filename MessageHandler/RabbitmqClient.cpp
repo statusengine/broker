@@ -7,11 +7,29 @@
 namespace statusengine {
 
     RabbitmqClient::RabbitmqClient(Statusengine *se, RabbitmqConfiguration *cfg)
-        : MessageHandler(se), cfg(cfg), connected(false) {
-        conn = amqp_new_connection();
+        : MessageHandler(se), cfg(cfg), connected(false), conn(nullptr), socket(nullptr) {}
+
+    RabbitmqClient::~RabbitmqClient() {
+        CloseConnection(true);
     }
 
-    RabbitmqClient::~RabbitmqClient() {}
+    bool RabbitmqClient::CloseConnection(bool quiet) {
+        bool result = true;
+        if (!CheckAMQPReply(amqp_channel_close(conn, 1, AMQP_REPLY_SUCCESS), "Closing amqp channel", quiet)) {
+            result = false;
+        }
+
+        if (!CheckAMQPReply(amqp_connection_close(conn, AMQP_REPLY_SUCCESS), "Closing amqp connection", quiet)) {
+            result = false;
+        }
+        if (amqp_destroy_connection(conn) < 0) {
+            if (!quiet) {
+                se->Log() << "Error ending amqp connection" << LogLevel::Error;
+            }
+            result = false;
+        }
+        return result;
+    }
 
     bool RabbitmqClient::CheckAMQPReply(char const *context, bool quiet) {
         CheckAMQPReply(amqp_get_rpc_reply(conn), context, quiet);
@@ -73,6 +91,7 @@ namespace statusengine {
     }
 
     bool RabbitmqClient::Connect(bool quiet) {
+        conn = amqp_new_connection();
         if (cfg->ssl) {
             socket = amqp_ssl_socket_new(conn);
             amqp_ssl_socket_set_verify(socket, cfg->ssl_verify);
@@ -189,6 +208,7 @@ namespace statusengine {
             if (pubStatus < 0) {
                 connected = false;
                 se->Log() << "Could not send message to rabbitmq: " << amqp_error_string2(pubStatus) << LogLevel::Error;
+                CloseConnection(true);
             }
         }
     }

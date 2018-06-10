@@ -20,6 +20,7 @@ namespace statusengine {
       private:
         virtual bool CheckAMQPReply(char const *context, bool quiet = false);
         virtual bool CheckAMQPReply(amqp_rpc_reply_t x, char const *context, bool quiet = false);
+        virtual bool CloseConnection(bool quiet = false);
 
         RabbitmqConfiguration *cfg;
 
