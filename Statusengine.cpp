@@ -5,6 +5,7 @@
 #include "vendor/toml.hpp"
 
 #include "Configuration.h"
+#include "EventCallback/BulkMessageCallback.h"
 #include "LogStream.h"
 #include "Nebmodule.h"
 
@@ -15,6 +16,7 @@ namespace statusengine {
         ls = new LogStream(this);
         callbacks = new std::map<NEBCallbackType, std::vector<NebmoduleCallback *> *>();
         configuration = new Configuration(this);
+        testCB = nullptr;
     }
 
     int Statusengine::Init() {
@@ -113,12 +115,9 @@ namespace statusengine {
             RegisterCallback(new EventHandlerDataCallback(this));
         }
 
-        if (configuration->GetQueueRestartData() || configuration->GetQueueProcessData() ||
-            configuration->GetStartupScheduleMax() > 0) {
-            RegisterCallback(new ProcessDataCallback(this, configuration->GetQueueRestartData(),
-                                                     configuration->GetQueueProcessData(),
-                                                     configuration->GetStartupScheduleMax()));
-        }
+        RegisterCallback(new ProcessDataCallback(this, configuration->GetQueueRestartData(),
+                                                 configuration->GetQueueProcessData(),
+                                                 configuration->GetStartupScheduleMax()));
 
         return 0;
     }
@@ -132,11 +131,18 @@ namespace statusengine {
         }
         callbacks->clear();
         delete callbacks;
+        delete testCB;
         delete configuration;
         delete messageHandlers;
 
         Log() << "unloading finished" << LogLevel::Info;
         delete ls;
+    }
+
+    void Statusengine::InitEventCallbacks() {
+        Log() << "Initialize event callbacks" << LogLevel::Info;
+        testCB = new BulkMessageCallback(this);
+        RegisterEventCallback(testCB);
     }
 
     LogStream &Statusengine::Log() {
@@ -162,6 +168,10 @@ namespace statusengine {
             Nebmodule::RegisterCallback(cb->GetCallbackType());
         }
         tpcb->push_back(cb);
+    }
+
+    void Statusengine::RegisterEventCallback(EventCallback *ecb) {
+        Nebmodule::RegisterEventCallback(ecb);
     }
 
     int Statusengine::Callback(int event_type, void *data) {

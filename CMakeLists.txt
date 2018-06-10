@@ -22,6 +22,7 @@ set (SESources
 	Nebmodule.cpp Statusengine.cpp LogStream.cpp
 	Configuration.cpp RabbitmqConfiguration.cpp
 	MessageHandler/MessageHandler.cpp MessageHandler/MessageHandlerList.cpp
+	EventCallback/EventCallback.cpp EventCallback/BulkMessageCallback.cpp
 	NagiosObjects/NagiosObject.cpp
 	NagiosObjects/NagiosHost.cpp
 	NagiosObjects/NagiosHostStatusData.cpp

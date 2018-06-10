@@ -9,6 +9,7 @@
 
 #include "MessageHandler/MessageHandlerList.h"
 
+#include "EventCallback/EventCallback.h"
 #include "NagiosCallbacks/NagiosCallbacks.h"
 
 namespace statusengine {
@@ -24,10 +25,12 @@ namespace statusengine {
         Statusengine &operator=(const Statusengine &) = delete;
 
         int Init();
+        void InitEventCallbacks();
 
         LogStream &Log();
         void SendMessage(const std::string queue, const std::string message) const;
         void RegisterCallback(NebmoduleCallback *cb);
+        void RegisterEventCallback(EventCallback *ecb);
 
       private:
         Statusengine(nebmodule *handle, std::string configurationPath);
@@ -43,5 +46,6 @@ namespace statusengine {
         MessageHandlerList *messageHandlers;
         LogStream *ls;
         std::map<NEBCallbackType, std::vector<NebmoduleCallback *> *> *callbacks;
+        EventCallback *testCB;
     };
 } // namespace statusengine

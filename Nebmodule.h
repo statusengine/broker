@@ -32,6 +32,7 @@ inline void nm_log(long unsigned logLevel, const char *_, const char *message) {
 
 namespace statusengine {
     class Statusengine;
+    class EventCallback;
 
     class Nebmodule {
       public:
@@ -43,9 +44,17 @@ namespace statusengine {
 
         static bool RegisterCallback(NEBCallbackType cbType);
 
+        static void RegisterEventCallback(EventCallback *ecb);
+
       private:
         static Statusengine *se;
     };
 } // namespace statusengine
 
 int nebmodule_callback(int event_type, void *data);
+
+#ifndef BUILD_NAGIOS
+void nebmodule_event_callback(struct nm_event_execution_properties *properties);
+#else
+void nebmodule_event_callback(statusengine::EventCallback *ecb);
+#endif // BUILD_NAGIOS

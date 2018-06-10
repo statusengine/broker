@@ -1,7 +1,9 @@
 #include "Nebmodule.h"
 
+#include <ctime>
 #include <string>
 
+#include "EventCallback/EventCallback.h"
 #include "Statusengine.h"
 
 // This is required by naemon
@@ -39,6 +41,16 @@ namespace statusengine {
             return true;
         }
     }
+
+    void Nebmodule::RegisterEventCallback(EventCallback *ecb) {
+#ifndef BUILD_NAGIOS
+        schedule_event(ecb->Interval(), nebmodule_event_callback, ecb);
+#else
+        time_t interval = static_cast<time_t>(ecb->Interval());
+        schedule_new_event(EVENT_USER_FUNCTION, 1, std::time(0) + interval, 1, interval, nullptr, 1,
+                           reinterpret_cast<void *>(nebmodule_event_callback), reinterpret_cast<void *>(ecb), 0);
+#endif // BUILD_NAGIOS
+    }
 } // namespace statusengine
 
 extern "C" int nebmodule_init(int flags, char *args, nebmodule *handle) {
@@ -52,3 +64,15 @@ extern "C" int nebmodule_deinit(int flags, int reason) {
 int nebmodule_callback(int event_type, void *data) {
     return statusengine::Nebmodule::Callback(event_type, data);
 }
+
+#ifndef BUILD_NAGIOS
+void nebmodule_event_callback(struct nm_event_execution_properties *properties) {
+    auto ecb = reinterpret_cast<statusengine::EventCallback *>(properties->user_data);
+    ecb->Callback();
+    statusengine::Nebmodule::RegisterEventCallback(ecb);
+}
+#else
+void nebmodule_event_callback(statusengine::EventCallback *ecb) {
+    ecb->Callback();
+}
+#endif

@@ -15,11 +15,14 @@ namespace statusengine {
     void ProcessDataCallback::Callback(int event_type, void *vdata) {
         auto data = reinterpret_cast<nebstruct_process_data *>(vdata);
 
-        if (restartData && data->type == NEBTYPE_PROCESS_START) {
-            json_object *restartData = json_object_new_object();
-            json_object_object_add(restartData, "object_type", json_object_new_int(NEBTYPE_PROCESS_RESTART));
-            se->SendMessage("statusngin_core_restart", std::string(json_object_to_json_string(restartData)));
-            json_object_put(restartData);
+        if (data->type == NEBTYPE_PROCESS_START) {
+            se->InitEventCallbacks();
+            if (restartData) {
+                json_object *restartData = json_object_new_object();
+                json_object_object_add(restartData, "object_type", json_object_new_int(NEBTYPE_PROCESS_RESTART));
+                se->SendMessage("statusngin_core_restart", std::string(json_object_to_json_string(restartData)));
+                json_object_put(restartData);
+            }
         }
 
         if (startupSchedulerMax > 0 && data->type == NEBTYPE_PROCESS_EVENTLOOPSTART) {
