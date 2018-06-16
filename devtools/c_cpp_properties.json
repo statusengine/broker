@@ -1,0 +1,49 @@
+{
+    "configurations": [
+        {
+            "name": "linux",
+            "intelliSenseMode": "clang-x64",
+            "includePath": [
+                "${workspaceRoot}",
+                "${workspaceRoot}/devtools/include/usr/include/c++/7",
+                "${workspaceRoot}/devtools/include/usr/include/x86_64-linux-gnu/c++/7",
+                "${workspaceRoot}/devtools/include/usr/include/c++/7/backward",
+                "${workspaceRoot}/devtools/include/usr/lib/gcc/x86_64-linux-gnu/7/include",
+                "${workspaceRoot}/devtools/include/usr/local/include",
+                "${workspaceRoot}/devtools/include/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed",
+                "${workspaceRoot}/devtools/include/usr/include/x86_64-linux-gnu",
+                "${workspaceRoot}/devtools/include/usr/include",
+                "${workspaceRoot}/devtools/include/usr/lib/x86_64-linux-gnu/glib-2.0/include/",
+                "${workspaceRoot}/devtools/include/usr/include/glib-2.0/",
+                "${workspaceRoot}/devtools/include/usr/include/json-c"
+            ],
+            "defines": [
+                "__linux__",
+                "__x86_64__",
+                "WITH_GEARMAN",
+                "WITH_RABBITMQ"
+            ],
+            "browse": {
+                "path": [
+                    "${workspaceRoot}",
+                    "${workspaceRoot}/devtools/include/usr/include/c++/7",
+                    "${workspaceRoot}/devtools/include/usr/include/x86_64-linux-gnu/c++/7",
+                    "${workspaceRoot}/devtools/include/usr/include/c++/7/backward",
+                    "${workspaceRoot}/devtools/include/usr/lib/gcc/x86_64-linux-gnu/7/include",
+                    "${workspaceRoot}/devtools/include/usr/local/include",
+                    "${workspaceRoot}/devtools/include/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed",
+                    "${workspaceRoot}/devtools/include/usr/include/x86_64-linux-gnu",
+                    "${workspaceRoot}/devtools/include/usr/include",
+                    "${workspaceRoot}/devtools/include/usr/lib/x86_64-linux-gnu/glib-2.0/include/",
+                    "${workspaceRoot}/devtools/include/usr/include/glib-2.0/",
+                    "${workspaceRoot}/devtools/include/usr/include/json-c"
+                ],
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": "${workspaceRoot}/.vscode"
+            },
+            "cStandard": "c11",
+            "cppStandard": "c++11"
+        }
+    ],
+    "version": 4
+}
