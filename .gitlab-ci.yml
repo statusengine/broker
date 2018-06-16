@@ -6,8 +6,8 @@ build:trusty:
     - |
       set -e
       mkdir -p /usr/local/lib/pkgconfig /opt/naemon/include
-      ln -s $(readlink -f .ci/naemon) /opt/naemon/include/naemon
-      ln -s $(readlink -f .ci/naemon.pc) /usr/local/lib/pkgconfig/naemon.pc
+      ln -s $(readlink -f devtools/ci/naemon) /opt/naemon/include/naemon
+      ln -s $(readlink -f devtools/ci/naemon.pc) /usr/local/lib/pkgconfig/naemon.pc
     - |
       mkdir build
       cd build
@@ -26,8 +26,8 @@ build:xenial:
     - |
       set -e
       mkdir -p /usr/local/lib/pkgconfig /opt/naemon/include
-      ln -s $(readlink -f .ci/naemon) /opt/naemon/include/naemon
-      ln -s $(readlink -f .ci/naemon.pc) /usr/local/lib/pkgconfig/naemon.pc
+      ln -s $(readlink -f devtools/ci/naemon) /opt/naemon/include/naemon
+      ln -s $(readlink -f devtools/ci/naemon.pc) /usr/local/lib/pkgconfig/naemon.pc
     - |
       mkdir build
       cd build
@@ -46,8 +46,8 @@ build:bionic:
     - |
       set -e
       mkdir -p /usr/local/lib/pkgconfig /opt/naemon/include
-      ln -s $(readlink -f .ci/naemon) /opt/naemon/include/naemon
-      ln -s $(readlink -f .ci/naemon.pc) /usr/local/lib/pkgconfig/naemon.pc
+      ln -s $(readlink -f devtools/ci/naemon) /opt/naemon/include/naemon
+      ln -s $(readlink -f devtools/ci/naemon.pc) /usr/local/lib/pkgconfig/naemon.pc
     - |
       mkdir build
       cd build
@@ -67,8 +67,8 @@ build:jessie:
     - |
       set -e
       mkdir -p /usr/local/lib/pkgconfig /opt/naemon/include
-      ln -s $(readlink -f .ci/naemon) /opt/naemon/include/naemon
-      ln -s $(readlink -f .ci/naemon.pc) /usr/local/lib/pkgconfig/naemon.pc
+      ln -s $(readlink -f devtools/ci/naemon) /opt/naemon/include/naemon
+      ln -s $(readlink -f devtools/ci/naemon.pc) /usr/local/lib/pkgconfig/naemon.pc
     - |
       mkdir build
       cd build
@@ -87,8 +87,8 @@ build:stretch:
     - |
       set -e
       mkdir -p /usr/local/lib/pkgconfig /opt/naemon/include
-      ln -s $(readlink -f .ci/naemon) /opt/naemon/include/naemon
-      ln -s $(readlink -f .ci/naemon.pc) /usr/local/lib/pkgconfig/naemon.pc
+      ln -s $(readlink -f devtools/ci/naemon) /opt/naemon/include/naemon
+      ln -s $(readlink -f devtools/ci/naemon.pc) /usr/local/lib/pkgconfig/naemon.pc
     - |
       mkdir build
       cd build
@@ -107,7 +107,7 @@ build:nagios:trusty:
     - |
       set -e
       mkdir -p /opt/nagios/include
-      ln -s $(readlink -f .ci/nagios) /opt/nagios/include/nagios
+      ln -s $(readlink -f devtools/ci/nagios) /opt/nagios/include/nagios
     - |
       mkdir build
       cd build
@@ -126,7 +126,7 @@ build:nagios:xenial:
     - |
       set -e
       mkdir -p /opt/nagios/include
-      ln -s $(readlink -f .ci/nagios) /opt/nagios/include/nagios
+      ln -s $(readlink -f devtools/ci/nagios) /opt/nagios/include/nagios
     - |
       mkdir build
       cd build
@@ -145,7 +145,7 @@ build:nagios:bionic:
     - |
       set -e
       mkdir -p /opt/nagios/include
-      ln -s $(readlink -f .ci/nagios) /opt/nagios/include/nagios
+      ln -s $(readlink -f devtools/ci/nagios) /opt/nagios/include/nagios
     - |
       mkdir build
       cd build
@@ -165,7 +165,7 @@ build:nagios:jessie:
     - |
       set -e
       mkdir -p /opt/nagios/include
-      ln -s $(readlink -f .ci/nagios) /opt/nagios/include/nagios
+      ln -s $(readlink -f devtools/ci/nagios) /opt/nagios/include/nagios
     - |
       mkdir build
       cd build
@@ -184,7 +184,7 @@ build:nagios:stretch:
     - |
       set -e
       mkdir -p /opt/nagios/include
-      ln -s $(readlink -f .ci/nagios) /opt/nagios/include/nagios
+      ln -s $(readlink -f devtools/ci/nagios) /opt/nagios/include/nagios
     - |
       mkdir build
       cd build
