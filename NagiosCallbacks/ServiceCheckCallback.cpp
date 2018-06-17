@@ -14,7 +14,7 @@ namespace statusengine {
         auto data = reinterpret_cast<nebstruct_service_check_data *>(vdata);
 
         if (data->type == NEBTYPE_SERVICECHECK_PROCESSED) {
-            if (servicechecks || ocsp) {
+            if (servicechecks || ocsp || ocspBulk) {
                 auto checkData = NagiosServiceCheckData(data);
                 auto msg = checkData.ToString();
                 if (servicechecks) {
