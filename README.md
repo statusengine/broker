@@ -73,4 +73,48 @@ You can specify -DWITH_GEARMAN=OFF or -DWITH_RABBITMQ=OFF as cmake argument to d
 
 Per default everything is disabled and the broker does nothing.
 
-TODO Example config
+This is an example config that works perfectly with statusengine worker:
+```toml
+[Queues]
+HostStatus = true
+HostCheck = true
+ServiceStatus = true
+ServiceCheck = true
+ServicePerfData = true
+StateChange = true
+LogData = true
+AcknowledgementData = true
+FlappingData = true
+DowntimeData = true
+ContactNotificationMethodData = true
+RestartData = true
+#SystemCommandData = false
+#CommentData = false
+#ExternalCommandData = false
+#NotificationData = false
+#ProgramStatusData = false
+#ContactStatusData = false
+#ContactNotificationData = false
+#EventHandlerData = false
+#ProcessData = false
+#BulkOCSP = false
+#OCSP = false
+#BulkOCHP = false
+#OCHP = false
+
+# You can specify multiple gearman connections, by adding more [[Gearman]] sections.
+[[Gearman]]
+URL = "127.0.0.1:4730"
+
+# You can specify multiple rabbitmq connections, by adding more [[Rabbitmq]] sections.
+#[[Rabbitmq]]
+#Hostname = "localhost"
+#Username = "statusengine"
+#Password = "statusengine"
+
+[Scheduler]
+# Used to fix a nasty scheduler bug in naemon, needed when you often restart naemon
+# If next_schedule of a service or host is in the past during startup, we reschedule
+# the service/host within $StartupScheduleMax seconds.
+StartupScheduleMax = 30
+```
