@@ -1,0 +1,35 @@
+[Queues]
+HostStatus = true
+HostCheck = true
+OCHP = true
+ServiceStatus = true
+ServiceCheck = true
+ServicePerfData = true
+OCSP = true
+StateChange = true
+LogData = true
+SystemCommandData = true
+CommentData = true
+ExternalCommandData = true
+AcknowledgementData = true
+FlappingData = true
+DowntimeData = true
+NotificationData = true
+ProgramStatusData = true
+ContactStatusData = true
+ContactNotificationData = true
+ContactNotificationMethodData = true
+EventHandlerData = true
+ProcessData = true
+RestartData = true
+
+[[Gearman]]
+URL = "gearman:4730"
+
+[[Rabbitmq]]
+Hostname = "rabbit"
+Username = "statusengine"
+Password = "statusengine"
+
+[Scheduler]
+StartupScheduleMax = 30

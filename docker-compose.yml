@@ -1,0 +1,21 @@
+version: '3'
+services:
+  gearman:
+    build:
+      context: devtools/gearmand
+    expose:
+      - 4730
+  rabbit:
+    image: rabbitmq:management
+    environment:
+      RABBITMQ_DEFAULT_USER: statusengine
+      RABBITMQ_DEFAULT_PASS: statusengine
+    expose:
+      - 8080
+  naemon:
+    depends_on:
+      - gearman
+      - rabbit
+    build:
+      context: .
+      dockerfile: naemon.Dockerfile

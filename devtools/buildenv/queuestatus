@@ -1,0 +1,5 @@
+#!/bin/bash
+
+gearadmin --host=gearman --status
+
+rabbitmqadmin --host=rabbit --username=statusengine --password=statusengine  list queues
