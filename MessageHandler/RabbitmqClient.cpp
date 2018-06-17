@@ -94,7 +94,12 @@ namespace statusengine {
         conn = amqp_new_connection();
         if (cfg->ssl) {
             socket = amqp_ssl_socket_new(conn);
+#ifndef WITH_RABBITMQ_CX080
+            amqp_ssl_socket_set_verify_peer(socket, cfg->ssl_verify);
+            amqp_ssl_socket_set_verify_hostname(socket, cfg->ssl_verify);
+#else
             amqp_ssl_socket_set_verify(socket, cfg->ssl_verify);
+#endif // WITH_RABBITMQ_CX080
             if (cfg->ssl_cacert != "") {
                 if (!amqp_ssl_socket_set_cacert(socket, cfg->ssl_cacert.c_str())) {
                     if (!quiet) {
