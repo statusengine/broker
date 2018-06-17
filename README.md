@@ -118,3 +118,36 @@ URL = "127.0.0.1:4730"
 # the service/host within $StartupScheduleMax seconds.
 StartupScheduleMax = 30
 ```
+
+## Developer build + test
+
+If you want to build and test the broker, you can use the docker-compose configuration:
+```bash
+docker-compose up --build
+```
+
+This will create docker containers with naemon, rabbitmq and gearman. The broker module will be build on the naemon container. The up command will also run the containers, so you can test if it works.
+
+For deeper inspection you can switch into the naemon container on a second console:
+```bash
+docker exec -t -i broker_naemon_1 /bin/bash
+```
+
+I have also placed a small script inside the container that shows you the queue status of rabbitmq and gearman:
+```bash
+docker exec -t -i broker_naemon_1 /usr/bin/queuestatus
+```
+
+### Developers with Windows Client
+
+For developers working with a windows client, I have created a script that uses docker to download the necessary headers for autocomplete in VS oder VSCode.
+
+
+```powershell
+cd Path\To\Workspace\devtools
+.\DownloadHeaders.ps1
+```
+
+This will place a headers.zip file in the devtools folder. Extract the contents of this zip file to devtools/include.
+
+If you have VSCode you can copy devtools\c_cpp_properties.json to .vscode for a ready to run autocomplete configuration. Please note that VSCode may use IntelliSense from VS, so you have to install it too.
