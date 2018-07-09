@@ -6,6 +6,7 @@ namespace statusengine {
     class EventCallback {
       public:
         EventCallback(Statusengine *se);
+        virtual ~EventCallback();
 
         virtual double Interval() = 0;
         virtual void Callback() = 0;

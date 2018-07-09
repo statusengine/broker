@@ -1,5 +1,6 @@
 #include "GearmanClient.h"
 
+#include "Configuration/GearmanConfiguration.h"
 #include "LogStream.h"
 #include "Statusengine.h"
 
@@ -7,7 +8,8 @@
 
 namespace statusengine {
 
-    GearmanClient::GearmanClient(Statusengine *se, const std::string &url) : MessageHandler(se), url(url) {
+    GearmanClient::GearmanClient(Statusengine *se, std::shared_ptr<GearmanConfiguration> cfg)
+        : MessageHandler(se), cfg(cfg) {
         client = gearman_client_create(nullptr);
     }
 
@@ -17,7 +19,7 @@ namespace statusengine {
     }
 
     bool GearmanClient::Connect() {
-        gearman_return_t ret = gearman_client_add_servers(client, url.c_str());
+        gearman_return_t ret = gearman_client_add_servers(client, cfg->URL.c_str());
         if (gearman_success(ret)) {
             se->Log() << "Added gearman server connection" << LogLevel::Info;
             return true;

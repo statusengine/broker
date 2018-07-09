@@ -1,8 +1,9 @@
 #include "MessageHandlerList.h"
 
-#include "Configuration.h"
+#include "Configuration/Configuration.h"
+#include "Configuration/GearmanConfiguration.h"
+#include "Configuration/RabbitmqConfiguration.h"
 #include "NagiosObjects/NagiosObject.h"
-#include "RabbitmqConfiguration.h"
 
 #ifdef WITH_GEARMAN
 #include "GearmanClient.h"
@@ -17,14 +18,14 @@ namespace statusengine {
         : se(se), maxBulkSize(0), globalBulkCounter(0) {
         maxBulkSize = cfg->GetBulkMaximum();
 #ifdef WITH_GEARMAN
-        std::vector<std::string> gearmanUrls = cfg->GetGearmanList();
-        for (auto it = gearmanUrls.begin(); it != gearmanUrls.end(); ++it) {
+        auto gearmanConfig = cfg->GetGearmanConfiguration();
+        for (auto it = gearmanConfig->begin(); it != gearmanConfig->end(); ++it) {
             handlers.push_back(std::make_shared<GearmanClient>(se, *it));
         }
 #endif
 #ifdef WITH_RABBITMQ
-        std::vector<RabbitmqConfiguration *> rabbitmqConfig = cfg->GetRabbitmqConfiguration();
-        for (auto it = rabbitmqConfig.begin(); it != rabbitmqConfig.end(); ++it) {
+        auto rabbitmqConfig = cfg->GetRabbitmqConfiguration();
+        for (auto it = rabbitmqConfig->begin(); it != rabbitmqConfig->end(); ++it) {
             handlers.push_back(std::make_shared<RabbitmqClient>(se, *it));
         }
 #endif

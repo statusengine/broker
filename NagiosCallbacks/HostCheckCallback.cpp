@@ -4,7 +4,7 @@
 #include "Statusengine.h"
 
 namespace statusengine {
-    HostCheckCallback::HostCheckCallback(Statusengine *se, bool hostchecks, bool ocsp, bool ochpBulk)
+    HostCheckCallback::HostCheckCallback(Statusengine *se, bool hostchecks, bool ochp, bool ochpBulk)
         : NebmoduleCallback(NEBCALLBACK_HOST_CHECK_DATA, se), hostchecks(hostchecks), ochp(ochp), ochpBulk(ochpBulk) {}
 
     void HostCheckCallback::Callback(int event_type, void *vdata) {

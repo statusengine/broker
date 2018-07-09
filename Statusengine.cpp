@@ -4,7 +4,7 @@
 
 #include "vendor/toml.hpp"
 
-#include "Configuration.h"
+#include "Configuration/Configuration.h"
 #include "EventCallback/BulkMessageCallback.h"
 #include "LogStream.h"
 #include "Nebmodule.h"
@@ -12,11 +12,10 @@
 namespace statusengine {
 
     Statusengine::Statusengine(nebmodule *handle, std::string configurationPath)
-        : nebhandle(handle), configurationPath(configurationPath), ls(nullptr) {
+        : nebhandle(handle), configurationPath(configurationPath), ls(nullptr), bulkCallback(nullptr) {
         ls = new LogStream(this);
         callbacks = new std::map<NEBCallbackType, std::vector<NebmoduleCallback *> *>();
         configuration = new Configuration(this);
-        testCB = nullptr;
     }
 
     int Statusengine::Init() {
@@ -38,87 +37,87 @@ namespace statusengine {
         if (!messageHandlers->Connect()) {
             return 1;
         }
+        /*
+                if (configuration->GetQueueHostStatus()) {
+                    RegisterCallback(new HostStatusCallback(this));
+                }
 
-        if (configuration->GetQueueHostStatus()) {
-            RegisterCallback(new HostStatusCallback(this));
-        }
+                if (configuration->GetQueueHostCheck() || configuration->GetQueueOCHP() ||
+           configuration->GetQueueBulkOCHP()) { RegisterCallback(new HostCheckCallback(this,
+           configuration->GetQueueHostCheck(), configuration->GetQueueOCHP(), configuration->GetQueueBulkOCHP()));
+                }
 
-        if (configuration->GetQueueHostCheck() || configuration->GetQueueOCHP() || configuration->GetQueueBulkOCHP()) {
-            RegisterCallback(new HostCheckCallback(this, configuration->GetQueueHostCheck(),
-                                                   configuration->GetQueueOCHP(), configuration->GetQueueBulkOCHP()));
-        }
+                if (configuration->GetQueueServiceStatus()) {
+                    RegisterCallback(new ServiceStatusCallback(this));
+                }
 
-        if (configuration->GetQueueServiceStatus()) {
-            RegisterCallback(new ServiceStatusCallback(this));
-        }
+                if (configuration->GetQueueServiceCheck() || configuration->GetQueueOCSP() ||
+                    configuration->GetQueueBulkOCSP() || configuration->GetQueueServicePerfData()) {
+                    RegisterCallback(new ServiceCheckCallback(this, configuration->GetQueueServiceCheck(),
+                                                              configuration->GetQueueOCSP(),
+           configuration->GetQueueBulkOCSP(), configuration->GetQueueServicePerfData()));
+                }
 
-        if (configuration->GetQueueServiceCheck() || configuration->GetQueueOCSP() ||
-            configuration->GetQueueBulkOCSP() || configuration->GetQueueServicePerfData()) {
-            RegisterCallback(new ServiceCheckCallback(this, configuration->GetQueueServiceCheck(),
-                                                      configuration->GetQueueOCSP(), configuration->GetQueueBulkOCSP(),
-                                                      configuration->GetQueueServicePerfData()));
-        }
+                if (configuration->GetQueueStateChange()) {
+                    RegisterCallback(new StateChangeCallback(this));
+                }
 
-        if (configuration->GetQueueStateChange()) {
-            RegisterCallback(new StateChangeCallback(this));
-        }
+                if (configuration->GetQueueLogData()) {
+                    RegisterCallback(new LogDataCallback(this));
+                }
 
-        if (configuration->GetQueueLogData()) {
-            RegisterCallback(new LogDataCallback(this));
-        }
+                if (configuration->GetQueueSystemCommandData()) {
+                    RegisterCallback(new SystemCommandDataCallback(this));
+                }
 
-        if (configuration->GetQueueSystemCommandData()) {
-            RegisterCallback(new SystemCommandDataCallback(this));
-        }
+                if (configuration->GetQueueCommentData()) {
+                    RegisterCallback(new CommentDataCallback(this));
+                }
 
-        if (configuration->GetQueueCommentData()) {
-            RegisterCallback(new CommentDataCallback(this));
-        }
+                if (configuration->GetQueueExternalCommandData()) {
+                    RegisterCallback(new ExternalCommandDataCallback(this));
+                }
 
-        if (configuration->GetQueueExternalCommandData()) {
-            RegisterCallback(new ExternalCommandDataCallback(this));
-        }
+                if (configuration->GetQueueAcknowledgementData()) {
+                    RegisterCallback(new AcknowledgementDataCallback(this));
+                }
 
-        if (configuration->GetQueueAcknowledgementData()) {
-            RegisterCallback(new AcknowledgementDataCallback(this));
-        }
+                if (configuration->GetQueueFlappingData()) {
+                    RegisterCallback(new FlappingDataCallback(this));
+                }
 
-        if (configuration->GetQueueFlappingData()) {
-            RegisterCallback(new FlappingDataCallback(this));
-        }
+                if (configuration->GetQueueDowntimeData()) {
+                    RegisterCallback(new DowntimeDataCallback(this));
+                }
 
-        if (configuration->GetQueueDowntimeData()) {
-            RegisterCallback(new DowntimeDataCallback(this));
-        }
+                if (configuration->GetQueueNotificationData()) {
+                    RegisterCallback(new NotificationDataCallback(this));
+                }
 
-        if (configuration->GetQueueNotificationData()) {
-            RegisterCallback(new NotificationDataCallback(this));
-        }
+                if (configuration->GetQueueProgramStatusData()) {
+                    RegisterCallback(new ProgramStatusDataCallback(this));
+                }
 
-        if (configuration->GetQueueProgramStatusData()) {
-            RegisterCallback(new ProgramStatusDataCallback(this));
-        }
+                if (configuration->GetQueueContactStatusData()) {
+                    RegisterCallback(new ContactStatusDataCallback(this));
+                }
 
-        if (configuration->GetQueueContactStatusData()) {
-            RegisterCallback(new ContactStatusDataCallback(this));
-        }
+                if (configuration->GetQueueContactNotificationData()) {
+                    RegisterCallback(new ContactNotificationDataCallback(this));
+                }
 
-        if (configuration->GetQueueContactNotificationData()) {
-            RegisterCallback(new ContactNotificationDataCallback(this));
-        }
+                if (configuration->GetQueueContactNotificationMethodData()) {
+                    RegisterCallback(new ContactNotificationMethodDataCallback(this));
+                }
 
-        if (configuration->GetQueueContactNotificationMethodData()) {
-            RegisterCallback(new ContactNotificationMethodDataCallback(this));
-        }
+                if (configuration->GetQueueEventHandlerData()) {
+                    RegisterCallback(new EventHandlerDataCallback(this));
+                }
 
-        if (configuration->GetQueueEventHandlerData()) {
-            RegisterCallback(new EventHandlerDataCallback(this));
-        }
-
-        RegisterCallback(new ProcessDataCallback(this, configuration->GetQueueRestartData(),
-                                                 configuration->GetQueueProcessData(),
-                                                 configuration->GetStartupScheduleMax()));
-
+                RegisterCallback(new ProcessDataCallback(this, configuration->GetQueueRestartData(),
+                                                         configuration->GetQueueProcessData(),
+                                                         configuration->GetStartupScheduleMax()));
+        */
         return 0;
     }
 
@@ -131,7 +130,7 @@ namespace statusengine {
         }
         callbacks->clear();
         delete callbacks;
-        delete testCB;
+        delete bulkCallback;
         delete configuration;
         delete messageHandlers;
 
@@ -141,8 +140,8 @@ namespace statusengine {
 
     void Statusengine::InitEventCallbacks() {
         Log() << "Initialize event callbacks" << LogLevel::Info;
-        testCB = new BulkMessageCallback(this, configuration->GetBulkFlushInterval());
-        RegisterEventCallback(testCB);
+        bulkCallback = new BulkMessageCallback(this, configuration->GetBulkFlushInterval());
+        RegisterEventCallback(bulkCallback);
     }
 
     LogStream &Statusengine::Log() {

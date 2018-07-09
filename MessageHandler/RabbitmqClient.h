@@ -5,12 +5,13 @@
 #include <amqp.h>
 #include <amqp_ssl_socket.h>
 #include <amqp_tcp_socket.h>
+#include <memory>
 
 namespace statusengine {
     class RabbitmqConfiguration;
     class RabbitmqClient : public MessageHandler {
       public:
-        RabbitmqClient(Statusengine *se, RabbitmqConfiguration *cfg);
+        RabbitmqClient(Statusengine *se, std::shared_ptr<RabbitmqConfiguration> cfg);
         ~RabbitmqClient();
 
         virtual bool Connect();
@@ -22,7 +23,7 @@ namespace statusengine {
         virtual bool CheckAMQPReply(amqp_rpc_reply_t x, char const *context, bool quiet = false);
         virtual bool CloseConnection(bool quiet = false);
 
-        RabbitmqConfiguration *cfg;
+        std::shared_ptr<RabbitmqConfiguration> cfg;
 
         amqp_socket_t *socket;
         amqp_connection_state_t conn;

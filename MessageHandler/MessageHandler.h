@@ -1,8 +1,7 @@
 #pragma once
 
-#include <map>
+#include "vendor/toml.hpp"
 #include <string>
-#include <vector>
 
 namespace statusengine {
     class Statusengine;

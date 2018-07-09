@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <unordered_map>
 #include <vector>
 
 #include "MessageHandler.h"
@@ -23,7 +24,7 @@ namespace statusengine {
       private:
         Statusengine *se;
         std::vector<std::shared_ptr<MessageHandler>> handlers;
-        std::map<std::string, std::vector<std::string> *> bulkMessages;
+        std::unordered_map<std::string, std::vector<std::string> *> bulkMessages;
         unsigned long maxBulkSize;
         unsigned long globalBulkCounter;
     };

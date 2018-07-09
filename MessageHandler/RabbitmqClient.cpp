@@ -1,12 +1,12 @@
 #include "RabbitmqClient.h"
 
+#include "Configuration/RabbitmqConfiguration.h"
 #include "LogStream.h"
-#include "RabbitmqConfiguration.h"
 #include "Statusengine.h"
 
 namespace statusengine {
 
-    RabbitmqClient::RabbitmqClient(Statusengine *se, RabbitmqConfiguration *cfg)
+    RabbitmqClient::RabbitmqClient(Statusengine *se, std::shared_ptr<RabbitmqConfiguration> cfg)
         : MessageHandler(se), cfg(cfg), connected(false), conn(nullptr), socket(nullptr) {}
 
     RabbitmqClient::~RabbitmqClient() {
@@ -32,7 +32,7 @@ namespace statusengine {
     }
 
     bool RabbitmqClient::CheckAMQPReply(char const *context, bool quiet) {
-        CheckAMQPReply(amqp_get_rpc_reply(conn), context, quiet);
+        return CheckAMQPReply(amqp_get_rpc_reply(conn), context, quiet);
     }
 
     bool RabbitmqClient::CheckAMQPReply(amqp_rpc_reply_t x, char const *context, bool quiet) {
@@ -87,42 +87,42 @@ namespace statusengine {
     }
 
     bool RabbitmqClient::Connect() {
-        Connect(false);
+        return Connect(false);
     }
 
     bool RabbitmqClient::Connect(bool quiet) {
         conn = amqp_new_connection();
-        if (cfg->ssl) {
+        if (cfg->SSL) {
             socket = amqp_ssl_socket_new(conn);
 #ifndef WITH_RABBITMQ_CX080
-            amqp_ssl_socket_set_verify_peer(socket, cfg->ssl_verify);
-            amqp_ssl_socket_set_verify_hostname(socket, cfg->ssl_verify);
+            amqp_ssl_socket_set_verify_peer(socket, cfg->SSLVerify);
+            amqp_ssl_socket_set_verify_hostname(socket, cfg->SSLVerify);
 #else
-            amqp_ssl_socket_set_verify(socket, cfg->ssl_verify);
+            amqp_ssl_socket_set_verify(socket, cfg->SSLVerify);
 #endif // WITH_RABBITMQ_CX080
-            if (cfg->ssl_cacert != "") {
-                if (!amqp_ssl_socket_set_cacert(socket, cfg->ssl_cacert.c_str())) {
+            if (cfg->SSLCacert != "") {
+                if (!amqp_ssl_socket_set_cacert(socket, cfg->SSLCacert.c_str())) {
                     if (!quiet) {
                         se->Log() << "Could not set ssl ca for rabbitmq connection" << LogLevel::Error;
                     }
                     return false;
                 }
             }
-            if (cfg->ssl_cert != "") {
-                if (cfg->ssl_key == "") {
+            if (cfg->SSLCert != "") {
+                if (cfg->SSLKey == "") {
                     if (!quiet) {
                         se->Log() << "Please specify an ssl key for rabbitmq connection" << LogLevel::Error;
                     }
                     return false;
                 }
-                if (!amqp_ssl_socket_set_key(socket, cfg->ssl_cert.c_str(), cfg->ssl_key.c_str())) {
+                if (!amqp_ssl_socket_set_key(socket, cfg->SSLCert.c_str(), cfg->SSLKey.c_str())) {
                     if (!quiet) {
                         se->Log() << "Could not set ssl cert and key for rabbitmq connection" << LogLevel::Error;
                     }
                     return false;
                 }
             }
-            else if (cfg->ssl_key != "") {
+            else if (cfg->SSLKey != "") {
                 if (!quiet) {
                     se->Log() << "Please specify an ssl cert for rabbitmq connection" << LogLevel::Error;
                 }
@@ -140,7 +140,7 @@ namespace statusengine {
             return false;
         }
 
-        auto socketStatus = amqp_socket_open_noblock(socket, cfg->hostname.c_str(), cfg->port, cfg->timeout);
+        auto socketStatus = amqp_socket_open_noblock(socket, cfg->Hostname.c_str(), cfg->Port, cfg->Timeout);
         if (socketStatus != AMQP_STATUS_OK) {
             if (!quiet) {
                 se->Log() << "Could not connect to rabbitmq: " << socketStatus << LogLevel::Error;
@@ -148,8 +148,8 @@ namespace statusengine {
             return false;
         }
 
-        if (!CheckAMQPReply(amqp_login(conn, cfg->vhost.c_str(), 0, 131072, 0, AMQP_SASL_METHOD_PLAIN,
-                                       cfg->username.c_str(), cfg->password.c_str()),
+        if (!CheckAMQPReply(amqp_login(conn, cfg->Vhost.c_str(), 0, 131072, 0, AMQP_SASL_METHOD_PLAIN,
+                                       cfg->Username.c_str(), cfg->Password.c_str()),
                             "amqp_login")) {
             return false;
         }
@@ -159,8 +159,8 @@ namespace statusengine {
             return false;
         }
 
-        amqp_exchange_declare(conn, 1, amqp_cstring_bytes(cfg->exchange.c_str()), amqp_cstring_bytes("direct"), 0,
-                              cfg->durable_exchange, 0, 0, amqp_empty_table);
+        amqp_exchange_declare(conn, 1, amqp_cstring_bytes(cfg->Exchange.c_str()), amqp_cstring_bytes("direct"), 0,
+                              cfg->DurableExchange, 0, 0, amqp_empty_table);
         if (!CheckAMQPReply("Declare amqp exchange")) {
             return false;
         }
@@ -185,11 +185,11 @@ namespace statusengine {
 
         for (auto it = queues.begin(); it != queues.end(); ++it) {
             auto queueString = amqp_cstring_bytes((*it).c_str());
-            amqp_queue_declare(conn, 1, queueString, 0, cfg->durable_queues, 0, 0, amqp_empty_table);
+            amqp_queue_declare(conn, 1, queueString, 0, cfg->DurableQueues, 0, 0, amqp_empty_table);
             if (!CheckAMQPReply(("Declare amqp queue " + *it).c_str())) {
                 return false;
             }
-            amqp_queue_bind(conn, 1, queueString, amqp_cstring_bytes(cfg->exchange.c_str()), queueString,
+            amqp_queue_bind(conn, 1, queueString, amqp_cstring_bytes(cfg->Exchange.c_str()), queueString,
                             amqp_empty_table);
             if (!CheckAMQPReply(("Bind amqp queue " + *it).c_str())) {
                 return false;
@@ -208,7 +208,7 @@ namespace statusengine {
             char *bytes = nullptr;
             bytes = strdup(message.c_str());
             message_bytes.bytes = reinterpret_cast<void *>(bytes);
-            auto pubStatus = amqp_basic_publish(conn, 1, amqp_cstring_bytes(cfg->exchange.c_str()),
+            auto pubStatus = amqp_basic_publish(conn, 1, amqp_cstring_bytes(cfg->Exchange.c_str()),
                                                 amqp_cstring_bytes(queue.c_str()), 0, 0, NULL, message_bytes);
             if (pubStatus < 0) {
                 connected = false;
