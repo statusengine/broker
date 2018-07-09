@@ -1,10 +1,11 @@
 #pragma once
 
+#include <map>
 #include <memory>
-#include <unordered_map>
 #include <vector>
 
 #include "MessageHandler.h"
+#include "MessageQueueHandler.h"
 
 namespace statusengine {
     class Statusengine;
@@ -17,14 +18,11 @@ namespace statusengine {
 
         virtual bool Connect();
 
-        virtual void SendMessage(const std::string &queue, const std::string &message);
-        virtual void SendBulkMessage(std::string queue, std::string message);
         virtual void FlushBulkQueue();
 
       private:
+        std::map<Queue, std::shared_ptr<MessageQueueHandler>> mqHandlers;
         Statusengine *se;
-        std::vector<std::shared_ptr<MessageHandler>> handlers;
-        std::unordered_map<std::string, std::vector<std::string> *> bulkMessages;
         unsigned long maxBulkSize;
         unsigned long globalBulkCounter;
     };

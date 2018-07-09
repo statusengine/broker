@@ -54,6 +54,9 @@ namespace statusengine {
         std::vector<std::shared_ptr<GearmanConfiguration>> *GetGearmanConfiguration();
         std::vector<std::shared_ptr<RabbitmqConfiguration>> *GetRabbitmqConfiguration();
 
+        static const std::map<std::string, Queue> QueueName;
+        static const std::map<Queue, std::string> QueueId;
+
       private:
         Statusengine *se;
         toml::Table cfg;

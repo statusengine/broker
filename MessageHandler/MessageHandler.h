@@ -1,7 +1,12 @@
 #pragma once
 
 #include "vendor/toml.hpp"
+#include <memory>
+#include <set>
 #include <string>
+
+#include "Configuration/Configuration.h"
+#include "Configuration/MessageHandlerConfiguration.h"
 
 namespace statusengine {
     class Statusengine;
@@ -12,8 +17,7 @@ namespace statusengine {
         ~MessageHandler();
 
         virtual bool Connect() = 0;
-
-        virtual void SendMessage(const std::string &queue, const std::string &message) = 0;
+        virtual void SendMessage(Queue queue, const std::string &message) = 0;
 
       protected:
         Statusengine *se;

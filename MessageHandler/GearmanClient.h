@@ -14,11 +14,12 @@ namespace statusengine {
 
         virtual bool Connect();
 
-        virtual void SendMessage(const std::string &queue, const std::string &message);
+        virtual void SendMessage(Queue queue, const std::string &message);
 
       private:
         gearman_client_st *client;
 
         std::shared_ptr<GearmanConfiguration> cfg;
+        std::shared_ptr<std::map<Queue, std::string>> queueNames;
     };
 } // namespace statusengine

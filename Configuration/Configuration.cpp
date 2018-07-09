@@ -101,4 +101,58 @@ namespace statusengine {
     std::vector<std::shared_ptr<RabbitmqConfiguration>> *Configuration::GetRabbitmqConfiguration() {
         return &rabbitmq;
     }
+
+    const std::map<std::string, Queue> Configuration::QueueName = {
+        {"HostStatus", Queue::HostStatus},
+        {"HostCheck", Queue::HostCheck},
+        {"ServiceStatus", Queue::ServiceStatus},
+        {"ServiceCheck", Queue::ServiceCheck},
+        {"ServicePerfData", Queue::ServicePerfData},
+        {"StateChange", Queue::StateChange},
+        {"LogData", Queue::LogData},
+        {"AcknowledgementData", Queue::AcknowledgementData},
+        {"FlappingData", Queue::FlappingData},
+        {"DowntimeData", Queue::DowntimeData},
+        {"ContactNotificationMethodData", Queue::ContactNotificationMethodData},
+        {"RestartData", Queue::RestartData},
+        {"SystemCommandData", Queue::SystemCommandData},
+        {"CommentData", Queue::CommentData},
+        {"ExternalCommandData", Queue::ExternalCommandData},
+        {"NotificationData", Queue::NotificationData},
+        {"ProgramStatusData", Queue::ProgramStatusData},
+        {"ContactStatusData", Queue::ContactStatusData},
+        {"ContactNotificationData", Queue::ContactNotificationData},
+        {"EventHandlerData", Queue::EventHandlerData},
+        {"ProcessData", Queue::ProcessData},
+        {"BulkOCSP", Queue::BulkOCSP},
+        {"OCSP", Queue::OCSP},
+        {"BulkOCHP", Queue::BulkOCHP},
+        {"OCHP", Queue::OCHP}};
+
+    const std::map<Queue, std::string> Configuration::QueueId = {
+        {Queue::HostStatus, "HostStatus"},
+        {Queue::HostCheck, "HostCheck"},
+        {Queue::ServiceStatus, "ServiceStatus"},
+        {Queue::ServiceCheck, "ServiceCheck"},
+        {Queue::ServicePerfData, "ServicePerfData"},
+        {Queue::StateChange, "StateChange"},
+        {Queue::LogData, "LogData"},
+        {Queue::AcknowledgementData, "AcknowledgementData"},
+        {Queue::FlappingData, "FlappingData"},
+        {Queue::DowntimeData, "DowntimeData"},
+        {Queue::ContactNotificationMethodData, "ContactNotificationMethodData"},
+        {Queue::RestartData, "RestartData"},
+        {Queue::SystemCommandData, "SystemCommandData"},
+        {Queue::CommentData, "CommentData"},
+        {Queue::ExternalCommandData, "ExternalCommandData"},
+        {Queue::NotificationData, "NotificationData"},
+        {Queue::ProgramStatusData, "ProgramStatusData"},
+        {Queue::ContactStatusData, "ContactStatusData"},
+        {Queue::ContactNotificationData, "ContactNotificationData"},
+        {Queue::EventHandlerData, "EventHandlerData"},
+        {Queue::ProcessData, "ProcessData"},
+        {Queue::BulkOCSP, "BulkOCSP"},
+        {Queue::OCSP, "OCSP"},
+        {Queue::BulkOCHP, "BulkOCHP"},
+        {Queue::OCHP, "OCHP"}};
 } // namespace statusengine

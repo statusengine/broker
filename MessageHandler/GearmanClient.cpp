@@ -11,6 +11,7 @@ namespace statusengine {
     GearmanClient::GearmanClient(Statusengine *se, std::shared_ptr<GearmanConfiguration> cfg)
         : MessageHandler(se), cfg(cfg) {
         client = gearman_client_create(nullptr);
+        queueNames = cfg->GetQueueNames();
     }
 
     GearmanClient::~GearmanClient() {
@@ -30,9 +31,10 @@ namespace statusengine {
         }
     }
 
-    void GearmanClient::SendMessage(const std::string &queue, const std::string &message) {
-        auto ret =
-            gearman_client_do_background(client, queue.c_str(), nullptr, message.c_str(), message.length(), nullptr);
+    void GearmanClient::SendMessage(Queue queue, const std::string &message) {
+        auto queueName = queueNames->find(queue)->second;
+        auto ret = gearman_client_do_background(client, queueName.c_str(), nullptr, message.c_str(), message.length(),
+                                                nullptr);
         if (!gearman_success(ret)) {
             se->Log() << "Could not write message to gearman queue: " << gearman_client_error(client)
                       << LogLevel::Error;

@@ -7,6 +7,7 @@
 #include "Configuration/Configuration.h"
 #include "EventCallback/BulkMessageCallback.h"
 #include "LogStream.h"
+#include "MessageHandler/MessageHandlerList.h"
 #include "Nebmodule.h"
 
 namespace statusengine {
@@ -33,8 +34,8 @@ namespace statusengine {
             return 1;
         }
 
-        messageHandlers = new MessageHandlerList(this, configuration);
-        if (!messageHandlers->Connect()) {
+        messageHandler = new MessageHandlerList(this, configuration);
+        if (!messageHandler->Connect()) {
             return 1;
         }
         /*
@@ -132,7 +133,7 @@ namespace statusengine {
         delete callbacks;
         delete bulkCallback;
         delete configuration;
-        delete messageHandlers;
+        delete messageHandler;
 
         Log() << "unloading finished" << LogLevel::Info;
         delete ls;
@@ -148,16 +149,8 @@ namespace statusengine {
         return *ls;
     }
 
-    void Statusengine::SendMessage(const std::string &queue, const std::string &message) const {
-        messageHandlers->SendMessage(queue, message);
-    }
-
-    void Statusengine::SendBulkMessage(const std::string &queue, const std::string &message) {
-        messageHandlers->SendBulkMessage(queue, message);
-    }
-
     void Statusengine::FlushBulkQueue() {
-        messageHandlers->FlushBulkQueue();
+        messageHandler->FlushBulkQueue();
     }
 
     void Statusengine::SetModuleInfo(int modinfo, std::string text) {
@@ -193,5 +186,9 @@ namespace statusengine {
             Log() << "Could not find callback for " << event_type << LogLevel::Warning;
         }
         return 0;
+    }
+
+    MessageHandlerList *Statusengine::GetMessageHandler() const {
+        return messageHandler;
     }
 } // namespace statusengine

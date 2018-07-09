@@ -20,7 +20,8 @@ find_package(PkgConfig REQUIRED)
 
 set (SESources
 	Nebmodule.cpp Statusengine.cpp LogStream.cpp
-	Configuration/Configuration.cpp Configuration/RabbitmqConfiguration.cpp Configuration/GearmanConfiguration.cpp
+	Configuration/Configuration.cpp Configuration/MessageHandlerConfiguration.cpp
+	Configuration/RabbitmqConfiguration.cpp Configuration/GearmanConfiguration.cpp
 	MessageHandler/MessageHandler.cpp MessageHandler/MessageHandlerList.cpp
 	EventCallback/EventCallback.cpp EventCallback/BulkMessageCallback.cpp
 	NagiosObjects/NagiosObject.cpp

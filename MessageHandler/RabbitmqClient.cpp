@@ -7,7 +7,9 @@
 namespace statusengine {
 
     RabbitmqClient::RabbitmqClient(Statusengine *se, std::shared_ptr<RabbitmqConfiguration> cfg)
-        : MessageHandler(se), cfg(cfg), connected(false), conn(nullptr), socket(nullptr) {}
+        : MessageHandler(se), cfg(cfg), connected(false), conn(nullptr), socket(nullptr) {
+        queueNames = cfg->GetQueueNames();
+    }
 
     RabbitmqClient::~RabbitmqClient() {
         CloseConnection(true);
@@ -201,7 +203,8 @@ namespace statusengine {
         return true;
     }
 
-    void RabbitmqClient::SendMessage(const std::string &queue, const std::string &message) {
+    void RabbitmqClient::SendMessage(Queue queue, const std::string &message) {
+        auto queueName = queueNames->find(queue)->second;
         if (connected || Connect(true)) {
             amqp_bytes_t message_bytes;
             message_bytes.len = message.length();
@@ -209,7 +212,7 @@ namespace statusengine {
             bytes = strdup(message.c_str());
             message_bytes.bytes = reinterpret_cast<void *>(bytes);
             auto pubStatus = amqp_basic_publish(conn, 1, amqp_cstring_bytes(cfg->Exchange.c_str()),
-                                                amqp_cstring_bytes(queue.c_str()), 0, 0, NULL, message_bytes);
+                                                amqp_cstring_bytes(queueName.c_str()), 0, 0, NULL, message_bytes);
             if (pubStatus < 0) {
                 connected = false;
                 se->Log() << "Could not send message to rabbitmq: " << amqp_error_string2(pubStatus) << LogLevel::Error;

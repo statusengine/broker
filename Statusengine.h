@@ -7,13 +7,12 @@
 #include "LogStream.h"
 #include "Nebmodule.h"
 
-#include "MessageHandler/MessageHandlerList.h"
-
 #include "EventCallback/BulkMessageCallback.h"
 #include "NagiosCallbacks/NagiosCallbacks.h"
 
 namespace statusengine {
     class Configuration;
+    class MessageHandlerList;
     class Nebmodule;
 
     class Statusengine {
@@ -28,11 +27,10 @@ namespace statusengine {
         void InitEventCallbacks();
 
         LogStream &Log();
-        void SendMessage(const std::string &queue, const std::string &message) const;
-        void SendBulkMessage(const std::string &queue, const std::string &message);
         void FlushBulkQueue();
         void RegisterCallback(NebmoduleCallback *cb);
         void RegisterEventCallback(EventCallback *ecb);
+        MessageHandlerList *GetMessageHandler() const;
 
       private:
         Statusengine(nebmodule *handle, std::string configurationPath);
@@ -45,7 +43,7 @@ namespace statusengine {
         nebmodule *nebhandle;
         std::string configurationPath;
         Configuration *configuration;
-        MessageHandlerList *messageHandlers;
+        MessageHandlerList *messageHandler;
         LogStream *ls;
         std::map<NEBCallbackType, std::vector<NebmoduleCallback *> *> *callbacks;
         BulkMessageCallback *bulkCallback;
