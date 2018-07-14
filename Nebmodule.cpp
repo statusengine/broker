@@ -69,7 +69,9 @@ int nebmodule_callback(int event_type, void *data) {
 void nebmodule_event_callback(struct nm_event_execution_properties *properties) {
     auto ecb = reinterpret_cast<statusengine::EventCallback *>(properties->user_data);
     ecb->Callback();
-    statusengine::Nebmodule::RegisterEventCallback(ecb);
+    if (!(sigshutdown || sigrestart)) {
+        statusengine::Nebmodule::RegisterEventCallback(ecb);
+    }
 }
 #else
 void nebmodule_event_callback(statusengine::EventCallback *ecb) {

@@ -57,13 +57,19 @@ namespace statusengine {
         }
     }
 
-    MessageHandlerList::~MessageHandlerList() {}
+    MessageHandlerList::~MessageHandlerList() {
+        FlushBulkQueue();
+    }
 
     void MessageHandlerList::FlushBulkQueue() {
-        for (auto &handler : mqHandlers) {
-            handler.second->FlushBulkQueue();
+        if (globalBulkCounter > 0) {
+            se->Log() << "Flush Bulk Queues" << LogLevel::Info;
+
+            for (auto &handler : mqHandlers) {
+                handler.second->FlushBulkQueue();
+            }
+            globalBulkCounter = 0;
         }
-        globalBulkCounter = 0;
     }
 
     bool MessageHandlerList::Connect() {
