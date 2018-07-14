@@ -1,39 +1,66 @@
-[Queues]
-HostStatus = true
-HostCheck = true
-ServiceStatus = true
-ServiceCheck = true
-ServicePerfData = true
-StateChange = true
-LogData = true
-AcknowledgementData = true
-FlappingData = true
-DowntimeData = true
-ContactNotificationMethodData = true
-RestartData = true
-#SystemCommandData = false
-#CommentData = false
-#ExternalCommandData = false
-#NotificationData = false
-#ProgramStatusData = false
-#ContactStatusData = false
-#ContactNotificationData = false
-#EventHandlerData = false
-#ProcessData = false
-#BulkOCSP = false
-#OCSP = false
-#BulkOCHP = false
-#OCHP = false
-
-# You can specify multiple gearman connections, by adding more [[Gearman]] sections.
+# You may specify multiple gearman connections, by adding more [[Gearman]] sections.
 [[Gearman]]
 URL = "127.0.0.1:4730"
+HostStatus = "statusngin_hoststatus"
+HostCheck = "statusngin_hostchecks"
+ServiceStatus = "statusngin_servicestatus"
+ServiceCheck = "statusngin_servicechecks"
+ServicePerfData = "statusngin_service_perfdata"
+StateChange = "statusngin_statechanges"
+LogData = "statusngin_logentries"
+AcknowledgementData = "statusngin_acknowledgements"
+FlappingData = "statusngin_flappings"
+DowntimeData = "statusngin_downtimes"
+ContactNotificationMethodData = "statusngin_contactnotificationmethod"
+RestartData = "statusngin_core_restart"
 
-# You can specify multiple rabbitmq connections, by adding more [[Rabbitmq]] sections.
+#SystemCommandData = "statusngin_systemcommands"
+#CommentData = "statusngin_comments"
+#ExternalCommandData = "statusngin_externalcommands"
+#NotificationData = "statusngin_notifications"
+#ProgramStatusData = "statusngin_programmstatus"
+#ContactStatusData = "statusngin_contactstatus"
+#ContactNotificationData = "statusngin_contactnotificationdata"
+#EventHandlerData = "statusngin_eventhandler"
+#ProcessData = "statusngin_processdata"
+#BulkOCSP = "BulkOCSP"
+#OCSP = "statusngin_ocsp"
+#BulkOCHP = "BulkOCHP"
+#OCHP = "statusngin_ochp"
+
+# You may specify multiple rabbitmq connections, by adding more [[Rabbitmq]] sections.
 #[[Rabbitmq]]
 #Hostname = "localhost"
 #Username = "statusengine"
 #Password = "statusengine"
+
+#URL = "127.0.0.1:4730"
+#HostStatus = "statusngin_hoststatus"
+#HostCheck = "statusngin_hostchecks"
+#ServiceStatus = "statusngin_servicestatus"
+#ServiceCheck = "statusngin_servicechecks"
+#ServicePerfData = "statusngin_service_perfdata"
+#StateChange = "statusngin_statechanges"
+#LogData = "statusngin_logentries"
+#AcknowledgementData = "statusngin_acknowledgements"
+#FlappingData = "statusngin_flappings"
+#DowntimeData = "statusngin_downtimes"
+#ContactNotificationMethodData = "statusngin_contactnotificationmethod"
+#RestartData = "statusngin_core_restart"
+
+##SystemCommandData = "statusngin_systemcommands"
+##CommentData = "statusngin_comments"
+##ExternalCommandData = "statusngin_externalcommands"
+##NotificationData = "statusngin_notifications"
+##ProgramStatusData = "statusngin_programmstatus"
+##ContactStatusData = "statusngin_contactstatus"
+##ContactNotificationData = "statusngin_contactnotificationdata"
+##EventHandlerData = "statusngin_eventhandler"
+##ProcessData = "statusngin_processdata"
+##BulkOCSP = "BulkOCSP"
+##OCSP = "statusngin_ocsp"
+##BulkOCHP = "BulkOCHP"
+##OCHP = "statusngin_ochp"
 
 [Scheduler]
 # Used to fix a nasty scheduler bug in naemon, needed when you often restart naemon

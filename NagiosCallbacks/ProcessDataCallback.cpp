@@ -2,15 +2,24 @@
 
 #include <algorithm>
 
-#include "LogStream.h"
+#include "MessageHandler/MessageHandlerList.h"
 #include "NagiosObjects/NagiosProcessData.h"
 #include "Statusengine.h"
 
 namespace statusengine {
-    ProcessDataCallback::ProcessDataCallback(Statusengine *se, bool restartData, bool processData,
-                                             time_t startupSchedulerMax)
-        : NebmoduleCallback(NEBCALLBACK_PROCESS_DATA, se), restartData(restartData), processData(processData),
-          startupSchedulerMax(startupSchedulerMax) {}
+    ProcessDataCallback::ProcessDataCallback(Statusengine *se, time_t startupSchedulerMax)
+        : NebmoduleCallback(NEBCALLBACK_PROCESS_DATA, se), restartData(false), processData(false),
+          startupSchedulerMax(startupSchedulerMax) {
+        auto mHandler = se->GetMessageHandler();
+        if (mHandler->QueueExists(Queue::RestartData)) {
+            restartHandler = mHandler->GetMessageQueueHandler(Queue::RestartData);
+            restartData = true;
+        }
+        if (mHandler->QueueExists(Queue::ProcessData)) {
+            processHandler = mHandler->GetMessageQueueHandler(Queue::ProcessData);
+            processData = true;
+        }
+    }
 
     void ProcessDataCallback::Callback(int event_type, void *vdata) {
         auto data = reinterpret_cast<nebstruct_process_data *>(vdata);
@@ -20,7 +29,7 @@ namespace statusengine {
             if (restartData) {
                 json_object *restartData = json_object_new_object();
                 json_object_object_add(restartData, "object_type", json_object_new_int(NEBTYPE_PROCESS_RESTART));
-                se->SendMessage("statusngin_core_restart", std::string(json_object_to_json_string(restartData)));
+                restartHandler->SendMessage(std::string(json_object_to_json_string(restartData)));
                 json_object_put(restartData);
             }
         }
@@ -65,7 +74,7 @@ namespace statusengine {
 
         if (processData) {
             NagiosProcessData processData(data);
-            se->SendMessage("statusngin_processdata", processData.ToString());
+            processHandler->SendMessage(processData.ToString());
         }
     }
 } // namespace statusengine

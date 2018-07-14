@@ -8,6 +8,26 @@
 #include "EventCallback/BulkMessageCallback.h"
 #include "LogStream.h"
 #include "MessageHandler/MessageHandlerList.h"
+#include "NagiosCallbacks/HostCheckCallback.h"
+#include "NagiosCallbacks/ProcessDataCallback.h"
+#include "NagiosCallbacks/ServiceCheckCallback.h"
+#include "NagiosCallbacks/StandardCallback.h"
+#include "NagiosObjects/NagiosAcknowledgementData.h"
+#include "NagiosObjects/NagiosCommentData.h"
+#include "NagiosObjects/NagiosContactNotificationData.h"
+#include "NagiosObjects/NagiosContactNotificationMethodData.h"
+#include "NagiosObjects/NagiosContactStatusData.h"
+#include "NagiosObjects/NagiosDowntimeData.h"
+#include "NagiosObjects/NagiosEventHandlerData.h"
+#include "NagiosObjects/NagiosExternalCommandData.h"
+#include "NagiosObjects/NagiosFlappingData.h"
+#include "NagiosObjects/NagiosHostStatusData.h"
+#include "NagiosObjects/NagiosLogData.h"
+#include "NagiosObjects/NagiosNotificationData.h"
+#include "NagiosObjects/NagiosProgramStatusData.h"
+#include "NagiosObjects/NagiosServiceStatusData.h"
+#include "NagiosObjects/NagiosStateChangeData.h"
+#include "NagiosObjects/NagiosSystemCommandData.h"
 #include "Nebmodule.h"
 
 namespace statusengine {
@@ -38,87 +58,104 @@ namespace statusengine {
         if (!messageHandler->Connect()) {
             return 1;
         }
-        /*
-                if (configuration->GetQueueHostStatus()) {
-                    RegisterCallback(new HostStatusCallback(this));
-                }
 
-                if (configuration->GetQueueHostCheck() || configuration->GetQueueOCHP() ||
-           configuration->GetQueueBulkOCHP()) { RegisterCallback(new HostCheckCallback(this,
-           configuration->GetQueueHostCheck(), configuration->GetQueueOCHP(), configuration->GetQueueBulkOCHP()));
-                }
+        if (messageHandler->QueueExists(Queue::HostStatus)) {
+            RegisterCallback(new StandardCallback<nebstruct_host_status_data, NagiosHostStatusData,
+                                                  NEBCALLBACK_HOST_STATUS_DATA, Queue::HostStatus>(this));
+        }
 
-                if (configuration->GetQueueServiceStatus()) {
-                    RegisterCallback(new ServiceStatusCallback(this));
-                }
+        if (messageHandler->QueueExists(Queue::ServiceStatus)) {
+            RegisterCallback(new StandardCallback<nebstruct_service_status_data, NagiosServiceStatusData,
+                                                  NEBCALLBACK_SERVICE_STATUS_DATA, Queue::ServiceStatus>(this));
+        }
 
-                if (configuration->GetQueueServiceCheck() || configuration->GetQueueOCSP() ||
-                    configuration->GetQueueBulkOCSP() || configuration->GetQueueServicePerfData()) {
-                    RegisterCallback(new ServiceCheckCallback(this, configuration->GetQueueServiceCheck(),
-                                                              configuration->GetQueueOCSP(),
-           configuration->GetQueueBulkOCSP(), configuration->GetQueueServicePerfData()));
-                }
+        if (messageHandler->QueueExists(Queue::LogData)) {
+            RegisterCallback(
+                new StandardCallback<nebstruct_log_data, NagiosLogData, NEBCALLBACK_LOG_DATA, Queue::LogData>(this));
+        }
 
-                if (configuration->GetQueueStateChange()) {
-                    RegisterCallback(new StateChangeCallback(this));
-                }
+        if (messageHandler->QueueExists(Queue::StateChange)) {
+            RegisterCallback(new StandardCallback<nebstruct_statechange_data, NagiosStateChangeData,
+                                                  NEBCALLBACK_STATE_CHANGE_DATA, Queue::StateChange>(this));
+        }
 
-                if (configuration->GetQueueLogData()) {
-                    RegisterCallback(new LogDataCallback(this));
-                }
+        if (messageHandler->QueueExists(Queue::SystemCommandData)) {
+            RegisterCallback(new StandardCallback<nebstruct_system_command_data, NagiosSystemCommandData,
+                                                  NEBCALLBACK_SYSTEM_COMMAND_DATA, Queue::SystemCommandData>(this));
+        }
 
-                if (configuration->GetQueueSystemCommandData()) {
-                    RegisterCallback(new SystemCommandDataCallback(this));
-                }
+        if (messageHandler->QueueExists(Queue::ExternalCommandData)) {
+            RegisterCallback(new StandardCallback<nebstruct_external_command_data, NagiosExternalCommandData,
+                                                  NEBCALLBACK_EXTERNAL_COMMAND_DATA, Queue::ExternalCommandData>(this));
+        }
 
-                if (configuration->GetQueueCommentData()) {
-                    RegisterCallback(new CommentDataCallback(this));
-                }
+        if (messageHandler->QueueExists(Queue::CommentData)) {
+            RegisterCallback(new StandardCallback<nebstruct_comment_data, NagiosCommentData, NEBCALLBACK_COMMENT_DATA,
+                                                  Queue::CommentData>(this));
+        }
 
-                if (configuration->GetQueueExternalCommandData()) {
-                    RegisterCallback(new ExternalCommandDataCallback(this));
-                }
+        if (messageHandler->QueueExists(Queue::AcknowledgementData)) {
+            RegisterCallback(new StandardCallback<nebstruct_acknowledgement_data, NagiosAcknowledgementData,
+                                                  NEBCALLBACK_ACKNOWLEDGEMENT_DATA, Queue::AcknowledgementData>(this));
+        }
 
-                if (configuration->GetQueueAcknowledgementData()) {
-                    RegisterCallback(new AcknowledgementDataCallback(this));
-                }
+        if (messageHandler->QueueExists(Queue::FlappingData)) {
+            RegisterCallback(new StandardCallback<nebstruct_flapping_data, NagiosFlappingData,
+                                                  NEBCALLBACK_FLAPPING_DATA, Queue::FlappingData>(this));
+        }
 
-                if (configuration->GetQueueFlappingData()) {
-                    RegisterCallback(new FlappingDataCallback(this));
-                }
+        if (messageHandler->QueueExists(Queue::DowntimeData)) {
+            RegisterCallback(new StandardCallback<nebstruct_downtime_data, NagiosDowntimeData,
+                                                  NEBCALLBACK_DOWNTIME_DATA, Queue::DowntimeData>(this));
+        }
 
-                if (configuration->GetQueueDowntimeData()) {
-                    RegisterCallback(new DowntimeDataCallback(this));
-                }
+        if (messageHandler->QueueExists(Queue::NotificationData)) {
+            RegisterCallback(new StandardCallback<nebstruct_notification_data, NagiosNotificationData,
+                                                  NEBCALLBACK_NOTIFICATION_DATA, Queue::NotificationData>(this));
+        }
 
-                if (configuration->GetQueueNotificationData()) {
-                    RegisterCallback(new NotificationDataCallback(this));
-                }
+        if (messageHandler->QueueExists(Queue::ProgramStatusData)) {
+            RegisterCallback(new StandardCallback<nebstruct_program_status_data, NagiosProgramStatusData,
+                                                  NEBCALLBACK_PROGRAM_STATUS_DATA, Queue::ProgramStatusData>(this));
+        }
 
-                if (configuration->GetQueueProgramStatusData()) {
-                    RegisterCallback(new ProgramStatusDataCallback(this));
-                }
+        if (messageHandler->QueueExists(Queue::ContactStatusData)) {
+            RegisterCallback(new StandardCallback<nebstruct_contact_status_data, NagiosContactStatusData,
+                                                  NEBCALLBACK_CONTACT_STATUS_DATA, Queue::ContactStatusData>(this));
+        }
 
-                if (configuration->GetQueueContactStatusData()) {
-                    RegisterCallback(new ContactStatusDataCallback(this));
-                }
+        if (messageHandler->QueueExists(Queue::ContactNotificationData)) {
+            RegisterCallback(
+                new StandardCallback<nebstruct_contact_notification_data, NagiosContactNotificationData,
+                                     NEBCALLBACK_CONTACT_NOTIFICATION_DATA, Queue::ContactNotificationData>(this));
+        }
 
-                if (configuration->GetQueueContactNotificationData()) {
-                    RegisterCallback(new ContactNotificationDataCallback(this));
-                }
+        if (messageHandler->QueueExists(Queue::ContactNotificationMethodData)) {
+            RegisterCallback(
+                new StandardCallback<nebstruct_contact_notification_method_data, NagiosContactNotificationMethodData,
+                                     NEBCALLBACK_CONTACT_NOTIFICATION_METHOD_DATA,
+                                     Queue::ContactNotificationMethodData>(this));
+        }
 
-                if (configuration->GetQueueContactNotificationMethodData()) {
-                    RegisterCallback(new ContactNotificationMethodDataCallback(this));
-                }
+        if (messageHandler->QueueExists(Queue::EventHandlerData)) {
+            RegisterCallback(new StandardCallback<nebstruct_event_handler_data, NagiosEventHandlerData,
+                                                  NEBCALLBACK_EVENT_HANDLER_DATA, Queue::EventHandlerData>(this));
+        }
 
-                if (configuration->GetQueueEventHandlerData()) {
-                    RegisterCallback(new EventHandlerDataCallback(this));
-                }
+        if (messageHandler->QueueExists(Queue::ServiceCheck) || messageHandler->QueueExists(Queue::OCSP) ||
+            messageHandler->QueueExists(Queue::BulkOCSP) || messageHandler->QueueExists(Queue::ServicePerfData)) {
+            RegisterCallback(new ServiceCheckCallback(this));
+        }
 
-                RegisterCallback(new ProcessDataCallback(this, configuration->GetQueueRestartData(),
-                                                         configuration->GetQueueProcessData(),
-                                                         configuration->GetStartupScheduleMax()));
-        */
+        if (messageHandler->QueueExists(Queue::HostCheck) || messageHandler->QueueExists(Queue::OCHP) ||
+            messageHandler->QueueExists(Queue::BulkOCHP)) {
+            RegisterCallback(new HostCheckCallback(this));
+        }
+
+        if (messageHandler->QueueExists(Queue::RestartData) || messageHandler->QueueExists(Queue::ProcessData)) {
+            RegisterCallback(new ProcessDataCallback(this, configuration->GetStartupScheduleMax()));
+        }
+
         return 0;
     }
 

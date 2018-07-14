@@ -72,4 +72,15 @@ namespace statusengine {
         return true;
     }
 
+    std::shared_ptr<MessageQueueHandler> MessageHandlerList::GetMessageQueueHandler(Queue queue) {
+        return mqHandlers.at(queue);
+    }
+
+    bool MessageHandlerList::QueueExists(Queue queue) {
+        if (mqHandlers.find(queue) != mqHandlers.end()) {
+            return true;
+        }
+        return false;
+    }
+
 } // namespace statusengine

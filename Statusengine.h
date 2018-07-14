@@ -8,7 +8,7 @@
 #include "Nebmodule.h"
 
 #include "EventCallback/BulkMessageCallback.h"
-#include "NagiosCallbacks/NagiosCallbacks.h"
+#include "NagiosCallbacks/NebmoduleCallback.h"
 
 namespace statusengine {
     class Configuration;

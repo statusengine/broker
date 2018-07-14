@@ -1,14 +1,32 @@
 #include "ServiceCheckCallback.h"
 
+#include "MessageHandler/MessageHandlerList.h"
 #include "NagiosObjects/NagiosServiceCheckData.h"
 #include "NagiosObjects/NagiosServiceCheckPerfData.h"
 #include "Statusengine.h"
 
 namespace statusengine {
-    ServiceCheckCallback::ServiceCheckCallback(Statusengine *se, bool servicechecks, bool ocsp, bool ocspBulk,
-                                               bool service_perfdata)
-        : NebmoduleCallback(NEBCALLBACK_SERVICE_CHECK_DATA, se), servicechecks(servicechecks), ocsp(ocsp),
-          ocspBulk(ocspBulk), service_perfdata(service_perfdata) {}
+    ServiceCheckCallback::ServiceCheckCallback(Statusengine *se)
+        : NebmoduleCallback(NEBCALLBACK_SERVICE_CHECK_DATA, se), servicechecks(false), ocsp(false), ocspBulk(false),
+          service_perfdata(false) {
+        auto mHandler = se->GetMessageHandler();
+        if (mHandler->QueueExists(Queue::ServiceCheck)) {
+            serviceCheckHandler = mHandler->GetMessageQueueHandler(Queue::ServiceCheck);
+            servicechecks = true;
+        }
+        if (mHandler->QueueExists(Queue::ServiceCheck)) {
+            ocspHandler = mHandler->GetMessageQueueHandler(Queue::OCSP);
+            ocsp = true;
+        }
+        if (mHandler->QueueExists(Queue::ServiceCheck)) {
+            bulkOCSPHandler = mHandler->GetMessageQueueHandler(Queue::BulkOCSP);
+            ocspBulk = true;
+        }
+        if (mHandler->QueueExists(Queue::ServiceCheck)) {
+            servicePerfHandler = mHandler->GetMessageQueueHandler(Queue::ServicePerfData);
+            service_perfdata = true;
+        }
+    }
 
     void ServiceCheckCallback::Callback(int event_type, void *vdata) {
         auto data = reinterpret_cast<nebstruct_service_check_data *>(vdata);
@@ -18,18 +36,18 @@ namespace statusengine {
                 auto checkData = NagiosServiceCheckData(data);
                 auto msg = checkData.ToString();
                 if (servicechecks) {
-                    se->SendMessage("statusngin_servicechecks", msg);
+                    serviceCheckHandler->SendMessage(msg);
                 }
                 if (ocsp) {
-                    se->SendMessage("statusngin_ocsp", msg);
+                    ocspHandler->SendMessage(msg);
                 }
                 if (ocspBulk) {
-                    se->SendBulkMessage("BulkOCSP", msg);
+                    bulkOCSPHandler->SendBulkMessage(msg);
                 }
             }
             if (service_perfdata) {
                 auto checkPerfData = NagiosServiceCheckPerfData(data);
-                se->SendMessage("statusngin_service_perfdata", checkPerfData.ToString());
+                servicePerfHandler->SendMessage(checkPerfData.ToString());
             }
         }
     }

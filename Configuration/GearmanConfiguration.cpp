@@ -1,5 +1,7 @@
 #include "GearmanConfiguration.h"
 
+#include "Statusengine.h"
+
 namespace statusengine {
     GearmanConfiguration::GearmanConfiguration(Statusengine *se) : MessageHandlerConfiguration(se) {}
 

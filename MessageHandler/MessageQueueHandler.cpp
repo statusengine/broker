@@ -1,5 +1,6 @@
 #include "MessageQueueHandler.h"
 
+#include "Configuration/Configuration.h"
 #include "MessageHandlerList.h"
 #include "NagiosObjects/NagiosObject.h"
 
@@ -11,14 +12,8 @@ namespace statusengine {
           handlers(handlers) {}
 
     void MessageQueueHandler::SendMessage(const std::string &message) {
-        for (auto it = handlers->begin(); it != handlers->end(); ++it) {
-            (*it)->SendMessage(queue, message);
-        }
-    }
-
-    void MessageQueueHandler::SendMessage(const std::string &message) {
-        for (auto it = handlers->begin(); it != handlers->end(); ++it) {
-            (*it)->SendMessage(queue, message);
+        for (auto &handler : *handlers) {
+            handler->SendMessage(queue, message);
         }
     }
 

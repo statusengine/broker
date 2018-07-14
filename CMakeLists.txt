@@ -22,7 +22,7 @@ set (SESources
 	Nebmodule.cpp Statusengine.cpp LogStream.cpp
 	Configuration/Configuration.cpp Configuration/MessageHandlerConfiguration.cpp
 	Configuration/RabbitmqConfiguration.cpp Configuration/GearmanConfiguration.cpp
-	MessageHandler/MessageHandler.cpp MessageHandler/MessageHandlerList.cpp
+	MessageHandler/MessageHandler.cpp MessageHandler/MessageHandlerList.cpp MessageHandler/MessageQueueHandler.cpp
 	EventCallback/EventCallback.cpp EventCallback/BulkMessageCallback.cpp
 	NagiosObjects/NagiosObject.cpp
 	NagiosObjects/NagiosHost.cpp
@@ -37,33 +37,17 @@ set (SESources
 	NagiosObjects/NagiosSystemCommandData.cpp
 	NagiosObjects/NagiosCommentData.cpp
 	NagiosCallbacks/NebmoduleCallback.cpp
-	NagiosCallbacks/HostStatusCallback.cpp
 	NagiosCallbacks/HostCheckCallback.cpp
-	NagiosCallbacks/ServiceStatusCallback.cpp
 	NagiosCallbacks/ServiceCheckCallback.cpp
-	NagiosCallbacks/StateChangeCallback.cpp
-	NagiosCallbacks/LogDataCallback.cpp
-	NagiosCallbacks/SystemCommandDataCallback.cpp
-	NagiosCallbacks/CommentDataCallback.cpp
-	NagiosCallbacks/ExternalCommandDataCallback.cpp
 	NagiosObjects/NagiosExternalCommandData.cpp
-	NagiosCallbacks/AcknowledgementDataCallback.cpp
 	NagiosObjects/NagiosAcknowledgementData.cpp
-	NagiosCallbacks/FlappingDataCallback.cpp
 	NagiosObjects/NagiosFlappingData.cpp
-	NagiosCallbacks/DowntimeDataCallback.cpp
 	NagiosObjects/NagiosDowntimeData.cpp
-	NagiosCallbacks/NotificationDataCallback.cpp
 	NagiosObjects/NagiosNotificationData.cpp
-	NagiosCallbacks/ProgramStatusDataCallback.cpp
 	NagiosObjects/NagiosProgramStatusData.cpp
-	NagiosCallbacks/ContactStatusDataCallback.cpp
 	NagiosObjects/NagiosContactStatusData.cpp
-	NagiosCallbacks/ContactNotificationDataCallback.cpp
 	NagiosObjects/NagiosContactNotificationData.cpp
-	NagiosCallbacks/ContactNotificationMethodDataCallback.cpp
 	NagiosObjects/NagiosContactNotificationMethodData.cpp
-	NagiosCallbacks/EventHandlerDataCallback.cpp
 	NagiosObjects/NagiosEventHandlerData.cpp
 	NagiosCallbacks/ProcessDataCallback.cpp
 	NagiosObjects/NagiosProcessData.cpp

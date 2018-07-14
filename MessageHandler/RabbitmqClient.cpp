@@ -167,33 +167,15 @@ namespace statusengine {
             return false;
         }
 
-        std::vector<std::string> queues = {"statusngin_contactstatus",
-                                           "statusngin_ochp",
-                                           "statusngin_servicestatus",
-                                           "statusngin_hoststatus",
-                                           "statusngin_contactnotificationdata",
-                                           "statusngin_contactnotificationmethod",
-                                           "statusngin_servicechecks",
-                                           "statusngin_service_perfdata",
-                                           "statusngin_ocsp",
-                                           "statusngin_core_restart",
-                                           "statusngin_notifications",
-                                           "statusngin_processdata",
-                                           "statusngin_hostchecks",
-                                           "statusngin_programmstatus",
-                                           "statusngin_logentries",
-                                           "BulkOCSP",
-                                           "BulkOCHP"};
-
-        for (auto it = queues.begin(); it != queues.end(); ++it) {
-            auto queueString = amqp_cstring_bytes((*it).c_str());
+        for (auto &queueName : *queueNames) {
+            auto queueString = amqp_cstring_bytes(queueName.second.c_str());
             amqp_queue_declare(conn, 1, queueString, 0, cfg->DurableQueues, 0, 0, amqp_empty_table);
-            if (!CheckAMQPReply(("Declare amqp queue " + *it).c_str())) {
+            if (!CheckAMQPReply(("Declare amqp queue " + queueName.second).c_str())) {
                 return false;
             }
             amqp_queue_bind(conn, 1, queueString, amqp_cstring_bytes(cfg->Exchange.c_str()), queueString,
                             amqp_empty_table);
-            if (!CheckAMQPReply(("Bind amqp queue " + *it).c_str())) {
+            if (!CheckAMQPReply(("Bind amqp queue " + queueName.second).c_str())) {
                 return false;
             }
         }

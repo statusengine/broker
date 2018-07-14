@@ -20,6 +20,9 @@ namespace statusengine {
 
         virtual void FlushBulkQueue();
 
+        virtual bool QueueExists(Queue queue);
+        virtual std::shared_ptr<MessageQueueHandler> GetMessageQueueHandler(Queue queue);
+
       private:
         std::map<Queue, std::shared_ptr<MessageQueueHandler>> mqHandlers;
         Statusengine *se;

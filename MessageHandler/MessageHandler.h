@@ -5,8 +5,8 @@
 #include <set>
 #include <string>
 
-#include "Configuration/Configuration.h"
 #include "Configuration/MessageHandlerConfiguration.h"
+#include "Configuration/Queue.h"
 
 namespace statusengine {
     class Statusengine;

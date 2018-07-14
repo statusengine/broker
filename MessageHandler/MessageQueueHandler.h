@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include "Configuration/Configuration.h"
+#include "Configuration/Queue.h"
 #include "MessageHandler.h"
 
 namespace statusengine {

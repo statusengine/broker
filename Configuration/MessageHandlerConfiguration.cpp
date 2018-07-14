@@ -2,6 +2,9 @@
 
 #include <string>
 
+#include "Configuration.h"
+#include "Statusengine.h"
+
 namespace statusengine {
     MessageHandlerConfiguration::MessageHandlerConfiguration(Statusengine *se) : se(se) {
         queues = std::make_shared<std::map<Queue, std::string>>();

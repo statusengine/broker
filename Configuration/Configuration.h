@@ -8,38 +8,11 @@
 #include "vendor/toml.hpp"
 
 #include "Statusengine.h"
+#include "Queue.h"
 
 namespace statusengine {
     class RabbitmqConfiguration;
     class GearmanConfiguration;
-
-    enum class Queue {
-        HostStatus,
-        HostCheck,
-        ServiceStatus,
-        ServiceCheck,
-        ServicePerfData,
-        StateChange,
-        LogData,
-        AcknowledgementData,
-        FlappingData,
-        DowntimeData,
-        ContactNotificationMethodData,
-        RestartData,
-        SystemCommandData,
-        CommentData,
-        ExternalCommandData,
-        NotificationData,
-        ProgramStatusData,
-        ContactStatusData,
-        ContactNotificationData,
-        EventHandlerData,
-        ProcessData,
-        BulkOCSP,
-        OCSP,
-        BulkOCHP,
-        OCHP
-    };
 
     class Configuration {
       public:

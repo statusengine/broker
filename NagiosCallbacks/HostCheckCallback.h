@@ -1,13 +1,16 @@
 #pragma once
 
+#include <memory>
+
 #include "Nebmodule.h"
 
+#include "MessageHandler/MessageQueueHandler.h"
 #include "NebmoduleCallback.h"
 
 namespace statusengine {
     class HostCheckCallback : public NebmoduleCallback {
       public:
-        explicit HostCheckCallback(Statusengine *se, bool hostchecks, bool ochp, bool ochpBulk);
+        explicit HostCheckCallback(Statusengine *se);
 
         virtual void Callback(int event_type, void *vdata);
 
@@ -15,5 +18,9 @@ namespace statusengine {
         bool hostchecks;
         bool ochp;
         bool ochpBulk;
+
+        std::shared_ptr<MessageQueueHandler> hostCheckHandler;
+        std::shared_ptr<MessageQueueHandler> ochpHandler;
+        std::shared_ptr<MessageQueueHandler> bulkOCHPHandler;
     };
 } // namespace statusengine

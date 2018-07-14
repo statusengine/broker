@@ -47,9 +47,9 @@ namespace statusengine {
 
         try {
             std::vector<toml::Table> gearmans = toml::get<std::vector<toml::Table>>(cfg.at("Gearman"));
-            for (auto it = gearmans.begin(); it != gearmans.end(); ++it) {
+            for (auto &gearmanConfig : gearmans) {
                 auto gfg = std::make_shared<GearmanConfiguration>(se);
-                if (!gfg->Load(*it)) {
+                if (!gfg->InitLoad(gearmanConfig)) {
                     return false;
                 }
                 gearman.push_back(gfg);
@@ -64,9 +64,9 @@ namespace statusengine {
 
         try {
             std::vector<toml::Table> rabbits = toml::get<std::vector<toml::Table>>(cfg.at("Rabbitmq"));
-            for (auto it = rabbits.begin(); it != rabbits.end(); ++it) {
+            for (auto &rabbitConfig : rabbits) {
                 auto rfg = std::make_shared<RabbitmqConfiguration>(se);
-                if (!rfg->Load(*it)) {
+                if (!rfg->InitLoad(rabbitConfig)) {
                     return false;
                 }
                 rabbitmq.push_back(rfg);
@@ -77,6 +77,27 @@ namespace statusengine {
         catch (const toml::type_error &tte) {
             se->Log() << "Invalid configuration: Rabbitmq isn't an Array of Tables!" << LogLevel::Error;
             return false;
+        }
+
+        se->Log() << "Finished loading config" << LogLevel::Info;
+        se->Log() << "Gearman Clients: " << gearman.size() << LogLevel::Info;
+        unsigned int counter = 0;
+        for (auto &gearmanClient : gearman) {
+            ++counter;
+            auto queueNames = gearmanClient->GetQueueNames();
+            for (auto &queueName : *queueNames) {
+                se->Log() << "Gearman " << counter << " queue name: " << queueName.second << LogLevel::Info;
+            }
+        }
+
+        se->Log() << "Rabbitmq Clients: " << rabbitmq.size() << LogLevel::Info;
+        counter = 0;
+        for (auto &rabbitClient : rabbitmq) {
+            ++counter;
+            auto queueNames = rabbitClient->GetQueueNames();
+            for (auto &queueName : *queueNames) {
+                se->Log() << "Rabbitmq " << counter << " queue name: " << queueName.second << LogLevel::Info;
+            }
         }
 
         return true;
