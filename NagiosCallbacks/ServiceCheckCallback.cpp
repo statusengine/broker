@@ -14,15 +14,15 @@ namespace statusengine {
             serviceCheckHandler = mHandler->GetMessageQueueHandler(Queue::ServiceCheck);
             servicechecks = true;
         }
-        if (mHandler->QueueExists(Queue::ServiceCheck)) {
+        if (mHandler->QueueExists(Queue::OCSP)) {
             ocspHandler = mHandler->GetMessageQueueHandler(Queue::OCSP);
             ocsp = true;
         }
-        if (mHandler->QueueExists(Queue::ServiceCheck)) {
+        if (mHandler->QueueExists(Queue::BulkOCSP)) {
             bulkOCSPHandler = mHandler->GetMessageQueueHandler(Queue::BulkOCSP);
             ocspBulk = true;
         }
-        if (mHandler->QueueExists(Queue::ServiceCheck)) {
+        if (mHandler->QueueExists(Queue::ServicePerfData)) {
             servicePerfHandler = mHandler->GetMessageQueueHandler(Queue::ServicePerfData);
             service_perfdata = true;
         }

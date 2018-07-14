@@ -24,6 +24,7 @@ namespace statusengine {
         virtual std::shared_ptr<MessageQueueHandler> GetMessageQueueHandler(Queue queue);
 
       private:
+        std::vector<std::shared_ptr<MessageHandler>> allHandlers;
         std::map<Queue, std::shared_ptr<MessageQueueHandler>> mqHandlers;
         Statusengine *se;
         unsigned long maxBulkSize;

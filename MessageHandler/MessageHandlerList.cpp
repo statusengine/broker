@@ -30,42 +30,45 @@ namespace statusengine {
         };
 
 #ifdef WITH_GEARMAN
-        auto gearmanConfig = cfg->GetGearmanConfiguration();
-        for (auto it = gearmanConfig->begin(); it != gearmanConfig->end(); ++it) {
-            auto queues = (*it)->GetQueues();
-            for (auto queue = queues->begin(); queue != queues->end(); ++queue) {
-                InsertHandler(*queue, std::make_shared<GearmanClient>(se, *it));
+        auto gearmanConfigs = cfg->GetGearmanConfiguration();
+        for (auto &gearmanConfig : *gearmanConfigs) {
+            auto gearmanClient = std::make_shared<GearmanClient>(se, gearmanConfig);
+            allHandlers.push_back(gearmanClient);
+            auto queues = gearmanConfig->GetQueues();
+            for (auto &queue : *queues) {
+                InsertHandler(queue, gearmanClient);
             }
         }
 #endif
 #ifdef WITH_RABBITMQ
-        auto rabbitmqConfig = cfg->GetRabbitmqConfiguration();
-        for (auto it = rabbitmqConfig->begin(); it != rabbitmqConfig->end(); ++it) {
-            auto queues = (*it)->GetQueues();
-            for (auto queue = queues->begin(); queue != queues->end(); ++queue) {
-                InsertHandler(*queue, std::make_shared<RabbitmqClient>(se, *it));
+        auto rabbitmqConfigs = cfg->GetRabbitmqConfiguration();
+        for (auto &rabbitmqConfig : *rabbitmqConfigs) {
+            auto rabbitmqClient = std::make_shared<RabbitmqClient>(se, rabbitmqConfig);
+            allHandlers.push_back(rabbitmqClient);
+            auto queues = rabbitmqConfig->GetQueues();
+            for (auto &queue : *queues) {
+                InsertHandler(queue, rabbitmqClient);
             }
         }
 #endif
-
-        for (auto qHandlerPair = handlers.begin(); qHandlerPair != handlers.end(); ++qHandlerPair) {
-            mqHandlers[qHandlerPair->first] = std::make_shared<MessageQueueHandler>(
-                se, this, maxBulkSize, &globalBulkCounter, qHandlerPair->first, qHandlerPair->second);
+        for (auto &qHandlerPair : handlers) {
+            mqHandlers[qHandlerPair.first] = std::make_shared<MessageQueueHandler>(
+                se, this, maxBulkSize, &globalBulkCounter, qHandlerPair.first, qHandlerPair.second);
         }
     }
 
     MessageHandlerList::~MessageHandlerList() {}
 
     void MessageHandlerList::FlushBulkQueue() {
-        for (auto it = mqHandlers.begin(); it != mqHandlers.end(); ++it) {
-            it->second->FlushBulkQueue();
+        for (auto &handler : mqHandlers) {
+            handler.second->FlushBulkQueue();
         }
         globalBulkCounter = 0;
     }
 
     bool MessageHandlerList::Connect() {
-        for (auto it = mqHandlers.begin(); it != mqHandlers.end(); ++it) {
-            if (!it->second->Connect()) {
+        for (auto &handler : allHandlers) {
+            if (!handler->Connect()) {
                 return false;
             }
         }

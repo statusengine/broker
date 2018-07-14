@@ -12,11 +12,11 @@ namespace statusengine {
             hostCheckHandler = mHandler->GetMessageQueueHandler(Queue::HostCheck);
             hostchecks = true;
         }
-        if (mHandler->QueueExists(Queue::ServiceCheck)) {
+        if (mHandler->QueueExists(Queue::OCHP)) {
             ochpHandler = mHandler->GetMessageQueueHandler(Queue::OCHP);
             ochp = true;
         }
-        if (mHandler->QueueExists(Queue::ServiceCheck)) {
+        if (mHandler->QueueExists(Queue::BulkOCHP)) {
             bulkOCHPHandler = mHandler->GetMessageQueueHandler(Queue::BulkOCHP);
             ochpBulk = true;
         }
