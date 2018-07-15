@@ -8,20 +8,42 @@
 namespace statusengine {
     MessageHandlerConfiguration::MessageHandlerConfiguration(Statusengine *se) : se(se) {
         queues = std::make_shared<std::map<Queue, std::string>>();
+        workerQueues = std::make_shared<std::map<WorkerQueue, std::string>>();
     }
 
     bool MessageHandlerConfiguration::InitLoad(const toml::Table &tbl) {
-        for (auto it = tbl.begin(); it != tbl.end(); ++it) {
-            auto itQueueName = Configuration::QueueName.find(it->first);
-            if (itQueueName != Configuration::QueueName.end()) {
+        for (auto &tableEntry : tbl) {
+            auto qName = Configuration::QueueName.find(tableEntry.first);
+            if (qName != Configuration::QueueName.end()) {
                 try {
-                    (*queues)[itQueueName->second] = toml::get<std::string>(it->second);
+                    (*queues)[qName->second] = toml::get<std::string>(tableEntry.second);
                 }
                 catch (const toml::type_error &tte) {
-                    se->Log() << "Invalid configuration: Invalid value for key " << it->first << LogLevel::Error;
+                    se->Log() << "Invalid configuration: Invalid value for key " << tableEntry.first << LogLevel::Error;
                     return false;
                 }
             }
+            else {
+                auto wqName = Configuration::WorkerQueueName.find(tableEntry.first);
+                if (wqName != Configuration::WorkerQueueName.end()) {
+                    try {
+                        (*workerQueues)[wqName->second] = toml::get<std::string>(tableEntry.second);
+                    }
+                    catch (const toml::type_error &tte) {
+                        se->Log() << "Invalid configuration: Invalid value for key " << tableEntry.first
+                                  << LogLevel::Error;
+                        return false;
+                    }
+                }
+            }
+        }
+        try {
+            maxWorkerMessagesPerInterval = toml::get_or<unsigned long>(tbl, "MaxWorkerMessagesPerInterval", 1000ul);
+        }
+        catch (const toml::type_error &tte) {
+            se->Log() << "Invalid configuration: Invalid value for key "
+                      << "MaxWorkerMessagesPerInterval" << LogLevel::Error;
+            return false;
         }
         return Load(tbl);
     }
@@ -32,10 +54,26 @@ namespace statusengine {
 
     std::shared_ptr<std::set<Queue>> MessageHandlerConfiguration::GetQueues() const {
         auto queueIds = std::make_shared<std::set<Queue>>();
-        for (auto it = queues->begin(); it != queues->end(); ++it) {
-            queueIds->insert(it->first);
+        for (auto &queue : *queues) {
+            queueIds->insert(queue.first);
         }
         return queueIds;
+    }
+
+    const std::shared_ptr<std::map<WorkerQueue, std::string>> MessageHandlerConfiguration::GetWorkerQueueNames() const {
+        return workerQueues;
+    }
+
+    std::shared_ptr<std::set<WorkerQueue>> MessageHandlerConfiguration::GetWorkerQueues() const {
+        auto queueIds = std::make_shared<std::set<WorkerQueue>>();
+        for (auto &queue : *workerQueues) {
+            queueIds->insert(queue.first);
+        }
+        return queueIds;
+    }
+
+    unsigned long MessageHandlerConfiguration::GetMaxWorkerMessagesPerInterval() const {
+        return maxWorkerMessagesPerInterval;
     }
 
 } // namespace statusengine

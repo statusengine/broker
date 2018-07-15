@@ -7,8 +7,8 @@
 
 #include "vendor/toml.hpp"
 
-#include "Statusengine.h"
 #include "Queue.h"
+#include "Statusengine.h"
 
 namespace statusengine {
     class RabbitmqConfiguration;
@@ -29,6 +29,8 @@ namespace statusengine {
 
         static const std::map<std::string, Queue> QueueName;
         static const std::map<Queue, std::string> QueueId;
+        static const std::map<std::string, WorkerQueue> WorkerQueueName;
+        static const std::map<WorkerQueue, std::string> WorkerQueueId;
 
       private:
         Statusengine *se;

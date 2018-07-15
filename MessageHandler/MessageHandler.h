@@ -17,6 +17,7 @@ namespace statusengine {
         ~MessageHandler();
 
         virtual bool Connect() = 0;
+        virtual void Worker() = 0;
         virtual void SendMessage(Queue queue, const std::string &message) = 0;
 
       protected:

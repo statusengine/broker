@@ -23,7 +23,7 @@ set (SESources
 	Configuration/Configuration.cpp Configuration/MessageHandlerConfiguration.cpp
 	Configuration/RabbitmqConfiguration.cpp Configuration/GearmanConfiguration.cpp
 	MessageHandler/MessageHandler.cpp MessageHandler/MessageHandlerList.cpp MessageHandler/MessageQueueHandler.cpp
-	EventCallback/EventCallback.cpp EventCallback/BulkMessageCallback.cpp
+	EventCallback/EventCallback.cpp EventCallback/BulkMessageCallback.cpp EventCallback/MessageWorkerCallback.cpp
 	NagiosObjects/NagiosObject.cpp
 	NagiosObjects/NagiosHost.cpp
 	NagiosObjects/NagiosHostStatusData.cpp

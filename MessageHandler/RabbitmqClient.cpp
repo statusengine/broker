@@ -202,4 +202,6 @@ namespace statusengine {
             }
         }
     }
+
+    void RabbitmqClient::Worker() {}
 } // namespace statusengine

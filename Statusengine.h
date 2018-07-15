@@ -8,6 +8,7 @@
 #include "Nebmodule.h"
 
 #include "EventCallback/BulkMessageCallback.h"
+#include "EventCallback/MessageWorkerCallback.h"
 #include "NagiosCallbacks/NebmoduleCallback.h"
 
 namespace statusengine {
@@ -47,5 +48,6 @@ namespace statusengine {
         LogStream *ls;
         std::map<NEBCallbackType, std::vector<NebmoduleCallback *> *> *callbacks;
         BulkMessageCallback *bulkCallback;
+        MessageWorkerCallback *messageWorkerCallback;
     };
 } // namespace statusengine

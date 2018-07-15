@@ -16,6 +16,7 @@ namespace statusengine {
 
         virtual bool Connect();
         virtual bool Connect(bool quiet);
+        virtual void Worker();
         virtual void SendMessage(Queue queue, const std::string &message);
 
       private:

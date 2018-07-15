@@ -92,4 +92,10 @@ namespace statusengine {
         return false;
     }
 
+    void MessageHandlerList::Worker() {
+        for (auto &handler : allHandlers) {
+            handler->Worker();
+        }
+    }
+
 } // namespace statusengine

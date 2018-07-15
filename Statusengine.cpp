@@ -33,7 +33,8 @@
 namespace statusengine {
 
     Statusengine::Statusengine(nebmodule *handle, std::string configurationPath)
-        : nebhandle(handle), configurationPath(configurationPath), ls(nullptr), bulkCallback(nullptr) {
+        : nebhandle(handle), configurationPath(configurationPath), ls(nullptr), bulkCallback(nullptr),
+          messageWorkerCallback(nullptr) {
         ls = new LogStream(this);
         callbacks = new std::map<NEBCallbackType, std::vector<NebmoduleCallback *> *>();
         configuration = new Configuration(this);
@@ -169,6 +170,7 @@ namespace statusengine {
         callbacks->clear();
         delete callbacks;
         delete bulkCallback;
+        delete messageWorkerCallback;
         delete configuration;
         delete messageHandler;
 
@@ -179,7 +181,9 @@ namespace statusengine {
     void Statusengine::InitEventCallbacks() {
         Log() << "Initialize event callbacks" << LogLevel::Info;
         bulkCallback = new BulkMessageCallback(this, configuration->GetBulkFlushInterval());
+        messageWorkerCallback = new MessageWorkerCallback(this, 1);
         RegisterEventCallback(bulkCallback);
+        RegisterEventCallback(messageWorkerCallback);
     }
 
     LogStream &Statusengine::Log() {

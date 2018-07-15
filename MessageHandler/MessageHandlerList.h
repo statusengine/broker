@@ -19,6 +19,7 @@ namespace statusengine {
         virtual bool Connect();
 
         virtual void FlushBulkQueue();
+        virtual void Worker();
 
         virtual bool QueueExists(Queue queue);
         virtual std::shared_ptr<MessageQueueHandler> GetMessageQueueHandler(Queue queue);
