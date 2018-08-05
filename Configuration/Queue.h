@@ -29,5 +29,5 @@ namespace statusengine {
         OCHP
     };
 
-    enum class WorkerQueue { OCSP, BulkOCSP, OCHP, BulkOCHP };
+    enum class WorkerQueue { OCSP, BulkOCSP, OCHP, BulkOCHP, Command };
 } // namespace statusengine

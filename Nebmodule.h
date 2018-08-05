@@ -46,6 +46,14 @@ namespace statusengine {
 
         static void RegisterEventCallback(EventCallback *ecb);
 
+        static void ScheduleHostCheckDelay(host *temp_host, time_t delay);
+
+        static void ScheduleHostCheckFixed(host *temp_host, time_t fixed);
+
+        static void ScheduleServiceCheckDelay(service *temp_service, time_t delay);
+
+        static void ScheduleServiceCheckFixed(service *temp_service, time_t fixed);
+
       private:
         static Statusengine *se;
     };

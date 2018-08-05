@@ -7,7 +7,7 @@ namespace statusengine {
     MessageHandler::MessageHandler(Statusengine *se) : se(se) {}
     MessageHandler::~MessageHandler(){};
 
-    char *get_json_string(json_object *obj) {
+    inline char *get_json_string(json_object *obj) {
         auto jsonChars = json_object_get_string(obj);
         auto jsonCharsLen = json_object_get_string_len(obj);
         char *chars = new char[jsonCharsLen + 1];
@@ -53,7 +53,7 @@ namespace statusengine {
                 se->Log() << "BulkOCHP Object doesn't contain a Messages array. Ignoring..." << LogLevel::Warning;
             }
             else {
-                if (json_object_get_type(messages) != json_type_array) {
+                if (!json_object_is_type(messages, json_type_array)) {
                     se->Log() << "BulkOCHP::Messages is not an array. Ignoring..." << LogLevel::Warning;
                 }
                 else {
@@ -72,7 +72,7 @@ namespace statusengine {
                 se->Log() << "BulkOCSP Object doesn't contain a Messages array. Ignoring..." << LogLevel::Warning;
             }
             else {
-                if (json_object_get_type(messages) != json_type_array) {
+                if (!json_object_is_type(messages, json_type_array)) {
                     se->Log() << "BulkOCSP::Messages is not an array. Ignoring..." << LogLevel::Warning;
                 }
                 else {
@@ -84,14 +84,71 @@ namespace statusengine {
                 }
             }
         }
+        else if (workerQueue == WorkerQueue::Command) {
+            std::string command;
+            json_object *data = nullptr;
+            bool haveCommand = false, haveData = false, haveList = false;
+            json_object_object_foreach(obj, cKey, jsonValue) {
+                std::string jsonKey(cKey);
+
+                if (jsonKey.compare("Command") == 0) {
+                    command = std::string(json_object_get_string(jsonValue), json_object_get_string_len(jsonValue));
+                    haveCommand = true;
+                }
+                else if (jsonKey.compare("Data") == 0) {
+                    data = jsonValue;
+                    haveData = true;
+                }
+                else if (jsonKey.compare("CommandList") == 0) {
+                    if (!json_object_is_type(jsonValue, json_type_array)) {
+                        se->Log() << "CommandList doesn't contain an array. Ignoring..." << LogLevel::Warning;
+                    }
+                    else {
+                        auto arrLen = json_object_array_length(jsonValue);
+                        for (auto i = 0; i < arrLen; i++) {
+                            json_object *arrObj = json_object_array_get_idx(jsonValue, i);
+                            ProcessMessage(WorkerQueue::Command, arrObj);
+                        }
+                    }
+                    haveList = true;
+                }
+            }
+            if (!haveList) {
+                if (haveData && haveCommand) {
+                    if (command.compare("check_result") == 0) {
+                        ParseCheckResult(data);
+                    }
+                    else if (command.compare("schedule_check") == 0) {
+                        ParseScheduleCheck(data);
+                    }
+                    else if (command.compare("downtime") == 0) {
+                        ParseDowntime(data);
+                    }
+                    else if (command.compare("acknowledge") == 0) {
+                        ParseAcknowledge(data);
+                    }
+                    else if (command.compare("flap_detection") == 0) {
+                        ParseFlapDetection(data);
+                    }
+                    else if (command.compare("custom_notification") == 0) {
+                        ParseCustomNotification(data);
+                    }
+                    else if (command.compare("notification") == 0) {
+                        ParseNotification(data);
+                    }
+                }
+                else {
+                    se->Log() << "Command Object is missing Command or Data. Ignoring..." << LogLevel::Warning;
+                }
+            }
+        }
+
         json_object_put(obj);
     }
 
     void MessageHandler::ParseCheckResult(json_object *obj) {
         check_result cr;
         init_check_result(&cr);
-        char *hostName = nullptr;
-        char *serviceDescription = nullptr;
         char *output = nullptr;
         char *longOutput = nullptr;
         char *fullOutput = nullptr;
@@ -99,12 +156,10 @@ namespace statusengine {
         json_object_object_foreach(obj, cKey, jsonValue) {
             std::string jsonKey(cKey);
             if (jsonKey.compare("host_name") == 0) {
-                hostName = get_json_string(jsonValue);
-                cr.host_name = hostName;
+                cr.host_name = get_json_string(jsonValue);
             }
             else if (jsonKey.compare("service_description") == 0) {
-                serviceDescription = get_json_string(jsonValue);
-                cr.service_description = serviceDescription;
+                cr.service_description = get_json_string(jsonValue);
             }
             else if (jsonKey.compare("output") == 0) {
                 output = get_json_string(jsonValue);
@@ -161,4 +216,58 @@ namespace statusengine {
             delete longOutput;
         }
     }
+
+    void MessageHandler::ParseScheduleCheck(json_object *obj) {
+        const char *hostname = nullptr;
+        const char *service_description = nullptr;
+        time_t schedule_time = 0;
+        json_object_object_foreach(obj, cKey, jsonValue) {
+            std::string jsonKey(cKey);
+            if (jsonKey.compare("host_name") == 0) {
+                hostname = get_json_string(jsonValue);
+            }
+            else if (jsonKey.compare("service_description") == 0) {
+                service_description = get_json_string(jsonValue);
+            }
+            else if (jsonKey.compare("schedule_time") == 0) {
+                schedule_time = json_object_get_int64(jsonValue);
+            }
+        }
+
+        if (hostname == nullptr || schedule_time == 0) {
+            se->Log() << "Received schedule_check command without host_name and schedule_time" << LogLevel::Warning;
+            return;
+        }
+
+        if (service_description == nullptr) {
+            host *temp_host = find_host(hostname);
+            if (temp_host == nullptr) {
+                se->Log() << "Received schedule_check command for unknown host " << hostname << LogLevel::Warning;
+                return;
+            }
+            Nebmodule::ScheduleHostCheckFixed(temp_host, schedule_time);
+        }
+        else {
+            service *temp_service = find_service(hostname, service_description);
+            if (temp_service == nullptr) {
+                se->Log() << "Received schedule_check command for unknown service " << service_description
+                          << LogLevel::Warning;
+                return;
+            }
+            Nebmodule::ScheduleServiceCheckFixed(temp_service, schedule_time);
+        }
+        delete hostname;
+        delete service_description;
+    }
+
+    void MessageHandler::ParseDowntime(json_object *obj) {}
+
+    void MessageHandler::ParseAcknowledge(json_object *obj) {}
+
+    void MessageHandler::ParseFlapDetection(json_object *obj) {}
+
+    void MessageHandler::ParseCustomNotification(json_object *obj) {}
+
+    void MessageHandler::ParseNotification(json_object *obj) {}
+
 } // namespace statusengine

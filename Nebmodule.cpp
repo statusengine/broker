@@ -51,6 +51,48 @@ namespace statusengine {
                            reinterpret_cast<void *>(nebmodule_event_callback), reinterpret_cast<void *>(ecb), 0);
 #endif // BUILD_NAGIOS
     }
+
+    void Nebmodule::ScheduleHostCheckDelay(host *temp_host, time_t delay) {
+        time_t schedule_time = std::time(nullptr) + delay;
+#ifndef BUILD_NAGIOS
+        schedule_next_host_check(temp_host, delay, CHECK_OPTION_NONE);
+#else
+        schedule_host_check(temp_host, schedule_time, CHECK_OPTION_NONE);
+#endif // BUILD_NAGIOS
+    }
+
+    void Nebmodule::ScheduleHostCheckFixed(host *temp_host, time_t fixed) {
+        time_t delay = fixed - std::time(nullptr);
+        if (fixed < 0) {
+            delay = 0;
+        }
+#ifndef BUILD_NAGIOS
+        schedule_next_host_check(temp_host, delay, CHECK_OPTION_NONE);
+#else
+        schedule_host_check(temp_host, schedule_time, CHECK_OPTION_NONE);
+#endif // BUILD_NAGIOS
+    }
+
+    void Nebmodule::ScheduleServiceCheckDelay(service *temp_service, time_t delay) {
+        time_t schedule_time = std::time(nullptr) + delay;
+#ifndef BUILD_NAGIOS
+        schedule_next_service_check(temp_service, delay, CHECK_OPTION_NONE);
+#else
+        schedule_service_check(temp_service, schedule_time, CHECK_OPTION_NONE);
+#endif // BUILD_NAGIOS
+    }
+
+    void Nebmodule::ScheduleServiceCheckFixed(service *temp_service, time_t fixed) {
+        time_t delay = fixed - std::time(nullptr);
+        if (fixed < 0) {
+            delay = 0;
+        }
+#ifndef BUILD_NAGIOS
+        schedule_next_service_check(temp_service, delay, CHECK_OPTION_NONE);
+#else
+        schedule_service_check(temp_service, schedule_time, CHECK_OPTION_NONE);
+#endif // BUILD_NAGIOS
+    }
 } // namespace statusengine
 
 extern "C" int nebmodule_init(int flags, char *args, nebmodule *handle) {

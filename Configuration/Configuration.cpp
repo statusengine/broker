@@ -197,11 +197,13 @@ namespace statusengine {
         {"WorkerOCSP", WorkerQueue::OCSP},
         {"WorkerBulkOCSP", WorkerQueue::BulkOCSP},
         {"WorkerOCHP", WorkerQueue::OCHP},
-        {"WorkerBulkOCHP", WorkerQueue::BulkOCHP}};
+        {"WorkerBulkOCHP", WorkerQueue::BulkOCHP},
+        {"Command", WorkerQueue::Command}};
 
     const std::map<WorkerQueue, std::string> WorkerQueueId = {{WorkerQueue::OCSP, "WorkerOCSP"},
                                                               {WorkerQueue::BulkOCSP, "WorkerBulkOCSP"},
                                                               {WorkerQueue::OCHP, "WorkerOCHP"},
-                                                              {WorkerQueue::BulkOCHP, "WorkerBulkOCHP"}};
+                                                              {WorkerQueue::BulkOCHP, "WorkerBulkOCHP"},
+                                                              {WorkerQueue::Command, "Command"}};
 
 } // namespace statusengine

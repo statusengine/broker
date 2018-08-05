@@ -27,6 +27,12 @@ namespace statusengine {
       protected:
         Statusengine *se;
 
-        virtual void ParseCheckResult(json_object *obj);
+        void ParseCheckResult(json_object *obj);
+        void ParseScheduleCheck(json_object *obj);
+        void ParseDowntime(json_object *obj);
+        void ParseAcknowledge(json_object *obj);
+        void ParseFlapDetection(json_object *obj);
+        void ParseCustomNotification(json_object *obj);
+        void ParseNotification(json_object *obj);
     };
 } // namespace statusengine
