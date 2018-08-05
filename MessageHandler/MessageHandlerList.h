@@ -30,5 +30,6 @@ namespace statusengine {
         Statusengine *se;
         unsigned long maxBulkSize;
         unsigned long globalBulkCounter;
+        unsigned long maxWorkerMessagesPerInterval;
     };
 } // namespace statusengine

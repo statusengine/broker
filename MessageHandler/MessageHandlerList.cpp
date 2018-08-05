@@ -28,6 +28,7 @@ namespace statusengine {
             }
             queueHandlers->push_back(handler);
         };
+        maxWorkerMessagesPerInterval = cfg->GetMaxWorkerMessagesPerInterval();
 
 #ifdef WITH_GEARMAN
         auto gearmanConfigs = cfg->GetGearmanConfiguration();
@@ -93,9 +94,16 @@ namespace statusengine {
     }
 
     void MessageHandlerList::Worker() {
-        for (auto &handler : allHandlers) {
-            handler->Worker();
-        }
+        unsigned long counter = 0ul;
+        bool moreMessages = false;
+        do {
+            moreMessages = false;
+            for (auto &handler : allHandlers) {
+                if (handler->Worker(counter)) {
+                    moreMessages = true;
+                }
+            }
+        } while (moreMessages && counter < maxWorkerMessagesPerInterval);
     }
 
 } // namespace statusengine

@@ -16,7 +16,7 @@ namespace statusengine {
 
         virtual bool Connect();
         virtual bool Connect(bool quiet);
-        virtual void Worker();
+        virtual bool Worker(unsigned long &counter);
         virtual void SendMessage(Queue queue, const std::string &message);
 
       private:
@@ -26,6 +26,8 @@ namespace statusengine {
 
         std::shared_ptr<RabbitmqConfiguration> cfg;
         std::shared_ptr<std::map<Queue, std::string>> queueNames;
+        std::shared_ptr<std::map<WorkerQueue, std::string>> workerQueueNames;
+        std::map<std::string, WorkerQueue> workerQueueNameReverse;
 
         amqp_socket_t *socket;
         amqp_connection_state_t conn;

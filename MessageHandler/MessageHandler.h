@@ -1,6 +1,7 @@
 #pragma once
 
 #include "vendor/toml.hpp"
+#include <json.h>
 #include <memory>
 #include <set>
 #include <string>
@@ -16,11 +17,15 @@ namespace statusengine {
         explicit MessageHandler(Statusengine *se);
         ~MessageHandler();
 
+        void ProcessMessage(WorkerQueue workerQueue, const std::string &message);
+
         virtual bool Connect() = 0;
-        virtual void Worker() = 0;
+        virtual bool Worker(unsigned long &counter) = 0;
         virtual void SendMessage(Queue queue, const std::string &message) = 0;
 
       protected:
         Statusengine *se;
+
+        virtual void ParseCheckResult(json_object *obj);
     };
 } // namespace statusengine

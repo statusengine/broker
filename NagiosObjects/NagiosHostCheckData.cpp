@@ -13,8 +13,8 @@ namespace statusengine {
         host *nag_host = reinterpret_cast<host *>(hostCheckData->object_ptr);
 
         char *raw_command = nullptr;
-        get_raw_command_line_r(get_global_macros(), nag_host->check_command_ptr, nag_host->check_command, &raw_command,
-                               0);
+        auto globalMacros = get_global_macros();
+        get_raw_command_line_r(globalMacros, nag_host->check_command_ptr, nag_host->check_command, &raw_command, 0);
 
         NagiosObject hostcheck;
 
@@ -38,5 +38,7 @@ namespace statusengine {
         hostcheck.SetData<>("return_code", hostCheckData->return_code);
 
         SetData<>("hostcheck", &hostcheck);
+
+        clear_volatile_macros_r(globalMacros);
     }
 } // namespace statusengine

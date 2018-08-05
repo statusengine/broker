@@ -14,7 +14,7 @@ namespace statusengine {
         ~GearmanClient();
 
         virtual bool Connect();
-        virtual void Worker();
+        virtual bool Worker(unsigned long &counter);
 
         virtual void SendMessage(Queue queue, const std::string &message);
 
@@ -28,7 +28,5 @@ namespace statusengine {
         std::shared_ptr<std::map<Queue, std::string>> queueNames;
         std::shared_ptr<std::map<WorkerQueue, std::string>> workerQueueNames;
         std::map<WorkerQueue, GearmanWorkerContext *> workerContexts;
-
-        unsigned long maxWorkerMessagesPerInterval;
     };
 } // namespace statusengine

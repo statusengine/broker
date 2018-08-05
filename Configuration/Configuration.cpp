@@ -79,6 +79,18 @@ namespace statusengine {
             return false;
         }
 
+        try {
+            maxWorkerMessagesPerInterval = toml::get_or<unsigned long>(toml::get<toml::Table>(cfg.at("Worker")),
+                                                                       "MaxWorkerMessagesPerInterval", 1000ul);
+        }
+        catch (const std::out_of_range &oor) {
+        }
+        catch (const toml::type_error &tte) {
+            se->Log() << "Invalid configuration: Invalid value for key "
+                      << "MaxWorkerMessagesPerInterval" << LogLevel::Error;
+            return false;
+        }
+
         se->Log() << "Finished loading config" << LogLevel::Info;
         se->Log() << "Gearman Clients: " << gearman.size() << LogLevel::Info;
         unsigned int counter = 0;
@@ -121,6 +133,10 @@ namespace statusengine {
 
     std::vector<std::shared_ptr<RabbitmqConfiguration>> *Configuration::GetRabbitmqConfiguration() {
         return &rabbitmq;
+    }
+
+    unsigned long Configuration::GetMaxWorkerMessagesPerInterval() const {
+        return maxWorkerMessagesPerInterval;
     }
 
     const std::map<std::string, Queue> Configuration::QueueName = {

@@ -34,8 +34,6 @@ namespace statusengine {
             worker = gearman_worker_create(nullptr);
             gearman_worker_add_options(worker, GEARMAN_WORKER_NON_BLOCKING);
         }
-
-        maxWorkerMessagesPerInterval = cfg->GetMaxWorkerMessagesPerInterval();
     }
 
     GearmanClient::~GearmanClient() {
@@ -101,36 +99,33 @@ namespace statusengine {
 
     gearman_return_t GearmanClient::WorkerCallback(WorkerQueue queue, gearman_job_st *job) {
         std::string msg(static_cast<const char *>(gearman_job_workload(job)), gearman_job_workload_size(job));
-        se->Log() << "Gearman Worker: " << msg << LogLevel::Info;
+        ProcessMessage(queue, msg);
         return GEARMAN_SUCCESS;
     }
 
-    void GearmanClient::Worker() {
+    bool GearmanClient::Worker(unsigned long &counter) {
+        bool moreJobs = false;
         if (workerQueueNames->size() > 0) {
-            unsigned long counter = 0ul;
-            bool moreJobs = true;
-            while (moreJobs) {
-                moreJobs = false;
-                auto ret = gearman_worker_work(worker);
-                switch (ret) {
-                    case GEARMAN_SUCCESS:
-                        if (counter++ < maxWorkerMessagesPerInterval) {
-                            moreJobs = true;
-                        }
-                        break;
-                    case GEARMAN_NO_JOBS:
-                        break;
-                    case GEARMAN_IO_WAIT:
-                        gearman_worker_wait(worker);
-                        moreJobs = true;
-                        break;
-                    case GEARMAN_NO_ACTIVE_FDS:
-                        se->Log() << "Gearman worker is not connected to server" << LogLevel::Error;
-                        break;
-                    default:
-                        se->Log() << "Unknown gearman worker error: " << ret << LogLevel::Error;
-                }
+            auto ret = gearman_worker_work(worker);
+            switch (ret) {
+                case GEARMAN_SUCCESS:
+                    ++counter;
+                    moreJobs = true;
+                    break;
+                case GEARMAN_NO_JOBS:
+                    break;
+                case GEARMAN_IO_WAIT:
+                    gearman_worker_wait(worker);
+                    moreJobs = true;
+                    break;
+                case GEARMAN_NO_ACTIVE_FDS:
+                    se->Log() << "Gearman worker is not connected to server" << LogLevel::Error;
+                    break;
+                default:
+                    se->Log() << "Unknown gearman worker error: " << ret << LogLevel::Error;
             }
         }
+        return moreJobs;
     }
+
 } // namespace statusengine

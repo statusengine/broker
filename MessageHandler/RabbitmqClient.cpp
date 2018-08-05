@@ -9,6 +9,10 @@ namespace statusengine {
     RabbitmqClient::RabbitmqClient(Statusengine *se, std::shared_ptr<RabbitmqConfiguration> cfg)
         : MessageHandler(se), cfg(cfg), connected(false), conn(nullptr), socket(nullptr) {
         queueNames = cfg->GetQueueNames();
+        workerQueueNames = cfg->GetWorkerQueueNames();
+        for (auto &queue : *workerQueueNames) {
+            workerQueueNameReverse[queue.second] = queue.first;
+        }
     }
 
     RabbitmqClient::~RabbitmqClient() {
@@ -180,6 +184,20 @@ namespace statusengine {
             }
         }
 
+        for (auto &queueName : *workerQueueNames) {
+            auto queueString = amqp_cstring_bytes(queueName.second.c_str());
+            amqp_queue_declare(conn, 1, queueString, 0, cfg->DurableQueues, 0, 0, amqp_empty_table);
+            if (!CheckAMQPReply(("Declare amqp queue " + queueName.second).c_str())) {
+                return false;
+            }
+            amqp_queue_bind(conn, 1, queueString, amqp_cstring_bytes(cfg->Exchange.c_str()), queueString,
+                            amqp_empty_table);
+            if (!CheckAMQPReply(("Bind amqp queue " + queueName.second).c_str())) {
+                return false;
+            }
+            amqp_basic_consume(conn, 1, queueString, amqp_empty_bytes, 0, 0, 0, amqp_empty_table);
+        }
+
         connected = true;
         se->Log() << "Rabbitmq (re)connected" << LogLevel::Info;
         return true;
@@ -203,5 +221,36 @@ namespace statusengine {
         }
     }
 
-    void RabbitmqClient::Worker() {}
+    bool RabbitmqClient::Worker(unsigned long &counter) {
+        amqp_rpc_reply_t res;
+        amqp_envelope_t envelope;
+
+        amqp_maybe_release_buffers(conn);
+        timeval timeout;
+        timeout.tv_sec = 0;
+        timeout.tv_usec = 0;
+
+        res = amqp_consume_message(conn, &envelope, &timeout, 0);
+        if (!CheckAMQPReply(res, "Consume message", true)) {
+            amqp_destroy_envelope(&envelope);
+            return false;
+        }
+
+        std::string msg(reinterpret_cast<char *>(envelope.message.body.bytes), envelope.message.body.len);
+        std::string queueName(reinterpret_cast<char *>(envelope.routing_key.bytes), envelope.routing_key.len);
+        WorkerQueue queue;
+        try {
+            queue = workerQueueNameReverse.at(queueName);
+        }
+        catch (std::out_of_range &oor) {
+            se->Log() << "Received message for unknown queue: " << queueName << LogLevel::Info;
+            amqp_destroy_envelope(&envelope);
+            return false;
+        }
+        ProcessMessage(queue, msg);
+        amqp_basic_ack(conn, 1, envelope.delivery_tag, false);
+
+        return true;
+    }
+
 } // namespace statusengine

@@ -37,14 +37,7 @@ namespace statusengine {
                 }
             }
         }
-        try {
-            maxWorkerMessagesPerInterval = toml::get_or<unsigned long>(tbl, "MaxWorkerMessagesPerInterval", 1000ul);
-        }
-        catch (const toml::type_error &tte) {
-            se->Log() << "Invalid configuration: Invalid value for key "
-                      << "MaxWorkerMessagesPerInterval" << LogLevel::Error;
-            return false;
-        }
+
         return Load(tbl);
     }
 
@@ -70,10 +63,6 @@ namespace statusengine {
             queueIds->insert(queue.first);
         }
         return queueIds;
-    }
-
-    unsigned long MessageHandlerConfiguration::GetMaxWorkerMessagesPerInterval() const {
-        return maxWorkerMessagesPerInterval;
     }
 
 } // namespace statusengine

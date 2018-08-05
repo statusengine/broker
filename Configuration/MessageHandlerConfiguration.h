@@ -21,7 +21,6 @@ namespace statusengine {
         virtual std::shared_ptr<std::set<Queue>> GetQueues() const;
         virtual const std::shared_ptr<std::map<WorkerQueue, std::string>> GetWorkerQueueNames() const;
         virtual std::shared_ptr<std::set<WorkerQueue>> GetWorkerQueues() const;
-        virtual unsigned long GetMaxWorkerMessagesPerInterval() const;
 
       protected:
         MessageHandlerConfiguration(Statusengine *se);

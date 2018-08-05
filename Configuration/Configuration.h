@@ -26,6 +26,7 @@ namespace statusengine {
 
         std::vector<std::shared_ptr<GearmanConfiguration>> *GetGearmanConfiguration();
         std::vector<std::shared_ptr<RabbitmqConfiguration>> *GetRabbitmqConfiguration();
+        virtual unsigned long GetMaxWorkerMessagesPerInterval() const;
 
         static const std::map<std::string, Queue> QueueName;
         static const std::map<Queue, std::string> QueueId;
@@ -40,6 +41,8 @@ namespace statusengine {
 
         std::vector<std::shared_ptr<RabbitmqConfiguration>> rabbitmq;
         std::vector<std::shared_ptr<GearmanConfiguration>> gearman;
+
+        unsigned long maxWorkerMessagesPerInterval;
 
         template <typename T> T GetTomlDefault(const toml::Table &tab, const char *ky, T &&opt) const {
             try {
