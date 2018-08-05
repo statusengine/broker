@@ -18,6 +18,7 @@ namespace statusengine {
         ~MessageHandler();
 
         void ProcessMessage(WorkerQueue workerQueue, const std::string &message);
+        void ProcessMessage(WorkerQueue workerQueue, json_object *obj);
 
         virtual bool Connect() = 0;
         virtual bool Worker(unsigned long &counter) = 0;

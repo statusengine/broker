@@ -17,10 +17,15 @@ namespace statusengine {
     }
 
     void MessageHandler::ProcessMessage(WorkerQueue workerQueue, const std::string &message) {
-        se->Log() << "Received Message: " << message << LogLevel::Info;
-
         json_object *obj = json_tokener_parse(message.c_str());
+        if (obj == nullptr) {
+            se->Log() << "Received non-json string '''" << message
+                      << "'''; \"'''\" is not part of the received message. Ignoring..." << LogLevel::Warning;
+        }
+        ProcessMessage(workerQueue, obj);
+    }
 
+    void MessageHandler::ProcessMessage(WorkerQueue workerQueue, json_object *obj) {
         if (workerQueue == WorkerQueue::OCHP) {
             json_object *hostcheck;
             json_object_object_get_ex(obj, "hostcheck", &hostcheck);
@@ -39,6 +44,44 @@ namespace statusengine {
             }
             else {
                 ParseCheckResult(servicecheck);
+            }
+        }
+        else if (workerQueue == WorkerQueue::BulkOCHP) {
+            json_object *messages;
+            json_object_object_get_ex(obj, "Messages", &messages);
+            if (messages == nullptr) {
+                se->Log() << "BulkOCHP Object doesn't contain a Messages array. Ignoring..." << LogLevel::Warning;
+            }
+            else {
+                if (json_object_get_type(messages) != json_type_array) {
+                    se->Log() << "BulkOCHP::Messages is not an array. Ignoring..." << LogLevel::Warning;
+                }
+                else {
+                    auto arrLen = json_object_array_length(messages);
+                    for (auto i = 0; i < arrLen; i++) {
+                        json_object *arrObj = json_object_array_get_idx(messages, i);
+                        ProcessMessage(WorkerQueue::OCHP, arrObj);
+                    }
+                }
+            }
+        }
+        else if (workerQueue == WorkerQueue::BulkOCSP) {
+            json_object *messages;
+            json_object_object_get_ex(obj, "Messages", &messages);
+            if (messages == nullptr) {
+                se->Log() << "BulkOCSP Object doesn't contain a Messages array. Ignoring..." << LogLevel::Warning;
+            }
+            else {
+                if (json_object_get_type(messages) != json_type_array) {
+                    se->Log() << "BulkOCSP::Messages is not an array. Ignoring..." << LogLevel::Warning;
+                }
+                else {
+                    auto arrLen = json_object_array_length(messages);
+                    for (auto i = 0; i < arrLen; i++) {
+                        json_object *arrObj = json_object_array_get_idx(messages, i);
+                        ProcessMessage(WorkerQueue::OCSP, arrObj);
+                    }
+                }
             }
         }
         json_object_put(obj);
