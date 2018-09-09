@@ -19,31 +19,6 @@ build:trusty:
     paths:
       - libstatusengine.so
 
-deploy:trusty:
-  dependencies:
-    - "build:trusty"
-  image: ruby:latest
-  stage: deploy
-  script:
-    - |
-      gem install fpm
-      mkdir -p /pkgbuild/etc/statusengine /pkgbuild/usr/lib/statusengine
-      cp libstatusengine.so /pkgbuild/usr/lib/statusengine/libstatusengine.so
-      cp packages/statusengine.toml /pkgbuild/etc/statusengine/statusengine.toml
-    - >
-      fpm -s dir -t deb -n statusengine-broker
-      -v "$(cat VERSION)" --iteration "trusty$CI_COMMIT_REF_NAME"
-      --deb-dist trusty -C /pkgbuild
-      -m "Johannes Drummer <j.drummer@thelambda.de>" --license GPLv2
-      -d libicu52 -d libstdc++6 -d libc6 -d libuuid1 -d libssl1.0.0 -d libjson-c2
-      -d librabbitmq1 -d libgearman7
-      --architecture native --url "https://statusengine.org/"
-      --description "Statusengine Naemon/Nagios Broker Module"
-  artifacts:
-    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-deb"
-    paths:
-      - "*.deb"
-
 build:xenial:
   image: ubuntu:xenial
   stage: build
@@ -65,31 +40,6 @@ build:xenial:
     paths:
       - libstatusengine.so
 
-deploy:xenial:
-  dependencies:
-    - "build:xenial"
-  image: ruby:latest
-  stage: deploy
-  script:
-    - |
-      gem install fpm
-      mkdir -p /pkgbuild/etc/statusengine /pkgbuild/usr/lib/statusengine
-      cp libstatusengine.so /pkgbuild/usr/lib/statusengine/libstatusengine.so
-      cp packages/statusengine.toml /pkgbuild/etc/statusengine/statusengine.toml
-    - >
-      fpm -s dir -t deb -n statusengine-broker
-      -v "$(cat VERSION)" --iteration "xenial$CI_COMMIT_REF_NAME"
-      --deb-dist xenial -C /pkgbuild
-      -m "Johannes Drummer <j.drummer@thelambda.de>" --license GPLv2
-      -d libicu55 -d libstdc++6 -d libc6 -d libuuid1 -d libssl1.0.0 -d libjson-c2
-      -d librabbitmq4 -d libgearman7
-      --architecture native --url "https://statusengine.org/"
-      --description "Statusengine Naemon/Nagios Broker Module"
-  artifacts:
-    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-deb"
-    paths:
-      - "*.deb"
-
 build:bionic:
   image: ubuntu:bionic
   stage: build
@@ -110,31 +60,6 @@ build:bionic:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
     paths:
       - libstatusengine.so
-
-deploy:bionic:
-  dependencies:
-    - "build:bionic"
-  image: ruby:latest
-  stage: deploy
-  script:
-    - |
-      gem install fpm
-      mkdir -p /pkgbuild/etc/statusengine /pkgbuild/usr/lib/statusengine
-      cp libstatusengine.so /pkgbuild/usr/lib/statusengine/libstatusengine.so
-      cp packages/statusengine.toml /pkgbuild/etc/statusengine/statusengine.toml
-    - >
-      fpm -s dir -t deb -n statusengine-broker
-      -v "$(cat VERSION)" --iteration "bionic$CI_COMMIT_REF_NAME"
-      --deb-dist bionic -C /pkgbuild
-      -m "Johannes Drummer <j.drummer@thelambda.de>" --license GPLv2
-      -d libicu60 -d libstdc++6 -d libc6 -d libuuid1 -d libssl1.1 -d libjson-c3
-      -d librabbitmq4 -d libgearman8
-      --architecture native --url "https://statusengine.org/"
-      --description "Statusengine Naemon/Nagios Broker Module"
-  artifacts:
-    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-deb"
-    paths:
-      - "*.deb"
 
 build:jessie:
   image: debian:jessie
@@ -158,31 +83,6 @@ build:jessie:
     paths:
       - libstatusengine.so
 
-deploy:jessie:
-  dependencies:
-    - "build:jessie"
-  image: ruby:latest
-  stage: deploy
-  script:
-    - |
-      gem install fpm
-      mkdir -p /pkgbuild/etc/statusengine /pkgbuild/usr/lib/statusengine
-      cp libstatusengine.so /pkgbuild/usr/lib/statusengine/libstatusengine.so
-      cp packages/statusengine.toml /pkgbuild/etc/statusengine/statusengine.toml
-    - >
-      fpm -s dir -t deb -n statusengine-broker
-      -v "$(cat VERSION)" --iteration "jessie$CI_COMMIT_REF_NAME"
-      --deb-dist jessie -C /pkgbuild
-      -m "Johannes Drummer <j.drummer@thelambda.de>" --license GPLv2
-      -d libicu52 -d libstdc++6 -d libc6 -d libuuid1 -d libssl1.1 -d libjson-c2
-      -d librabbitmq1 -d libgearman7
-      --architecture native --url "https://statusengine.org/"
-      --description "Statusengine Naemon/Nagios Broker Module"
-  artifacts:
-    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-deb"
-    paths:
-      - "*.deb"
-
 build:stretch:
   image: debian:stretch
   stage: build
@@ -204,31 +104,6 @@ build:stretch:
     paths:
       - libstatusengine.so
 
-deploy:stretch:
-  dependencies:
-    - "build:stretch"
-  image: ruby:latest
-  stage: deploy
-  script:
-    - |
-      gem install fpm
-      mkdir -p /pkgbuild/etc/statusengine /pkgbuild/usr/lib/statusengine
-      cp libstatusengine.so /pkgbuild/usr/lib/statusengine/libstatusengine.so
-      cp packages/statusengine.toml /pkgbuild/etc/statusengine/statusengine.toml
-    - >
-      fpm -s dir -t deb -n statusengine-broker
-      -v "$(cat VERSION)" --iteration "stretch$CI_COMMIT_REF_NAME"
-      --deb-dist stretch -C /pkgbuild
-      -m "Johannes Drummer <j.drummer@thelambda.de>" --license GPLv2
-      -d libicu57 -d libstdc++6 -d libc6 -d libuuid1 -d libssl1.1 -d libjson-c3
-      -d librabbitmq4 -d libgearman7
-      --architecture native --url "https://statusengine.org/"
-      --description "Statusengine Naemon/Nagios Broker Module"
-  artifacts:
-    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-deb"
-    paths:
-      - "*.deb"
-
 build:nagios:trusty:
   image: ubuntu:trusty
   stage: build
@@ -248,31 +123,6 @@ build:nagios:trusty:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
     paths:
       - libstatusengine.so
-
-deploy:nagios:trusty:
-  dependencies:
-    - "build:nagios:trusty"
-  image: ruby:latest
-  stage: deploy
-  script:
-    - |
-      gem install fpm
-      mkdir -p /pkgbuild/etc/statusengine /pkgbuild/usr/lib/statusengine
-      cp libstatusengine.so /pkgbuild/usr/lib/statusengine/libstatusengine.so
-      cp packages/statusengine.toml /pkgbuild/etc/statusengine/statusengine.toml
-    - >
-      fpm -s dir -t deb -n statusengine-broker-nagios
-      -v "$(cat VERSION)" --iteration "trusty$CI_COMMIT_REF_NAME"
-      --deb-dist trusty -C /pkgbuild
-      -m "Johannes Drummer <j.drummer@thelambda.de>" --license GPLv2
-      -d libicu52 -d libstdc++6 -d libc6 -d libuuid1 -d libssl1.0.0 -d libjson-c2
-      -d librabbitmq1 -d libgearman7
-      --architecture native --url "https://statusengine.org/"
-      --description "Statusengine Naemon/Nagios Broker Module"
-  artifacts:
-    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-nagios-deb"
-    paths:
-      - "*.deb"
 
 build:nagios:xenial:
   image: ubuntu:xenial
@@ -294,31 +144,6 @@ build:nagios:xenial:
     paths:
       - libstatusengine.so
 
-deploy:nagios:xenial:
-  dependencies:
-    - "build:nagios:xenial"
-  image: ruby:latest
-  stage: deploy
-  script:
-    - |
-      gem install fpm
-      mkdir -p /pkgbuild/etc/statusengine /pkgbuild/usr/lib/statusengine
-      cp libstatusengine.so /pkgbuild/usr/lib/statusengine/libstatusengine.so
-      cp packages/statusengine.toml /pkgbuild/etc/statusengine/statusengine.toml
-    - >
-      fpm -s dir -t deb -n statusengine-broker-xenial
-      -v "$(cat VERSION)" --iteration "xenial$CI_COMMIT_REF_NAME"
-      --deb-dist xenial -C /pkgbuild
-      -m "Johannes Drummer <j.drummer@thelambda.de>" --license GPLv2
-      -d libicu55 -d libstdc++6 -d libc6 -d libuuid1 -d libssl1.0.0 -d libjson-c2
-      -d librabbitmq4 -d libgearman7
-      --architecture native --url "https://statusengine.org/"
-      --description "Statusengine Naemon/Nagios Broker Module"
-  artifacts:
-    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-xenial-deb"
-    paths:
-      - "*.deb"
-
 build:nagios:bionic:
   image: ubuntu:bionic
   stage: build
@@ -338,31 +163,6 @@ build:nagios:bionic:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
     paths:
       - libstatusengine.so
-
-deploy:nagios:bionic:
-  dependencies:
-    - "build:nagios:bionic"
-  image: ruby:latest
-  stage: deploy
-  script:
-    - |
-      gem install fpm
-      mkdir -p /pkgbuild/etc/statusengine /pkgbuild/usr/lib/statusengine
-      cp libstatusengine.so /pkgbuild/usr/lib/statusengine/libstatusengine.so
-      cp packages/statusengine.toml /pkgbuild/etc/statusengine/statusengine.toml
-    - >
-      fpm -s dir -t deb -n statusengine-broker-nagios
-      -v "$(cat VERSION)" --iteration "bionic$CI_COMMIT_REF_NAME"
-      --deb-dist bionic -C /pkgbuild
-      -m "Johannes Drummer <j.drummer@thelambda.de>" --license GPLv2
-      -d libicu60 -d libstdc++6 -d libc6 -d libuuid1 -d libssl1.1 -d libjson-c3
-      -d librabbitmq4 -d libgearman8
-      --architecture native --url "https://statusengine.org/"
-      --description "Statusengine Naemon/Nagios Broker Module"
-  artifacts:
-    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-nagios-deb"
-    paths:
-      - "*.deb"
 
 build:nagios:jessie:
   image: debian:jessie
@@ -385,31 +185,6 @@ build:nagios:jessie:
     paths:
       - libstatusengine.so
 
-deploy:nagios:jessie:
-  dependencies:
-    - "build:nagios:jessie"
-  image: ruby:latest
-  stage: deploy
-  script:
-    - |
-      gem install fpm
-      mkdir -p /pkgbuild/etc/statusengine /pkgbuild/usr/lib/statusengine
-      cp libstatusengine.so /pkgbuild/usr/lib/statusengine/libstatusengine.so
-      cp packages/statusengine.toml /pkgbuild/etc/statusengine/statusengine.toml
-    - >
-      fpm -s dir -t deb -n statusengine-broker-nagios
-      -v "$(cat VERSION)" --iteration "jessie$CI_COMMIT_REF_NAME"
-      --deb-dist jessie -C /pkgbuild
-      -m "Johannes Drummer <j.drummer@thelambda.de>" --license GPLv2
-      -d libicu52 -d libstdc++6 -d libc6 -d libuuid1 -d libssl1.1 -d libjson-c2
-      -d librabbitmq1 -d libgearman7
-      --architecture native --url "https://statusengine.org/"
-      --description "Statusengine Naemon/Nagios Broker Module"
-  artifacts:
-    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-nagios-deb"
-    paths:
-      - "*.deb"
-
 build:nagios:stretch:
   image: debian:stretch
   stage: build
@@ -429,34 +204,3 @@ build:nagios:stretch:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
     paths:
       - libstatusengine.so
-
-deploy:nagios:stretch:
-  dependencies:
-    - "build:nagios:stretch"
-  image: ruby:latest
-  stage: deploy
-  script:
-    - |
-      gem install fpm
-      mkdir -p /pkgbuild/etc/statusengine /pkgbuild/usr/lib/statusengine
-      cp libstatusengine.so /pkgbuild/usr/lib/statusengine/libstatusengine.so
-      cp packages/statusengine.toml /pkgbuild/etc/statusengine/statusengine.toml
-    - >
-      fpm -s dir -t deb -n statusengine-broker-nagios
-      -v "$(cat VERSION)" --iteration "stretch$CI_COMMIT_REF_NAME"
-      --deb-dist stretch -C /pkgbuild
-      -m "Johannes Drummer <j.drummer@thelambda.de>" --license GPLv2
-      -d libicu57 -d libstdc++6 -d libc6 -d libuuid1 -d libssl1.1 -d libjson-c3
-      -d librabbitmq4 -d libgearman7
-      --architecture native --url "https://statusengine.org/"
-      --description "Statusengine Naemon/Nagios Broker Module"
-  artifacts:
-    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-nagios-deb"
-    paths:
-      - "*.deb"
-
-# run tests using the binary built before
-#test:
-#  stage: test
-#  script:
-#    - ./runmytests.sh
