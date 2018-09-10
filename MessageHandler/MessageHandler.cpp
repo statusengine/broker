@@ -142,6 +142,9 @@ namespace statusengine {
                 }
             }
         }
+        else {
+            se->Log() << "Received message for unknown worker queue" << LogLevel::Warning;
+        }
 
         json_object_put(obj);
     }
@@ -204,7 +207,13 @@ namespace statusengine {
             cr.output = longOutput;
         }
 
-        if (cr.host_name != nullptr && cr.output != nullptr) {
+        if (cr.host_name == nullptr) {
+            se->Log() << "Received hostcheck without host_name" << LogLevel::Warning;
+        }
+        else if (cr.output == nullptr) {
+            se->Log() << "Received hostcheck without output" << LogLevel::Warning;
+        }
+        else {
             process_check_result(&cr);
         }
 
