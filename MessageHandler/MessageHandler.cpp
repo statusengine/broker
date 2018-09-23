@@ -22,7 +22,9 @@ namespace statusengine {
             se->Log() << "Received non-json string '''" << message
                       << "'''; \"'''\" is not part of the received message. Ignoring..." << LogLevel::Warning;
         }
-        ProcessMessage(workerQueue, obj);
+        else {
+            ProcessMessage(workerQueue, obj);
+        }
     }
 
     void MessageHandler::ProcessMessage(WorkerQueue workerQueue, json_object *obj) {
@@ -271,7 +273,80 @@ namespace statusengine {
 
     void MessageHandler::ParseDowntime(json_object *obj) {}
 
-    void MessageHandler::ParseAcknowledge(json_object *obj) {}
+    void MessageHandler::ParseAcknowledge(json_object *obj) {
+        const char *hostname = nullptr;
+        const char *service_description = nullptr;
+        const char *author = nullptr;
+        const char *comment = nullptr;
+        bool sticky = false;
+        bool notify = false;
+        bool persistent = false;
+        json_object_object_foreach(obj, cKey, jsonValue) {
+            std::string jsonKey(cKey);
+            if (jsonKey.compare("host_name") == 0) {
+                hostname = get_json_string(jsonValue);
+            }
+            else if (jsonKey.compare("service_description") == 0) {
+                service_description = get_json_string(jsonValue);
+            }
+            else if (jsonKey.compare("author") == 0) {
+                author = get_json_string(jsonValue);
+            }
+            else if (jsonKey.compare("comment") == 0) {
+                comment = get_json_string(jsonValue);
+            }
+            else if (jsonKey.compare("sticky") == 0) {
+                sticky = json_object_get_boolean(jsonValue);
+            }
+            else if (jsonKey.compare("notify") == 0) {
+                notify = json_object_get_boolean(jsonValue);
+            }
+            else if (jsonKey.compare("persistent") == 0) {
+                persistent = json_object_get_boolean(jsonValue);
+            }
+        }
+
+        if (hostname == nullptr) {
+            se->Log() << "Received acknowledge command without host_name" << LogLevel::Warning;
+            return;
+        }
+
+        if (author == nullptr) {
+            author = strdup("unknown");
+        }
+
+        if (comment == nullptr) {
+            comment = strdup("");
+        }
+
+        if (service_description == nullptr) {
+            host *temp_host = find_host(hostname);
+            if (temp_host == nullptr) {
+                se->Log() << "Received acknowledge command for unknown host " << hostname << LogLevel::Warning;
+                return;
+            }
+            if (!Nebmodule::AcknowledgeHost(temp_host, author, comment, sticky, notify, persistent)) {
+                se->Log() << "Could not acknowledge host " << hostname << LogLevel::Info;
+            }
+        }
+        else {
+            service *temp_service = find_service(hostname, service_description);
+            if (temp_service == nullptr) {
+                se->Log() << "Received acknowledge command for unknown service " << hostname
+                          << "::" << service_description << LogLevel::Warning;
+                return;
+            }
+            if (!Nebmodule::AcknowledgeService(temp_service, author, comment, sticky, notify, persistent)) {
+                se->Log() << "Could not acknowledge service " << hostname << "::" << service_description
+                          << LogLevel::Info;
+            }
+        }
+
+        delete hostname;
+        delete service_description;
+        delete author;
+        delete comment;
+    }
 
     void MessageHandler::ParseFlapDetection(json_object *obj) {}
 

@@ -54,6 +54,12 @@ namespace statusengine {
 
         static void ScheduleServiceCheckFixed(service *temp_service, time_t fixed);
 
+        static bool AcknowledgeHost(host *hst, const char *ack_author, const char *comment, bool sticky, bool notify,
+                                    bool persistent);
+
+        static bool AcknowledgeService(service *svc, const char *ack_author, const char *comment, bool sticky,
+                                       bool notify, bool persistent);
+
       private:
         static Statusengine *se;
     };

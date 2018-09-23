@@ -84,6 +84,7 @@ namespace statusengine {
                                                                        "MaxWorkerMessagesPerInterval", 1000ul);
         }
         catch (const std::out_of_range &oor) {
+            maxWorkerMessagesPerInterval = 1000ul;
         }
         catch (const toml::type_error &tte) {
             se->Log() << "Invalid configuration: Invalid value for key "
@@ -198,12 +199,12 @@ namespace statusengine {
         {"WorkerBulkOCSP", WorkerQueue::BulkOCSP},
         {"WorkerOCHP", WorkerQueue::OCHP},
         {"WorkerBulkOCHP", WorkerQueue::BulkOCHP},
-        {"Command", WorkerQueue::Command}};
+        {"WorkerCommand", WorkerQueue::Command}};
 
     const std::map<WorkerQueue, std::string> WorkerQueueId = {{WorkerQueue::OCSP, "WorkerOCSP"},
                                                               {WorkerQueue::BulkOCSP, "WorkerBulkOCSP"},
                                                               {WorkerQueue::OCHP, "WorkerOCHP"},
                                                               {WorkerQueue::BulkOCHP, "WorkerBulkOCHP"},
-                                                              {WorkerQueue::Command, "Command"}};
+                                                              {WorkerQueue::Command, "WorkerCommand"}};
 
 } // namespace statusengine

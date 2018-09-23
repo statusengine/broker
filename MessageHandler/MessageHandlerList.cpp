@@ -103,7 +103,7 @@ namespace statusengine {
                     moreMessages = true;
                 }
             }
-        } while (moreMessages && counter < maxWorkerMessagesPerInterval);
+        } while (moreMessages && (counter < maxWorkerMessagesPerInterval));
     }
 
 } // namespace statusengine

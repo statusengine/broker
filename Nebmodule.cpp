@@ -61,9 +61,9 @@ namespace statusengine {
 #endif // BUILD_NAGIOS
     }
 
-    void Nebmodule::ScheduleHostCheckFixed(host *temp_host, time_t fixed) {
-        time_t delay = fixed - std::time(nullptr);
-        if (fixed < 0) {
+    void Nebmodule::ScheduleHostCheckFixed(host *temp_host, time_t schedule_time) {
+        time_t delay = schedule_time - std::time(nullptr);
+        if (schedule_time < 0) {
             delay = 0;
         }
 #ifndef BUILD_NAGIOS
@@ -82,9 +82,9 @@ namespace statusengine {
 #endif // BUILD_NAGIOS
     }
 
-    void Nebmodule::ScheduleServiceCheckFixed(service *temp_service, time_t fixed) {
-        time_t delay = fixed - std::time(nullptr);
-        if (fixed < 0) {
+    void Nebmodule::ScheduleServiceCheckFixed(service *temp_service, time_t schedule_time) {
+        time_t delay = schedule_time - std::time(nullptr);
+        if (schedule_time < 0) {
             delay = 0;
         }
 #ifndef BUILD_NAGIOS
@@ -92,6 +92,68 @@ namespace statusengine {
 #else
         schedule_service_check(temp_service, schedule_time, CHECK_OPTION_NONE);
 #endif // BUILD_NAGIOS
+    }
+
+    bool Nebmodule::AcknowledgeHost(host *hst, const char *ack_author, const char *comment, bool sticky, bool notify,
+                                    bool persistent) {
+        char *author = strdup(ack_author);
+        char *cmt = strdup(comment);
+        int type = sticky ? ACKNOWLEDGEMENT_STICKY : ACKNOWLEDGEMENT_NORMAL;
+        time_t current_time = std::time(nullptr);
+
+#ifndef BUILD_NAGIOS
+        if (hst->current_state == STATE_UP)
+            return false;
+
+        broker_acknowledgement_data(NEBTYPE_ACKNOWLEDGEMENT_ADD, NEBFLAG_NONE, NEBATTR_NONE, HOST_ACKNOWLEDGEMENT,
+                                    reinterpret_cast<void *>(hst), author, cmt, type, notify, persistent);
+
+        if (notify)
+            host_notification(hst, NOTIFICATION_ACKNOWLEDGEMENT, author, cmt, NOTIFICATION_OPTION_NONE);
+
+        hst->problem_has_been_acknowledged = true;
+        hst->acknowledgement_type = sticky ? ACKNOWLEDGEMENT_STICKY : ACKNOWLEDGEMENT_NORMAL;
+        update_host_status(hst, false);
+        add_new_host_comment(ACKNOWLEDGEMENT_COMMENT, hst->name, current_time, author, cmt, persistent,
+                             COMMENTSOURCE_INTERNAL, false, (time_t)0, NULL);
+#else
+        acknowledge_host_problem(hst, author, cmt, type, notify, persistent);
+#endif // BUILD_NAGIOS
+
+        delete author;
+        delete cmt;
+        return true;
+    }
+
+    bool Nebmodule::AcknowledgeService(service *svc, const char *ack_author, const char *comment, bool sticky,
+                                       bool notify, bool persistent) {
+        char *author = strdup(ack_author);
+        char *cmt = strdup(comment);
+        int type = sticky ? ACKNOWLEDGEMENT_STICKY : ACKNOWLEDGEMENT_NORMAL;
+        time_t current_time = std::time(nullptr);
+
+#ifndef BUILD_NAGIOS
+        if (svc->current_state == STATE_OK)
+            return false;
+
+        broker_acknowledgement_data(NEBTYPE_ACKNOWLEDGEMENT_ADD, NEBFLAG_NONE, NEBATTR_NONE, SERVICE_ACKNOWLEDGEMENT,
+                                    reinterpret_cast<void *>(svc), author, cmt, type, notify, persistent);
+
+        if (notify)
+            service_notification(svc, NOTIFICATION_ACKNOWLEDGEMENT, author, cmt, NOTIFICATION_OPTION_NONE);
+
+        svc->problem_has_been_acknowledged = true;
+        svc->acknowledgement_type = type ? ACKNOWLEDGEMENT_STICKY : ACKNOWLEDGEMENT_NORMAL;
+        update_service_status(svc, false);
+        add_new_service_comment(ACKNOWLEDGEMENT_COMMENT, svc->host_name, svc->description, current_time, author, cmt,
+                                persistent, COMMENTSOURCE_INTERNAL, false, (time_t)0, NULL);
+#else
+        acknowledge_service_problem(svc, author, cmt, type, notify, persistent);
+#endif // BUILD_NAGIOS
+
+        delete author;
+        delete cmt;
+        return true;
     }
 } // namespace statusengine
 
