@@ -16,11 +16,9 @@ namespace statusengine {
       private:
         bool servicechecks;
         bool ocsp;
-        bool ocspBulk;
         bool service_perfdata;
         std::shared_ptr<MessageQueueHandler> serviceCheckHandler;
         std::shared_ptr<MessageQueueHandler> ocspHandler;
-        std::shared_ptr<MessageQueueHandler> bulkOCSPHandler;
         std::shared_ptr<MessageQueueHandler> servicePerfHandler;
     };
 } // namespace statusengine

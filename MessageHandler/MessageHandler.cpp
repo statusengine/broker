@@ -29,59 +29,56 @@ namespace statusengine {
 
     void MessageHandler::ProcessMessage(WorkerQueue workerQueue, json_object *obj) {
         if (workerQueue == WorkerQueue::OCHP) {
-            json_object *hostcheck;
-            json_object_object_get_ex(obj, "hostcheck", &hostcheck);
-            if (hostcheck == nullptr) {
-                se->Log() << "OCHP Object doesn't contain a hostcheck value. Ignoring..." << LogLevel::Warning;
-            }
-            else {
-                ParseCheckResult(hostcheck);
-            }
-        }
-        else if (workerQueue == WorkerQueue::OCSP) {
-            json_object *servicecheck;
-            json_object_object_get_ex(obj, "servicecheck", &servicecheck);
-            if (servicecheck == nullptr) {
-                se->Log() << "OCSP Object doesn't contain a servicecheck value. Ignoring..." << LogLevel::Warning;
-            }
-            else {
-                ParseCheckResult(servicecheck);
-            }
-        }
-        else if (workerQueue == WorkerQueue::BulkOCHP) {
             json_object *messages;
-            json_object_object_get_ex(obj, "Messages", &messages);
+            json_object_object_get_ex(obj, "messages", &messages);
             if (messages == nullptr) {
-                se->Log() << "BulkOCHP Object doesn't contain a Messages array. Ignoring..." << LogLevel::Warning;
+                se->Log() << "OCHP Object doesn't contain a Messages array. Ignoring..." << LogLevel::Warning;
             }
             else {
                 if (!json_object_is_type(messages, json_type_array)) {
-                    se->Log() << "BulkOCHP::Messages is not an array. Ignoring..." << LogLevel::Warning;
+                    se->Log() << "OCHP::Messages is not an array. Ignoring..." << LogLevel::Warning;
                 }
                 else {
                     auto arrLen = json_object_array_length(messages);
                     for (auto i = 0; i < arrLen; i++) {
                         json_object *arrObj = json_object_array_get_idx(messages, i);
-                        ProcessMessage(WorkerQueue::OCHP, arrObj);
+                        json_object *hostcheck;
+                        json_object_object_get_ex(obj, "hostcheck", &hostcheck);
+                        if (hostcheck == nullptr) {
+                            se->Log() << "OCHP Object doesn't contain a hostcheck value. Ignoring..."
+                                      << LogLevel::Warning;
+                        }
+                        else {
+                            ParseCheckResult(hostcheck);
+                        }
                     }
                 }
             }
         }
-        else if (workerQueue == WorkerQueue::BulkOCSP) {
+        else if (workerQueue == WorkerQueue::OCSP) {
             json_object *messages;
-            json_object_object_get_ex(obj, "Messages", &messages);
+            json_object_object_get_ex(obj, "messages", &messages);
             if (messages == nullptr) {
-                se->Log() << "BulkOCSP Object doesn't contain a Messages array. Ignoring..." << LogLevel::Warning;
+                se->Log() << "OCSP Object doesn't contain a Messages array. Ignoring..." << LogLevel::Warning;
             }
             else {
                 if (!json_object_is_type(messages, json_type_array)) {
-                    se->Log() << "BulkOCSP::Messages is not an array. Ignoring..." << LogLevel::Warning;
+                    se->Log() << "OCSP::Messages is not an array. Ignoring..." << LogLevel::Warning;
                 }
                 else {
                     auto arrLen = json_object_array_length(messages);
                     for (auto i = 0; i < arrLen; i++) {
                         json_object *arrObj = json_object_array_get_idx(messages, i);
                         ProcessMessage(WorkerQueue::OCSP, arrObj);
+                        json_object *servicecheck;
+                        json_object_object_get_ex(obj, "servicecheck", &servicecheck);
+                        if (servicecheck == nullptr) {
+                            se->Log() << "OCSP Object doesn't contain a servicecheck value. Ignoring..."
+                                      << LogLevel::Warning;
+                        }
+                        else {
+                            ParseCheckResult(servicecheck);
+                        }
                     }
                 }
             }

@@ -7,7 +7,7 @@
 
 namespace statusengine {
     ServiceCheckCallback::ServiceCheckCallback(Statusengine *se)
-        : NebmoduleCallback(NEBCALLBACK_SERVICE_CHECK_DATA, se), servicechecks(false), ocsp(false), ocspBulk(false),
+        : NebmoduleCallback(NEBCALLBACK_SERVICE_CHECK_DATA, se), servicechecks(false), ocsp(false),
           service_perfdata(false) {
         auto mHandler = se->GetMessageHandler();
         if (mHandler->QueueExists(Queue::ServiceCheck)) {
@@ -17,10 +17,6 @@ namespace statusengine {
         if (mHandler->QueueExists(Queue::OCSP)) {
             ocspHandler = mHandler->GetMessageQueueHandler(Queue::OCSP);
             ocsp = true;
-        }
-        if (mHandler->QueueExists(Queue::BulkOCSP)) {
-            bulkOCSPHandler = mHandler->GetMessageQueueHandler(Queue::BulkOCSP);
-            ocspBulk = true;
         }
         if (mHandler->QueueExists(Queue::ServicePerfData)) {
             servicePerfHandler = mHandler->GetMessageQueueHandler(Queue::ServicePerfData);
@@ -32,22 +28,18 @@ namespace statusengine {
         auto data = reinterpret_cast<nebstruct_service_check_data *>(vdata);
 
         if (data->type == NEBTYPE_SERVICECHECK_PROCESSED) {
-            if (servicechecks || ocsp || ocspBulk) {
-                auto checkData = NagiosServiceCheckData(data);
-                auto msg = checkData.ToString();
+            if (servicechecks || ocsp) {
+                auto checkData = new NagiosServiceCheckData(data);
                 if (servicechecks) {
-                    serviceCheckHandler->SendMessage(msg);
+                    serviceCheckHandler->SendMessage(checkData);
                 }
                 if (ocsp) {
-                    ocspHandler->SendMessage(msg);
-                }
-                if (ocspBulk) {
-                    bulkOCSPHandler->SendBulkMessage(msg);
+                    ocspHandler->SendMessage(checkData);
                 }
             }
             if (service_perfdata) {
-                auto checkPerfData = NagiosServiceCheckPerfData(data);
-                servicePerfHandler->SendMessage(checkPerfData.ToString());
+                auto checkPerfData = new NagiosServiceCheckPerfData(data);
+                servicePerfHandler->SendMessage(checkPerfData);
             }
         }
     }

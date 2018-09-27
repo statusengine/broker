@@ -54,7 +54,7 @@ namespace statusengine {
 #endif
         for (auto &qHandlerPair : handlers) {
             mqHandlers[qHandlerPair.first] = std::make_shared<MessageQueueHandler>(
-                se, this, maxBulkSize, &globalBulkCounter, qHandlerPair.first, qHandlerPair.second);
+                se, this, maxBulkSize, &globalBulkCounter, qHandlerPair.first, qHandlerPair.second, false);
         }
     }
 

@@ -6,7 +6,7 @@
 
 namespace statusengine {
     HostCheckCallback::HostCheckCallback(Statusengine *se)
-        : NebmoduleCallback(NEBCALLBACK_HOST_CHECK_DATA, se), hostchecks(false), ochp(false), ochpBulk(false) {
+        : NebmoduleCallback(NEBCALLBACK_HOST_CHECK_DATA, se), hostchecks(false), ochp(false) {
         auto mHandler = se->GetMessageHandler();
         if (mHandler->QueueExists(Queue::HostCheck)) {
             hostCheckHandler = mHandler->GetMessageQueueHandler(Queue::HostCheck);
@@ -16,26 +16,18 @@ namespace statusengine {
             ochpHandler = mHandler->GetMessageQueueHandler(Queue::OCHP);
             ochp = true;
         }
-        if (mHandler->QueueExists(Queue::BulkOCHP)) {
-            bulkOCHPHandler = mHandler->GetMessageQueueHandler(Queue::BulkOCHP);
-            ochpBulk = true;
-        }
     }
 
     void HostCheckCallback::Callback(int event_type, void *vdata) {
         auto data = reinterpret_cast<nebstruct_host_check_data *>(vdata);
 
         if (data->type == NEBTYPE_HOSTCHECK_PROCESSED) {
-            auto checkData = NagiosHostCheckData(data);
-            auto msg = checkData.ToString();
+            auto checkData = new NagiosHostCheckData(data);
             if (hostchecks) {
-                hostCheckHandler->SendMessage(msg);
+                hostCheckHandler->SendMessage(checkData);
             }
             if (ochp) {
-                ochpHandler->SendMessage(msg);
-            }
-            if (ochpBulk) {
-                bulkOCHPHandler->SendBulkMessage(msg);
+                ochpHandler->SendMessage(checkData);
             }
         }
     }

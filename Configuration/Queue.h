@@ -23,11 +23,9 @@ namespace statusengine {
         ContactNotificationData,
         EventHandlerData,
         ProcessData,
-        BulkOCSP,
         OCSP,
-        BulkOCHP,
         OCHP
     };
 
-    enum class WorkerQueue { OCSP, BulkOCSP, OCHP, BulkOCHP, Command };
+    enum class WorkerQueue { OCSP, OCHP, Command };
 } // namespace statusengine

@@ -7,35 +7,48 @@
 namespace statusengine {
     MessageQueueHandler::MessageQueueHandler(Statusengine *se, MessageHandlerList *mhlist, unsigned long maxBulkSize,
                                              unsigned long *globalBulkCounter, Queue queue,
-                                             std::shared_ptr<std::vector<std::shared_ptr<MessageHandler>>> handlers)
+                                             std::shared_ptr<std::vector<std::shared_ptr<MessageHandler>>> handlers,
+                                             bool bulk)
         : se(se), mhlist(mhlist), maxBulkSize(maxBulkSize), globalBulkCounter(globalBulkCounter), queue(queue),
           handlers(handlers) {}
 
-    void MessageQueueHandler::SendMessage(const std::string &message) {
-        for (auto &handler : *handlers) {
-            handler->SendMessage(queue, message);
+    void MessageQueueHandler::SendMessage(NagiosObject *obj) {
+        if (bulk) {
+            bulkMessages.push_back(obj);
+            if (++(*globalBulkCounter) >= maxBulkSize) {
+                mhlist->FlushBulkQueue();
+            }
         }
-    }
-
-    void MessageQueueHandler::SendBulkMessage(std::string message) {
-        bulkMessages.push_back(message);
-        if (++(*globalBulkCounter) >= maxBulkSize) {
-            mhlist->FlushBulkQueue();
+        else {
+            std::string msg = obj->ToString();
+            for (auto &handler : *handlers) {
+                handler->SendMessage(queue, msg);
+            }
+            delete obj;
         }
     }
 
     void MessageQueueHandler::FlushBulkQueue() {
         if (bulkMessages.size() > 0) {
-            NagiosObject obj;
+            NagiosObject *msgObj = new NagiosObject();
             json_object *arr = json_object_new_array();
-            for (auto &message : bulkMessages) {
-                json_object_array_add(arr, json_object_new_string(message.c_str()));
+
+            for (auto &obj : bulkMessages) {
+                json_object_array_add(arr, obj->data);
             }
-            obj.SetData<>("Messages", arr);
-            obj.SetData<>("Compression", "plain");
-            se->Log() << "Send bulk message (" << bulkMessages.size() << ") for queue "
+
+            msgObj->SetData<>("messages", arr);
+            msgObj->SetData<>("format", "none");
+
+            std::string msg = msgObj->ToString();
+            for (auto &handler : *handlers) {
+                handler->SendMessage(queue, msg);
+            }
+
+            se->Log() << "Sent bulk message (" << bulkMessages.size() << ") for queue "
                       << Configuration::QueueId.at(queue) << LogLevel::Info;
-            SendMessage(obj.ToString());
+
+            delete msgObj;
             bulkMessages.clear();
         }
     }

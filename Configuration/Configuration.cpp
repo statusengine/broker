@@ -162,9 +162,7 @@ namespace statusengine {
         {"ContactNotificationData", Queue::ContactNotificationData},
         {"EventHandlerData", Queue::EventHandlerData},
         {"ProcessData", Queue::ProcessData},
-        {"BulkOCSP", Queue::BulkOCSP},
         {"OCSP", Queue::OCSP},
-        {"BulkOCHP", Queue::BulkOCHP},
         {"OCHP", Queue::OCHP}};
 
     const std::map<Queue, std::string> Configuration::QueueId = {
@@ -189,22 +187,13 @@ namespace statusengine {
         {Queue::ContactNotificationData, "ContactNotificationData"},
         {Queue::EventHandlerData, "EventHandlerData"},
         {Queue::ProcessData, "ProcessData"},
-        {Queue::BulkOCSP, "BulkOCSP"},
         {Queue::OCSP, "OCSP"},
-        {Queue::BulkOCHP, "BulkOCHP"},
         {Queue::OCHP, "OCHP"}};
 
     const std::map<std::string, WorkerQueue> Configuration::WorkerQueueName = {
-        {"WorkerOCSP", WorkerQueue::OCSP},
-        {"WorkerBulkOCSP", WorkerQueue::BulkOCSP},
-        {"WorkerOCHP", WorkerQueue::OCHP},
-        {"WorkerBulkOCHP", WorkerQueue::BulkOCHP},
-        {"WorkerCommand", WorkerQueue::Command}};
+        {"WorkerOCSP", WorkerQueue::OCSP}, {"WorkerOCHP", WorkerQueue::OCHP}, {"WorkerCommand", WorkerQueue::Command}};
 
-    const std::map<WorkerQueue, std::string> WorkerQueueId = {{WorkerQueue::OCSP, "WorkerOCSP"},
-                                                              {WorkerQueue::BulkOCSP, "WorkerBulkOCSP"},
-                                                              {WorkerQueue::OCHP, "WorkerOCHP"},
-                                                              {WorkerQueue::BulkOCHP, "WorkerBulkOCHP"},
-                                                              {WorkerQueue::Command, "WorkerCommand"}};
+    const std::map<WorkerQueue, std::string> WorkerQueueId = {
+        {WorkerQueue::OCSP, "WorkerOCSP"}, {WorkerQueue::OCHP, "WorkerOCHP"}, {WorkerQueue::Command, "WorkerCommand"}};
 
 } // namespace statusengine

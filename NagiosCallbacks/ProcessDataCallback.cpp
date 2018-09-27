@@ -27,10 +27,9 @@ namespace statusengine {
         if (data->type == NEBTYPE_PROCESS_START) {
             se->InitEventCallbacks();
             if (restartData) {
-                json_object *restartData = json_object_new_object();
-                json_object_object_add(restartData, "object_type", json_object_new_int(NEBTYPE_PROCESS_RESTART));
-                restartHandler->SendMessage(std::string(json_object_to_json_string(restartData)));
-                json_object_put(restartData);
+                NagiosObject *restartData = new NagiosObject();
+                restartData->SetData<>("object_type", static_cast<int>(NEBTYPE_PROCESS_RESTART));
+                restartHandler->SendMessage(restartData);
             }
         }
 
@@ -65,8 +64,8 @@ namespace statusengine {
         }
 
         if (processData) {
-            NagiosProcessData processData(data);
-            processHandler->SendMessage(processData.ToString());
+            NagiosProcessData *processData = new NagiosProcessData(data);
+            processHandler->SendMessage(processData);
         }
     }
 } // namespace statusengine

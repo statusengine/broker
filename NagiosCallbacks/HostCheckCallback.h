@@ -17,10 +17,8 @@ namespace statusengine {
       private:
         bool hostchecks;
         bool ochp;
-        bool ochpBulk;
 
         std::shared_ptr<MessageQueueHandler> hostCheckHandler;
         std::shared_ptr<MessageQueueHandler> ochpHandler;
-        std::shared_ptr<MessageQueueHandler> bulkOCHPHandler;
     };
 } // namespace statusengine

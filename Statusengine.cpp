@@ -144,12 +144,11 @@ namespace statusengine {
         }
 
         if (messageHandler->QueueExists(Queue::ServiceCheck) || messageHandler->QueueExists(Queue::OCSP) ||
-            messageHandler->QueueExists(Queue::BulkOCSP) || messageHandler->QueueExists(Queue::ServicePerfData)) {
+            messageHandler->QueueExists(Queue::ServicePerfData)) {
             RegisterCallback(new ServiceCheckCallback(this));
         }
 
-        if (messageHandler->QueueExists(Queue::HostCheck) || messageHandler->QueueExists(Queue::OCHP) ||
-            messageHandler->QueueExists(Queue::BulkOCHP)) {
+        if (messageHandler->QueueExists(Queue::HostCheck) || messageHandler->QueueExists(Queue::OCHP)) {
             RegisterCallback(new HostCheckCallback(this));
         }
 

@@ -4,8 +4,6 @@
 
 #include <json.h>
 
-#include "Nebmodule.h"
-
 namespace statusengine {
     class NagiosObject {
       public:
@@ -20,6 +18,8 @@ namespace statusengine {
             SetJSONData(data, name, value);
         }
 
+        json_object *data;
+
       protected:
         std::string EncodeString(char *value);
 
@@ -31,8 +31,6 @@ namespace statusengine {
         void SetJSONData(json_object *obj, const char *name, long unsigned int value);
         void SetJSONData(json_object *obj, const char *name, NagiosObject *other);
         void SetJSONData(json_object *obj, const char *name, json_object *other);
-
-        json_object *data;
     };
 
 } // namespace statusengine
