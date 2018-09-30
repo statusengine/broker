@@ -125,6 +125,16 @@ namespace statusengine {
         return true;
     }
 
+    void Nebmodule::DeleteAcknowledgeHost(host *hst) {
+#ifndef BUILD_NAGIOS
+        hst->problem_has_been_acknowledged = false;
+        update_host_status(hst, false);
+        delete_host_acknowledgement_comments(hst);
+#else
+        remove_host_acknowledgement(hst);
+#endif // BUILD_NAGIOS
+}
+
     bool Nebmodule::AcknowledgeService(service *svc, const char *ack_author, const char *comment, bool sticky,
                                        bool notify, bool persistent) {
         char *author = strdup(ack_author);
@@ -154,6 +164,16 @@ namespace statusengine {
         delete author;
         delete cmt;
         return true;
+    }
+
+    void Nebmodule::DeleteAcknowledgeService(service *svc) {
+#ifndef BUILD_NAGIOS
+        svc->problem_has_been_acknowledged = false;
+        update_service_status(svc, false);
+        delete_service_acknowledgement_comments(svc);
+#else
+        remove_host_acknowledgement(svc);
+#endif // BUILD_NAGIOS
     }
 } // namespace statusengine
 

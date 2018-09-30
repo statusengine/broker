@@ -57,8 +57,12 @@ namespace statusengine {
         static bool AcknowledgeHost(host *hst, const char *ack_author, const char *comment, bool sticky, bool notify,
                                     bool persistent);
 
+        static void DeleteAcknowledgeHost(host *hst);
+
         static bool AcknowledgeService(service *svc, const char *ack_author, const char *comment, bool sticky,
                                        bool notify, bool persistent);
+
+        static void DeleteAcknowledgeService(service *svc);
 
       private:
         static Statusengine *se;

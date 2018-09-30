@@ -29,56 +29,51 @@ namespace statusengine {
     void MessageHandler::ProcessMessage(WorkerQueue workerQueue, json_object *obj) {
         if (workerQueue == WorkerQueue::OCHP) {
             json_object *messages;
-            json_object_object_get_ex(obj, "messages", &messages);
-            if (messages == nullptr) {
-                se->Log() << "OCHP Object doesn't contain a Messages array. Ignoring..." << LogLevel::Warning;
-            }
-            else {
+            if(json_object_object_get_ex(obj, "messages", &messages)) {
                 if (!json_object_is_type(messages, json_type_array)) {
-                    se->Log() << "OCHP::Messages is not an array. Ignoring..." << LogLevel::Warning;
+                    se->Log() << "OCHP::messages is not an array. Ignoring..." << LogLevel::Warning;
                 }
                 else {
                     auto arrLen = json_object_array_length(messages);
                     for (auto i = 0; i < arrLen; i++) {
                         json_object *arrObj = json_object_array_get_idx(messages, i);
-                        json_object *hostcheck;
-                        json_object_object_get_ex(obj, "hostcheck", &hostcheck);
-                        if (hostcheck == nullptr) {
-                            se->Log() << "OCHP Object doesn't contain a hostcheck value. Ignoring..."
-                                      << LogLevel::Warning;
-                        }
-                        else {
-                            ParseCheckResult(hostcheck);
-                        }
+                        ProcessMessage(WorkerQueue::OCHP, arrObj);
                     }
+                }
+            }
+            else {
+                json_object *hostcheck;
+                if(json_object_object_get_ex(obj, "hostcheck", &hostcheck)) {
+                    ParseCheckResult(hostcheck);
+                }
+                else {
+                    se->Log() << "OCHP Object doesn't contain a hostcheck value. Ignoring..."
+                              << LogLevel::Warning;
                 }
             }
         }
         else if (workerQueue == WorkerQueue::OCSP) {
             json_object *messages;
-            json_object_object_get_ex(obj, "messages", &messages);
-            if (messages == nullptr) {
-                se->Log() << "OCSP Object doesn't contain a Messages array. Ignoring..." << LogLevel::Warning;
-            }
-            else {
+            if(json_object_object_get_ex(obj, "messages", &messages)) {
                 if (!json_object_is_type(messages, json_type_array)) {
-                    se->Log() << "OCSP::Messages is not an array. Ignoring..." << LogLevel::Warning;
+                    se->Log() << "OCSP::messages is not an array. Ignoring..." << LogLevel::Warning;
                 }
                 else {
                     auto arrLen = json_object_array_length(messages);
                     for (auto i = 0; i < arrLen; i++) {
                         json_object *arrObj = json_object_array_get_idx(messages, i);
                         ProcessMessage(WorkerQueue::OCSP, arrObj);
-                        json_object *servicecheck;
-                        json_object_object_get_ex(obj, "servicecheck", &servicecheck);
-                        if (servicecheck == nullptr) {
-                            se->Log() << "OCSP Object doesn't contain a servicecheck value. Ignoring..."
-                                      << LogLevel::Warning;
-                        }
-                        else {
-                            ParseCheckResult(servicecheck);
-                        }
                     }
+                }
+            }
+            else {
+                json_object *servicecheck;
+                if(json_object_object_get_ex(obj, "servicecheck", &servicecheck)) {
+                    ParseCheckResult(servicecheck);
+                }
+                else {
+                    se->Log() << "OCSP Object doesn't contain a servicecheck value. Ignoring..."
+                              << LogLevel::Warning;
                 }
             }
         }
@@ -97,9 +92,9 @@ namespace statusengine {
                     data = jsonValue;
                     haveData = true;
                 }
-                else if (jsonKey.compare("CommandList") == 0) {
+                else if (jsonKey.compare("messages") == 0) {
                     if (!json_object_is_type(jsonValue, json_type_array)) {
-                        se->Log() << "CommandList doesn't contain an array. Ignoring..." << LogLevel::Warning;
+                        se->Log() << "messages doesn't contain an array. Ignoring..." << LogLevel::Warning;
                     }
                     else {
                         auto arrLen = json_object_array_length(jsonValue);
@@ -122,8 +117,14 @@ namespace statusengine {
                     else if (command.compare("downtime") == 0) {
                         ParseDowntime(data);
                     }
+                    else if(command.compare("delete_downtime") == 0) {
+                        ParseDeleteDowntime(data);
+                    }
                     else if (command.compare("acknowledge") == 0) {
                         ParseAcknowledge(data);
+                    }
+                    else if(command.compare("delete_acknowledge") == 0) {
+                        ParseDeleteAcknowledge(data);
                     }
                     else if (command.compare("flap_detection") == 0) {
                         ParseFlapDetection(data);
@@ -267,7 +268,110 @@ namespace statusengine {
         delete service_description;
     }
 
-    void MessageHandler::ParseDowntime(json_object *obj) {}
+    void MessageHandler::ParseDowntime(json_object *obj) {
+        const char *hostname = nullptr;
+        host *temp_host = nullptr;
+        const char *service_description = nullptr;
+        service * temp_service = nullptr;
+        const char *hostgroup_name = nullptr;
+        hostgroup *temp_hostgroup = nullptr;
+        const char *servicegroup_name = nullptr;
+        servicegroup *temp_servicegroup = nullptr;
+        const char *author = nullptr;
+        const char *comment = nullptr;
+        bool fixed = false;
+        bool includeServices = false;
+        bool recursive = false;
+        time_t start_time = 0, end_time = 0, duration = 0;
+        json_object_object_foreach(obj, cKey, jsonValue) {
+            std::string jsonKey(cKey);
+            if (jsonKey.compare("host_name") == 0) {
+                hostname = get_json_string(jsonValue);
+            }
+            else if (jsonKey.compare("service_description") == 0) {
+                service_description = get_json_string(jsonValue);
+            }
+            else if (jsonKey.compare("hostgroup") == 0) {
+                hostgroup_name = get_json_string(jsonValue);
+            }
+            else if (jsonKey.compare("servicegroup") == 0) {
+                servicegroup_name = get_json_string(jsonValue);
+            }
+            else if (jsonKey.compare("author") == 0) {
+                author = get_json_string(jsonValue);
+            }
+            else if (jsonKey.compare("comment") == 0) {
+                comment = get_json_string(jsonValue);
+            }
+            else if (jsonKey.compare("fixed") == 0) {
+                fixed = json_object_get_boolean(jsonValue);
+            }
+            else if (jsonKey.compare("includeServices") == 0) {
+                includeServices = json_object_get_boolean(jsonValue);
+            }
+            else if (jsonKey.compare("recursive") == 0) {
+                recursive = json_object_get_boolean(jsonValue);
+            }
+            else if (jsonKey.compare("start_time") == 0) {
+                start_time = json_object_get_int64(jsonValue);
+            }
+            else if (jsonKey.compare("end_time") == 0) {
+                end_time = json_object_get_int64(jsonValue);
+            }
+            else if (jsonKey.compare("duration") == 0) {
+                duration = json_object_get_int64(jsonValue);
+            }
+        }
+
+        if (author == nullptr) {
+            author = strdup("unknown");
+        }
+
+        if (comment == nullptr) {
+            comment = strdup("");
+        }
+
+        if(hostname != nullptr) {
+            if(service_description == nullptr) {
+                temp_host = find_host(hostname);
+                if (temp_host == nullptr) {
+                    se->Log() << "Received downtime command with unknown host_name: " << hostname << LogLevel::Warning;
+                }
+                else {
+                    schedule_downtime(HOST_DOWNTIME, temp_host->name, nullptr, )
+                }
+            }
+            else {
+                temp_service = find_service(hostname, service_description);
+                if (temp_service == nullptr) {
+                    se->Log() << "Received downtime command with unknown host_name/service_description: " << hostname << "/" << service_description << LogLevel::Warning;
+                }
+                else {
+
+                }
+            }
+        }
+        else if(hostgroup_name != nullptr) {
+            temp_hostgroup = find_hostgroup(hostgroup_name);
+            if (temp_hostgroup == nullptr) {
+                se->Log() << "Received downtime command with unknown hostgroup: " << hostgroup_name << LogLevel::Warning;
+            }
+            else {
+
+            }
+        }
+        else if(servicegroup_name != nullptr) {
+            temp_servicegroup = find_servicegroup(servicegroup_name);
+            if (temp_servicegroup == nullptr) {
+                se->Log() << "Received downtime command with unknown servicegroup: " << servicegroup_name << LogLevel::Warning;
+            }
+            else {
+
+            }
+        }
+    }
+
+    void MessageHandler::ParseDeleteDowntime(json_object *obj) {}
 
     void MessageHandler::ParseAcknowledge(json_object *obj) {
         const char *hostname = nullptr;
@@ -316,7 +420,7 @@ namespace statusengine {
         }
 
         if (service_description == nullptr) {
-            host *temp_host = find_host(hostname);
+            auto temp_host = find_host(hostname);
             if (temp_host == nullptr) {
                 se->Log() << "Received acknowledge command for unknown host " << hostname << LogLevel::Warning;
                 return;
@@ -326,7 +430,7 @@ namespace statusengine {
             }
         }
         else {
-            service *temp_service = find_service(hostname, service_description);
+            auto temp_service = find_service(hostname, service_description);
             if (temp_service == nullptr) {
                 se->Log() << "Received acknowledge command for unknown service " << hostname
                           << "::" << service_description << LogLevel::Warning;
@@ -342,6 +446,43 @@ namespace statusengine {
         delete service_description;
         delete author;
         delete comment;
+    }
+
+    void MessageHandler::ParseDeleteAcknowledge(json_object *obj) {
+        const char *hostname = nullptr;
+        const char *service_description = nullptr;
+        json_object_object_foreach(obj, cKey, jsonValue) {
+            std::string jsonKey(cKey);
+            if (jsonKey.compare("host_name") == 0) {
+                hostname = get_json_string(jsonValue);
+            }
+            else if (jsonKey.compare("service_description") == 0) {
+                service_description = get_json_string(jsonValue);
+            }
+        }
+
+        if (hostname == nullptr) {
+            se->Log() << "Received delete acknowledge command without host_name" << LogLevel::Warning;
+            return;
+        }
+
+        if (service_description == nullptr) {
+            auto temp_host = find_host(hostname);
+            if (temp_host == nullptr) {
+                se->Log() << "Received acknowledge command for unknown host " << hostname << LogLevel::Warning;
+                return;
+            }
+            Nebmodule::DeleteAcknowledgeHost(temp_host);
+        }
+        else {
+            auto temp_service = find_service(hostname, service_description);
+            if (temp_service == nullptr) {
+                se->Log() << "Received acknowledge command for unknown service " << hostname
+                          << "::" << service_description << LogLevel::Warning;
+                return;
+            }
+            Nebmodule::DeleteAcknowledgeService(temp_service);
+        }
     }
 
     void MessageHandler::ParseFlapDetection(json_object *obj) {}
