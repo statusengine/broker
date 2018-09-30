@@ -15,7 +15,6 @@ namespace statusengine {
     class MessageHandler {
       public:
         explicit MessageHandler(Statusengine *se);
-        ~MessageHandler();
 
         void ProcessMessage(WorkerQueue workerQueue, const std::string &message);
         void ProcessMessage(WorkerQueue workerQueue, json_object *obj);

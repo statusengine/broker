@@ -15,7 +15,7 @@ namespace statusengine {
 
         virtual void Callback(int event_type, void *data) {
             auto nData = reinterpret_cast<N *>(data);
-            D *dData = new D(nData);
+            D dData(nData);
             qHandler->SendMessage(dData);
         }
 

@@ -8,3 +8,5 @@
 /.vscode
 /devtools/headers.zip
 /devtools/include
+/.idea
+/cmake-build-debug

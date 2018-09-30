@@ -9,7 +9,7 @@ namespace statusengine {
     Configuration::Configuration(Statusengine *se) : se(se) {}
 
     Configuration::~Configuration() {
-        rabbitmq.clear();
+        rabbitmq.clear(); // shared_ptr
     }
 
     bool Configuration::Load(std::string configurationPath) {
@@ -32,6 +32,25 @@ namespace statusengine {
         }
         catch (const toml::type_error &tte) {
             se->Log() << "Invalid configuration: Bulk isn't a table!" << LogLevel::Error;
+            return false;
+        }
+
+        try {
+            std::vector<std::string> bulkQueueList = toml::get<std::vector<std::string>>(bulkTable.at("Queues"));
+            for (auto &bulkQueueItem : bulkQueueList) {
+                try {
+                    bulkQueues.insert(QueueName.at(bulkQueueItem));
+                }
+                catch (std::out_of_range &oor) {
+                    se->Log() << "Invalid configuration: Bulk::Queues contains an unknown queue identifier: " << bulkQueueItem << LogLevel::Error;
+                    return false;
+                }
+            }
+        }
+        catch (std::out_of_range &oor) {
+        }
+        catch (const toml::type_error &tte) {
+            se->Log() << "Invalid configuration: Bulk::Queues isn't an array!" << LogLevel::Error;
             return false;
         }
 
@@ -122,6 +141,10 @@ namespace statusengine {
 
     unsigned long Configuration::GetBulkMaximum() const {
         return GetTomlDefault<>(bulkTable, "Maximum", 200ul);
+    }
+
+    bool Configuration::isBulkQueue(Queue queue) const {
+        return bulkQueues.find(queue) != bulkQueues.end();
     }
 
     time_t Configuration::GetStartupScheduleMax() const {

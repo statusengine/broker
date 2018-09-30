@@ -20,9 +20,8 @@ namespace statusengine {
          * SendMessage
          * @param JsonObjectContainer contains json object that will be deleted after sending the message
          */
-        void SendMessage(NagiosObject *obj);
+        void SendMessage(NagiosObject &obj);
         void FlushBulkQueue();
-        bool Connect();
 
       private:
         MessageHandlerList *mhlist;

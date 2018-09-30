@@ -27,8 +27,8 @@ namespace statusengine {
         if (data->type == NEBTYPE_PROCESS_START) {
             se->InitEventCallbacks();
             if (restartData) {
-                NagiosObject *restartData = new NagiosObject();
-                restartData->SetData<>("object_type", static_cast<int>(NEBTYPE_PROCESS_RESTART));
+                NagiosObject restartData;
+                restartData.SetData<>("object_type", static_cast<int>(NEBTYPE_PROCESS_RESTART));
                 restartHandler->SendMessage(restartData);
             }
         }
@@ -64,7 +64,7 @@ namespace statusengine {
         }
 
         if (processData) {
-            NagiosProcessData *processData = new NagiosProcessData(data);
+            NagiosProcessData processData(data);
             processHandler->SendMessage(processData);
         }
     }

@@ -3,6 +3,7 @@
 #include "Configuration/GearmanConfiguration.h"
 #include "LogStream.h"
 #include "Statusengine.h"
+#include "Utility.h"
 
 #include <iostream>
 
@@ -16,7 +17,7 @@ namespace statusengine {
     };
 
     gearman_return_t se_gearman_worker_callback(gearman_job_st *job, void *worker_context) {
-        GearmanWorkerContext *ctx = reinterpret_cast<GearmanWorkerContext *>(worker_context);
+        auto ctx = reinterpret_cast<GearmanWorkerContext *>(worker_context);
         auto ret = ctx->Client->WorkerCallback(ctx->Queue, job);
         return ret;
     }
@@ -25,12 +26,12 @@ namespace statusengine {
         : MessageHandler(se), cfg(cfg), client(nullptr), worker(nullptr) {
 
         queueNames = cfg->GetQueueNames();
-        if (queueNames->size() > 0) {
+        if (!queueNames->empty()) {
             client = gearman_client_create(nullptr);
         }
 
         workerQueueNames = cfg->GetWorkerQueueNames();
-        if (workerQueueNames->size() > 0) {
+        if (!workerQueueNames->empty()) {
             worker = gearman_worker_create(nullptr);
             gearman_worker_add_options(worker, GEARMAN_WORKER_NON_BLOCKING);
         }
@@ -44,12 +45,12 @@ namespace statusengine {
 
         if (worker != nullptr) {
             gearman_worker_free(worker);
-            workerContexts.clear();
+            clearContainer<>(&workerContexts);
         }
     }
 
     bool GearmanClient::Connect() {
-        if (queueNames->size() > 0) {
+        if (!queueNames->empty()) {
             auto ret = gearman_client_add_servers(client, cfg->URL.c_str());
             if (gearman_success(ret)) {
                 se->Log() << "Added gearman client server connection" << LogLevel::Info;
@@ -60,7 +61,7 @@ namespace statusengine {
             }
         }
 
-        if (workerQueueNames->size() > 0) {
+        if (!workerQueueNames->empty()) {
             auto ret = gearman_worker_add_servers(worker, cfg->URL.c_str());
             if (gearman_success(ret)) {
                 se->Log() << "Added gearman worker server connection" << LogLevel::Info;
@@ -105,7 +106,7 @@ namespace statusengine {
 
     bool GearmanClient::Worker(unsigned long &counter) {
         bool moreJobs = false;
-        if (workerQueueNames->size() > 0) {
+        if (!workerQueueNames->empty()) {
             auto ret = gearman_worker_work(worker);
             switch (ret) {
                 case GEARMAN_SUCCESS:

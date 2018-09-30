@@ -54,7 +54,7 @@ namespace statusengine {
 #endif
         for (auto &qHandlerPair : handlers) {
             mqHandlers[qHandlerPair.first] = std::make_shared<MessageQueueHandler>(
-                se, this, maxBulkSize, &globalBulkCounter, qHandlerPair.first, qHandlerPair.second, false);
+                se, this, maxBulkSize, &globalBulkCounter, qHandlerPair.first, qHandlerPair.second, cfg->isBulkQueue(qHandlerPair.first));
         }
     }
 
@@ -87,15 +87,12 @@ namespace statusengine {
     }
 
     bool MessageHandlerList::QueueExists(Queue queue) {
-        if (mqHandlers.find(queue) != mqHandlers.end()) {
-            return true;
-        }
-        return false;
+        return mqHandlers.find(queue) != mqHandlers.end();
     }
 
     void MessageHandlerList::Worker() {
         unsigned long counter = 0ul;
-        bool moreMessages = false;
+        bool moreMessages;
         do {
             moreMessages = false;
             for (auto &handler : allHandlers) {

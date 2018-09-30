@@ -5,7 +5,6 @@
 namespace statusengine {
 
     MessageHandler::MessageHandler(Statusengine *se) : se(se) {}
-    MessageHandler::~MessageHandler(){};
 
     inline char *get_json_string(json_object *obj) {
         auto jsonChars = json_object_get_string(obj);

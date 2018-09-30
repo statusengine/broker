@@ -29,7 +29,7 @@ namespace statusengine {
 
         if (data->type == NEBTYPE_SERVICECHECK_PROCESSED) {
             if (servicechecks || ocsp) {
-                auto checkData = new NagiosServiceCheckData(data);
+                NagiosServiceCheckData checkData(data);;
                 if (servicechecks) {
                     serviceCheckHandler->SendMessage(checkData);
                 }
@@ -38,7 +38,7 @@ namespace statusengine {
                 }
             }
             if (service_perfdata) {
-                auto checkPerfData = new NagiosServiceCheckPerfData(data);
+                NagiosServiceCheckPerfData checkPerfData(data);
                 servicePerfHandler->SendMessage(checkPerfData);
             }
         }

@@ -22,7 +22,7 @@ namespace statusengine {
         auto data = reinterpret_cast<nebstruct_host_check_data *>(vdata);
 
         if (data->type == NEBTYPE_HOSTCHECK_PROCESSED) {
-            auto checkData = new NagiosHostCheckData(data);
+            NagiosHostCheckData checkData(data);
             if (hostchecks) {
                 hostCheckHandler->SendMessage(checkData);
             }

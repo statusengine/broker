@@ -29,11 +29,12 @@
 #include "NagiosObjects/NagiosStateChangeData.h"
 #include "NagiosObjects/NagiosSystemCommandData.h"
 #include "Nebmodule.h"
+#include "Utility.h"
 
 namespace statusengine {
 
     Statusengine::Statusengine(nebmodule *handle, std::string configurationPath)
-        : nebhandle(handle), configurationPath(configurationPath), ls(nullptr), bulkCallback(nullptr),
+        : nebhandle(handle), configurationPath(std::move(configurationPath)), ls(nullptr), bulkCallback(nullptr),
           messageWorkerCallback(nullptr) {
         ls = new LogStream(this);
         callbacks = new std::map<NEBCallbackType, std::vector<NebmoduleCallback *> *>();
@@ -162,11 +163,10 @@ namespace statusengine {
     Statusengine::~Statusengine() {
         Log() << "unloading..." << LogLevel::Info;
         neb_deregister_module_callbacks(nebhandle);
-
         for (auto const &x : *callbacks) {
-            x.second->clear();
+            clearContainer<>(x.second);
         }
-        callbacks->clear();
+        clearContainer<>(callbacks);
         delete callbacks;
         delete bulkCallback;
         delete messageWorkerCallback;
@@ -215,7 +215,7 @@ namespace statusengine {
     }
 
     int Statusengine::Callback(int event_type, void *data) {
-        NEBCallbackType cbType = static_cast<NEBCallbackType>(event_type);
+        auto cbType = static_cast<NEBCallbackType>(event_type);
         try {
             std::vector<NebmoduleCallback *> *tpcb = callbacks->at(cbType);
             for (auto &x : *tpcb) {

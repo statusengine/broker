@@ -4,6 +4,8 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <set>
+#include <utility>
 
 #include "vendor/toml.hpp"
 
@@ -16,12 +18,13 @@ namespace statusengine {
 
     class Configuration {
       public:
-        Configuration(Statusengine *se);
+        explicit Configuration(Statusengine *se);
         ~Configuration();
         bool Load(std::string);
 
         time_t GetBulkFlushInterval() const;
         unsigned long GetBulkMaximum() const;
+        bool isBulkQueue(Queue queue) const;
         time_t GetStartupScheduleMax() const;
 
         std::vector<std::shared_ptr<GearmanConfiguration>> *GetGearmanConfiguration();
@@ -41,6 +44,7 @@ namespace statusengine {
 
         std::vector<std::shared_ptr<RabbitmqConfiguration>> rabbitmq;
         std::vector<std::shared_ptr<GearmanConfiguration>> gearman;
+        std::set<Queue> bulkQueues;
 
         unsigned long maxWorkerMessagesPerInterval;
 
@@ -51,7 +55,7 @@ namespace statusengine {
             catch (const toml::type_error &tte) {
                 se->Log() << "Invalid configuration: Invalid value for key " << ky << LogLevel::Error;
             }
-            return std::move(opt);
+            return opt;
         }
     };
 } // namespace statusengine

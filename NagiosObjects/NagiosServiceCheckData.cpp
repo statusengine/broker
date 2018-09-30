@@ -1,5 +1,7 @@
 #include "NagiosServiceCheckData.h"
 
+#include <iostream>
+
 #include "NagiosService.h"
 
 namespace statusengine {
@@ -17,7 +19,6 @@ namespace statusengine {
                                &raw_command, 0);
 
         NagiosObject servicecheck;
-
         servicecheck.SetData<>("host_name", serviceCheckData->host_name);
         servicecheck.SetData<>("service_description", serviceCheckData->service_description);
         servicecheck.SetData<>("command_line", (raw_command != nullptr ? raw_command : nullptr));
@@ -38,7 +39,6 @@ namespace statusengine {
         servicecheck.SetData<>("execution_time", serviceCheckData->execution_time);
         servicecheck.SetData<>("latency", serviceCheckData->latency);
         servicecheck.SetData<>("return_code", serviceCheckData->return_code);
-
         SetData<>("servicecheck", &servicecheck);
     }
 } // namespace statusengine
