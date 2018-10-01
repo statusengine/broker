@@ -26,7 +26,7 @@ inline void nm_log(long unsigned logLevel, const char *_, const char *message) {
     char *temp = nullptr;
     temp = strdup(message);
     write_to_all_logs(temp, logLevel);
-    delete temp;W
+    delete temp;
 }
 #endif
 
