@@ -26,7 +26,7 @@ inline void nm_log(long unsigned logLevel, const char *_, const char *message) {
     char *temp = nullptr;
     temp = strdup(message);
     write_to_all_logs(temp, logLevel);
-    delete temp;
+    delete temp;W
 }
 #endif
 
@@ -53,16 +53,6 @@ namespace statusengine {
         static void ScheduleServiceCheckDelay(service *temp_service, time_t delay);
 
         static void ScheduleServiceCheckFixed(service *temp_service, time_t fixed);
-
-        static bool AcknowledgeHost(host *hst, const char *ack_author, const char *comment, bool sticky, bool notify,
-                                    bool persistent);
-
-        static void DeleteAcknowledgeHost(host *hst);
-
-        static bool AcknowledgeService(service *svc, const char *ack_author, const char *comment, bool sticky,
-                                       bool notify, bool persistent);
-
-        static void DeleteAcknowledgeService(service *svc);
 
       private:
         static Statusengine *se;

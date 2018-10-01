@@ -7,17 +7,15 @@ namespace statusengine {
 
     class NebmoduleCallback {
       public:
-        explicit NebmoduleCallback(NEBCallbackType cbType, Statusengine *se, int priority = 0);
+        explicit NebmoduleCallback(NEBCallbackType cbType, Statusengine *se);
+        virtual ~NebmoduleCallback() = default;
 
         virtual NEBCallbackType GetCallbackType();
-
-        virtual int GetPriority();
 
         virtual void Callback(int event_type, void *data) = 0;
 
       protected:
         Statusengine *se;
-        int priority;
         NEBCallbackType cbType;
     };
 
