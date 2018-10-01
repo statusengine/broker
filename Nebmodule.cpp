@@ -78,7 +78,7 @@ namespace statusengine {
 #ifndef BUILD_NAGIOS
         schedule_next_service_check(temp_service, delay, CHECK_OPTION_NONE);
 #else
-        schedule_service_check(temp_service, schedule_time, CHECK_OPTION_NONE);W
+        schedule_service_check(temp_service, schedule_time, CHECK_OPTION_NONE);
 #endif // BUILD_NAGIOS
     }
 
