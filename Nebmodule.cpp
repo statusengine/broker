@@ -15,7 +15,7 @@ namespace statusengine {
     Statusengine *Nebmodule::se = nullptr;
 
     int Nebmodule::Init(nebmodule *handle, std::string args) {
-        se = new Statusengine(handle, args);
+        se = new Statusengine(handle, std::move(args));
         return se->Init();
     }
 

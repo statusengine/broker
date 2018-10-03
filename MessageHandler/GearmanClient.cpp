@@ -38,12 +38,13 @@ namespace statusengine {
     }
 
     GearmanClient::~GearmanClient() {
-        se->Log() << "Destroy gearman client" << LogLevel::Info;
         if (client != nullptr) {
+            se->Log() << "Destroy gearman client" << LogLevel::Info;
             gearman_client_free(client);
         }
 
         if (worker != nullptr) {
+            se->Log() << "Destroy gearman worker" << LogLevel::Info;
             gearman_worker_free(worker);
             clearContainer<>(&workerContexts);
         }
