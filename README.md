@@ -19,10 +19,12 @@ apt install cmake gcc g++ build-essential libglib2.0-dev libgearman-dev uuid-dev
 
 ### Sources
 
+```bash
 cd /tmp
 git clone https://github.com/statusengine/broker
 mkdir build
 cd build
+```
 
 ### Naemon
 
@@ -73,50 +75,10 @@ You can specify -DWITH_GEARMAN=OFF or -DWITH_RABBITMQ=OFF as cmake argument to d
 
 Per default everything is disabled and the broker does nothing.
 
-This is an example config that works perfectly with statusengine worker:
-```toml
-[Queues]
-HostStatus = true
-HostCheck = true
-ServiceStatus = true
-ServiceCheck = true
-ServicePerfData = true
-StateChange = true
-LogData = true
-AcknowledgementData = true
-FlappingData = true
-DowntimeData = true
-ContactNotificationMethodData = true
-RestartData = true
-#SystemCommandData = false
-#CommentData = false
-#ExternalCommandData = false
-#NotificationData = false
-#ProgramStatusData = false
-#ContactStatusData = false
-#ContactNotificationData = false
-#EventHandlerData = false
-#ProcessData = false
-#BulkOCSP = false
-#OCSP = false
-#BulkOCHP = false
-#OCHP = false
-
-# You can specify multiple gearman connections, by adding more [[Gearman]] sections.
-[[Gearman]]
-URL = "127.0.0.1:4730"
-
-# You can specify multiple rabbitmq connections, by adding more [[Rabbitmq]] sections.
-#[[Rabbitmq]]
-#Hostname = "localhost"
-#Username = "statusengine"
-#Password = "statusengine"
-
-[Scheduler]
-# Used to fix a nasty scheduler bug in naemon, needed when you often restart naemon
-# If next_schedule of a service or host is in the past during startup, we reschedule
-# the service/host within $StartupScheduleMax seconds.
-StartupScheduleMax = 30
+You can look at statusengine.toml as an example configuration file. In your naemon.cfg/nagios.cfg you have to specify the
+broker module like this:
+```ini
+broker_module=/opt/naemon/lib/libstatusengine.so /path/to/statusengine.toml
 ```
 
 ## Developer build + test
@@ -137,17 +99,3 @@ I have also placed a small script inside the container that shows you the queue 
 ```bash
 docker exec -t -i broker_naemon_1 /usr/bin/queuestatus
 ```
-
-### Developers with Windows Client
-
-For developers working with a windows client, I have created a script that uses docker to download the necessary headers for autocomplete in VS oder VSCode.
-
-
-```powershell
-cd Path\To\Workspace\devtools
-.\DownloadHeaders.ps1
-```
-
-This will place a headers.zip file in the devtools folder. Extract the contents of this zip file to devtools/include.
-
-If you have VSCode you can copy devtools\c_cpp_properties.json to .vscode for a ready to run autocomplete configuration. Please note that VSCode may use IntelliSense from VS, so you have to install it too.
