@@ -18,6 +18,9 @@ build:trusty:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
     paths:
       - libstatusengine.so
+      - README.md
+      - VERSION
+      - LICENSE
 
 build:xenial:
   image: ubuntu:xenial
@@ -39,6 +42,9 @@ build:xenial:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
     paths:
       - libstatusengine.so
+      - README.md
+      - VERSION
+      - LICENSE
 
 build:bionic:
   image: ubuntu:bionic
@@ -60,6 +66,9 @@ build:bionic:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
     paths:
       - libstatusengine.so
+      - README.md
+      - VERSION
+      - LICENSE
 
 build:jessie:
   image: debian:jessie
@@ -82,6 +91,9 @@ build:jessie:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
     paths:
       - libstatusengine.so
+      - README.md
+      - VERSION
+      - LICENSE
 
 build:stretch:
   image: debian:stretch
@@ -103,6 +115,9 @@ build:stretch:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
     paths:
       - libstatusengine.so
+      - README.md
+      - VERSION
+      - LICENSE
 
 build:nagios:trusty:
   image: ubuntu:trusty
@@ -123,6 +138,9 @@ build:nagios:trusty:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
     paths:
       - libstatusengine.so
+      - README.md
+      - VERSION
+      - LICENSE
 
 build:nagios:xenial:
   image: ubuntu:xenial
@@ -143,6 +161,9 @@ build:nagios:xenial:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
     paths:
       - libstatusengine.so
+      - README.md
+      - VERSION
+      - LICENSE
 
 build:nagios:bionic:
   image: ubuntu:bionic
@@ -163,6 +184,9 @@ build:nagios:bionic:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
     paths:
       - libstatusengine.so
+      - README.md
+      - VERSION
+      - LICENSE
 
 build:nagios:jessie:
   image: debian:jessie
@@ -184,6 +208,9 @@ build:nagios:jessie:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
     paths:
       - libstatusengine.so
+      - README.md
+      - VERSION
+      - LICENSE
 
 build:nagios:stretch:
   image: debian:stretch
@@ -204,3 +231,6 @@ build:nagios:stretch:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
     paths:
       - libstatusengine.so
+      - README.md
+      - VERSION
+      - LICENSE
