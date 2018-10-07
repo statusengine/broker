@@ -82,9 +82,9 @@ WorkerCommand = "statusngin_cmd"
 ##LogData = "statusngin_logentries"
 
 [Scheduler]
-# Used to fix a nasty scheduler behaviour in naemon, needed when you often restart naemon
+# Used to fix a nasty scheduler behaviour in naemon when you often restart naemon
 # If next_schedule of a service or host is in the past during startup, we reschedule
-# the service/host within $StartupScheduleMax seconds.
+# the service/host within $StartupScheduleMax seconds instead of the check_intervall of the host/service.
 StartupScheduleMax = 30
 
 [Bulk]
