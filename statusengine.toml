@@ -2,6 +2,10 @@
 # to the specified URL/Hostname.
 [[Gearman]]
 URL = "127.0.0.1:4730"
+# The following configuration items activating the generation and queuing of events.
+# The format is Identifier = "NameOfQueueinGearmanOrRabbitmq"
+# If you define multiple Gearman or Rabbitmq sections with the same Identifier, the generated message will be sent
+# to every instance. 
 HostStatus = "statusngin_hoststatus"
 HostCheck = "statusngin_hostchecks"
 ServiceStatus = "statusngin_servicestatus"
@@ -18,9 +22,7 @@ OCSP = "statusngin_ocsp"
 # You can run external commands vis this queue.
 WorkerCommand = "statusngin_cmd"
 
-# To process OCHP/OCSP queues from, for example, a satellite, you could connect to that gearman/rabbitmq server
-# This would mean that every host and service on the remote instance must be configured on the master too (as passive
-# service)
+# The broker can directly process OCHP/OCSP from another naemon/nagios instance. If you have multiple 
 #WorkerOCHP = "statusngin_ochp"
 #WorkerOCSP = "statusngin_ocsp"
 
@@ -86,9 +88,9 @@ WorkerCommand = "statusngin_cmd"
 StartupScheduleMax = 30
 
 [Bulk]
-#Maximum number of messages in one bulk message
+## Maximum number of messages in one bulk message
 #Maximum = 200
-#Flush Bulk messages every X seconds dispite number of cached messages
+## Flush Bulk messages every X seconds dispite number of cached messages
 #FlushInterval = 10
-#List of queue identifier which should be created as bulk message
+## List of queue identifier which should be created as bulk message. This is a global option for all connections
 Queues = ["HostStatus", "HostCheck", "ServiceStatus", "ServiceCheck", "ServicePerfData", "StateChange", "OCHP", "OCSP", "LogData"]
