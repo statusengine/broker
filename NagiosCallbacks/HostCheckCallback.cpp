@@ -18,6 +18,10 @@ namespace statusengine {
         }
     }
 
+    HostCheckCallback::HostCheckCallback(HostCheckCallback &&other) noexcept
+        : NebmoduleCallback::NebmoduleCallback(std::move(other)), hostchecks(other.hostchecks), ochp(other.ochp),
+          hostCheckHandler(std::move(other.hostCheckHandler)), ochpHandler(std::move(other.ochpHandler)) {}
+
     void HostCheckCallback::Callback(int event_type, void *vdata) {
         auto data = reinterpret_cast<nebstruct_host_check_data *>(vdata);
 

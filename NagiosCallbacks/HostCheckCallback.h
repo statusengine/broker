@@ -11,8 +11,9 @@ namespace statusengine {
     class HostCheckCallback : public NebmoduleCallback {
       public:
         explicit HostCheckCallback(Statusengine *se);
+        HostCheckCallback(HostCheckCallback && other) noexcept;
 
-        virtual void Callback(int event_type, void *vdata);
+        void Callback(int event_type, void *vdata) override;
 
       private:
         bool hostchecks;

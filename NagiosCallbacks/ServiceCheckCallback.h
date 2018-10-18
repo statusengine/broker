@@ -10,8 +10,9 @@ namespace statusengine {
     class ServiceCheckCallback : public NebmoduleCallback {
       public:
         explicit ServiceCheckCallback(Statusengine *se);
+        ServiceCheckCallback(ServiceCheckCallback &&other) noexcept;
 
-        virtual void Callback(int event_type, void *vdata);
+        void Callback(int event_type, void *vdata) override;
 
       private:
         bool servicechecks;

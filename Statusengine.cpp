@@ -35,9 +35,8 @@ namespace statusengine {
 
     Statusengine::Statusengine(nebmodule *handle, std::string configurationPath)
         : nebhandle(handle), configurationPath(std::move(configurationPath)), ls(nullptr), bulkCallback(nullptr),
-          messageWorkerCallback(nullptr) {
+          messageWorkerCallback(nullptr), callbacks() {
         ls = new LogStream(this);
-        callbacks = new std::map<NEBCallbackType, std::vector<NebmoduleCallback *> *>();
         configuration = new Configuration(this);
     }
 
@@ -73,105 +72,104 @@ namespace statusengine {
             return 1;
         }
 
+        callbacks.emplace();
+
         messageHandler = new MessageHandlerList(this, configuration);
         if (!messageHandler->Connect()) {
             return 1;
         }
 
         if (messageHandler->QueueExists(Queue::HostStatus)) {
-            RegisterCallback(new StandardCallback<nebstruct_host_status_data, NagiosHostStatusData,
-                                                  NEBCALLBACK_HOST_STATUS_DATA, Queue::HostStatus>(this));
+            RegisterCallback<StandardCallback<nebstruct_host_status_data, NagiosHostStatusData,
+                    NEBCALLBACK_HOST_STATUS_DATA, Queue::HostStatus>>(this);
         }
 
         if (messageHandler->QueueExists(Queue::ServiceStatus)) {
-            RegisterCallback(new StandardCallback<nebstruct_service_status_data, NagiosServiceStatusData,
-                                                  NEBCALLBACK_SERVICE_STATUS_DATA, Queue::ServiceStatus>(this));
+            RegisterCallback<StandardCallback<nebstruct_service_status_data, NagiosServiceStatusData,
+                    NEBCALLBACK_SERVICE_STATUS_DATA, Queue::ServiceStatus>>(this);
         }
 
         if (messageHandler->QueueExists(Queue::LogData)) {
-            RegisterCallback(
-                new StandardCallback<nebstruct_log_data, NagiosLogData, NEBCALLBACK_LOG_DATA, Queue::LogData>(this));
+            RegisterCallback<StandardCallback<nebstruct_log_data, NagiosLogData, NEBCALLBACK_LOG_DATA, Queue::LogData>>(this);
         }
 
         if (messageHandler->QueueExists(Queue::StateChange)) {
-            RegisterCallback(new StandardCallback<nebstruct_statechange_data, NagiosStateChangeData,
-                                                  NEBCALLBACK_STATE_CHANGE_DATA, Queue::StateChange>(this));
+            RegisterCallback<StandardCallback<nebstruct_statechange_data, NagiosStateChangeData,
+                    NEBCALLBACK_STATE_CHANGE_DATA, Queue::StateChange>>(this);
         }
 
         if (messageHandler->QueueExists(Queue::SystemCommandData)) {
-            RegisterCallback(new StandardCallback<nebstruct_system_command_data, NagiosSystemCommandData,
-                                                  NEBCALLBACK_SYSTEM_COMMAND_DATA, Queue::SystemCommandData>(this));
+            RegisterCallback<StandardCallback<nebstruct_system_command_data, NagiosSystemCommandData,
+                    NEBCALLBACK_SYSTEM_COMMAND_DATA, Queue::SystemCommandData>>(this);
         }
 
         if (messageHandler->QueueExists(Queue::ExternalCommandData)) {
-            RegisterCallback(new StandardCallback<nebstruct_external_command_data, NagiosExternalCommandData,
-                                                  NEBCALLBACK_EXTERNAL_COMMAND_DATA, Queue::ExternalCommandData>(this));
+            RegisterCallback<StandardCallback<nebstruct_external_command_data, NagiosExternalCommandData,
+                    NEBCALLBACK_EXTERNAL_COMMAND_DATA, Queue::ExternalCommandData>>(this);
         }
 
         if (messageHandler->QueueExists(Queue::CommentData)) {
-            RegisterCallback(new StandardCallback<nebstruct_comment_data, NagiosCommentData, NEBCALLBACK_COMMENT_DATA,
-                                                  Queue::CommentData>(this));
+            RegisterCallback<StandardCallback<nebstruct_comment_data, NagiosCommentData, NEBCALLBACK_COMMENT_DATA,
+                    Queue::CommentData>>(this);
         }
 
         if (messageHandler->QueueExists(Queue::AcknowledgementData)) {
-            RegisterCallback(new StandardCallback<nebstruct_acknowledgement_data, NagiosAcknowledgementData,
-                                                  NEBCALLBACK_ACKNOWLEDGEMENT_DATA, Queue::AcknowledgementData>(this));
+            RegisterCallback<StandardCallback<nebstruct_acknowledgement_data, NagiosAcknowledgementData,
+                    NEBCALLBACK_ACKNOWLEDGEMENT_DATA, Queue::AcknowledgementData>>(this);
         }
 
         if (messageHandler->QueueExists(Queue::FlappingData)) {
-            RegisterCallback(new StandardCallback<nebstruct_flapping_data, NagiosFlappingData,
-                                                  NEBCALLBACK_FLAPPING_DATA, Queue::FlappingData>(this));
+            RegisterCallback<StandardCallback<nebstruct_flapping_data, NagiosFlappingData,
+                    NEBCALLBACK_FLAPPING_DATA, Queue::FlappingData>>(this);
         }
 
         if (messageHandler->QueueExists(Queue::DowntimeData)) {
-            RegisterCallback(new StandardCallback<nebstruct_downtime_data, NagiosDowntimeData,
-                                                  NEBCALLBACK_DOWNTIME_DATA, Queue::DowntimeData>(this));
+            RegisterCallback<StandardCallback<nebstruct_downtime_data, NagiosDowntimeData,
+                    NEBCALLBACK_DOWNTIME_DATA, Queue::DowntimeData>>(this);
         }
 
         if (messageHandler->QueueExists(Queue::NotificationData)) {
-            RegisterCallback(new StandardCallback<nebstruct_notification_data, NagiosNotificationData,
-                                                  NEBCALLBACK_NOTIFICATION_DATA, Queue::NotificationData>(this));
+            RegisterCallback<StandardCallback<nebstruct_notification_data, NagiosNotificationData,
+                    NEBCALLBACK_NOTIFICATION_DATA, Queue::NotificationData>>(this);
         }
 
         if (messageHandler->QueueExists(Queue::ProgramStatusData)) {
-            RegisterCallback(new StandardCallback<nebstruct_program_status_data, NagiosProgramStatusData,
-                                                  NEBCALLBACK_PROGRAM_STATUS_DATA, Queue::ProgramStatusData>(this));
+            RegisterCallback<StandardCallback<nebstruct_program_status_data, NagiosProgramStatusData,
+                    NEBCALLBACK_PROGRAM_STATUS_DATA, Queue::ProgramStatusData>>(this);
         }
 
         if (messageHandler->QueueExists(Queue::ContactStatusData)) {
-            RegisterCallback(new StandardCallback<nebstruct_contact_status_data, NagiosContactStatusData,
-                                                  NEBCALLBACK_CONTACT_STATUS_DATA, Queue::ContactStatusData>(this));
+            RegisterCallback<StandardCallback<nebstruct_contact_status_data, NagiosContactStatusData,
+                    NEBCALLBACK_CONTACT_STATUS_DATA, Queue::ContactStatusData>>(this);
         }
 
         if (messageHandler->QueueExists(Queue::ContactNotificationData)) {
-            RegisterCallback(
-                new StandardCallback<nebstruct_contact_notification_data, NagiosContactNotificationData,
-                                     NEBCALLBACK_CONTACT_NOTIFICATION_DATA, Queue::ContactNotificationData>(this));
+            RegisterCallback<StandardCallback<nebstruct_contact_notification_data, NagiosContactNotificationData,
+                    NEBCALLBACK_CONTACT_NOTIFICATION_DATA, Queue::ContactNotificationData>>(this);
         }
 
         if (messageHandler->QueueExists(Queue::ContactNotificationMethodData)) {
-            RegisterCallback(
-                new StandardCallback<nebstruct_contact_notification_method_data, NagiosContactNotificationMethodData,
-                                     NEBCALLBACK_CONTACT_NOTIFICATION_METHOD_DATA,
-                                     Queue::ContactNotificationMethodData>(this));
+            RegisterCallback<StandardCallback<nebstruct_contact_notification_method_data, NagiosContactNotificationMethodData,
+                    NEBCALLBACK_CONTACT_NOTIFICATION_METHOD_DATA,
+                    Queue::ContactNotificationMethodData>>(this);
         }
 
         if (messageHandler->QueueExists(Queue::EventHandlerData)) {
-            RegisterCallback(new StandardCallback<nebstruct_event_handler_data, NagiosEventHandlerData,
-                                                  NEBCALLBACK_EVENT_HANDLER_DATA, Queue::EventHandlerData>(this));
+            RegisterCallback<StandardCallback<nebstruct_event_handler_data, NagiosEventHandlerData,
+                    NEBCALLBACK_EVENT_HANDLER_DATA, Queue::EventHandlerData>>(this);
         }
 
         if (messageHandler->QueueExists(Queue::ServiceCheck) || messageHandler->QueueExists(Queue::OCSP) ||
             messageHandler->QueueExists(Queue::ServicePerfData)) {
-            RegisterCallback(new ServiceCheckCallback(this));
+            RegisterCallback<ServiceCheckCallback>(this);
         }
 
         if (messageHandler->QueueExists(Queue::HostCheck) || messageHandler->QueueExists(Queue::OCHP)) {
-            RegisterCallback(new HostCheckCallback(this));
+            RegisterCallback<HostCheckCallback>(this);
         }
 
         if (messageHandler->QueueExists(Queue::RestartData) || messageHandler->QueueExists(Queue::ProcessData)) {
-            RegisterCallback(new ProcessDataCallback(this, configuration->GetStartupScheduleMax()));
+            RegisterCallback<ProcessDataCallback>(this, configuration->GetStartupScheduleMax());
         }
 
         return 0;
@@ -180,11 +178,7 @@ namespace statusengine {
     Statusengine::~Statusengine() {
         Log() << "unloading..." << LogLevel::Info;
         neb_deregister_module_callbacks(nebhandle);
-        for (auto const &x : *callbacks) {
-            clearContainer<>(x.second);
-        }
-        clearContainer<>(callbacks);
-        delete callbacks;
+        callbacks.clear();
         delete bulkCallback;
         delete messageWorkerCallback;
         delete configuration;
@@ -214,34 +208,18 @@ namespace statusengine {
         neb_set_module_info(nebhandle, modinfo, const_cast<char *>(text.c_str()));
     }
 
-    void Statusengine::RegisterCallback(NebmoduleCallback *cb) {
-        std::vector<NebmoduleCallback *> *tpcb;
-        try {
-            tpcb = callbacks->at(cb->GetCallbackType());
-        }
-        catch (std::out_of_range &oor) {
-            tpcb = new std::vector<NebmoduleCallback *>();
-            callbacks->insert(std::make_pair(cb->GetCallbackType(), tpcb));
-            Nebmodule::RegisterCallback(cb->GetCallbackType());
-        }
-        tpcb->push_back(cb);
-    }
-
     void Statusengine::RegisterEventCallback(EventCallback *ecb) {
         Nebmodule::RegisterEventCallback(ecb);
     }
 
     int Statusengine::Callback(int event_type, void *data) {
         auto cbType = static_cast<NEBCallbackType>(event_type);
-        try {
-            std::vector<NebmoduleCallback *> *tpcb = callbacks->at(cbType);
-            for (auto &x : *tpcb) {
-                x->Callback(event_type, data);
-            }
+        auto cblist = callbacks.equal_range(cbType);
+
+        for (auto cb = cblist.first; cb != cblist.second; ++cb) {
+            cb->second->Callback(event_type, data);
         }
-        catch (std::out_of_range &oor) {
-            Log() << "Could not find callback for " << event_type << LogLevel::Warning;
-        }
+
         return 0;
     }
 

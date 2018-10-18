@@ -24,12 +24,18 @@ namespace statusengine {
         }
     }
 
+    ServiceCheckCallback::ServiceCheckCallback(ServiceCheckCallback &&other) noexcept
+        : NebmoduleCallback::NebmoduleCallback(std::move(other)), servicechecks(other.servicechecks), ocsp(other.ocsp),
+          service_perfdata(other.service_perfdata), serviceCheckHandler(std::move(other.serviceCheckHandler)),
+          ocspHandler(std::move(other.ocspHandler)), servicePerfHandler(std::move(other.servicePerfHandler)) {}
+
     void ServiceCheckCallback::Callback(int event_type, void *vdata) {
         auto data = reinterpret_cast<nebstruct_service_check_data *>(vdata);
 
         if (data->type == NEBTYPE_SERVICECHECK_PROCESSED) {
             if (servicechecks || ocsp) {
-                NagiosServiceCheckData checkData(data);;
+                NagiosServiceCheckData checkData(data);
+                ;
                 if (servicechecks) {
                     serviceCheckHandler->SendMessage(checkData);
                 }

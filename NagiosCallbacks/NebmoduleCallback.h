@@ -8,6 +8,7 @@ namespace statusengine {
     class NebmoduleCallback {
       public:
         explicit NebmoduleCallback(NEBCallbackType cbType, Statusengine *se);
+        NebmoduleCallback(NebmoduleCallback &&other) noexcept;
         virtual ~NebmoduleCallback() = default;
 
         virtual NEBCallbackType GetCallbackType();

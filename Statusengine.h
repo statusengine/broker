@@ -2,7 +2,7 @@
 
 #include <map>
 #include <string>
-#include <vector>
+#include <memory>
 
 #include "LogStream.h"
 #include "Nebmodule.h"
@@ -29,9 +29,17 @@ namespace statusengine {
 
         LogStream &Log();
         void FlushBulkQueue();
-        void RegisterCallback(NebmoduleCallback *cb);
         void RegisterEventCallback(EventCallback *ecb);
         MessageHandlerList *GetMessageHandler() const;
+
+        template<typename T, typename... _Args>
+        void RegisterCallback(_Args&&... __args) {
+            std::shared_ptr<NebmoduleCallback> cb  = std::static_pointer_cast<NebmoduleCallback>(std::make_shared<T>(std::forward<_Args>(__args)...));
+            NEBCallbackType cbType = cb->GetCallbackType();
+            if (callbacks.find(cbType) == callbacks.end())
+                Nebmodule::RegisterCallback(cbType);
+            callbacks.insert(std::make_pair(cbType, cb));
+        }
 
       private:
         Statusengine(nebmodule *handle, std::string configurationPath);
@@ -46,7 +54,7 @@ namespace statusengine {
         Configuration *configuration;
         MessageHandlerList *messageHandler;
         LogStream *ls;
-        std::map<NEBCallbackType, std::vector<NebmoduleCallback *> *> *callbacks;
+        std::multimap<NEBCallbackType, std::shared_ptr<NebmoduleCallback>> callbacks;
         BulkMessageCallback *bulkCallback;
         MessageWorkerCallback *messageWorkerCallback;
     };
