@@ -34,9 +34,8 @@
 namespace statusengine {
 
     Statusengine::Statusengine(nebmodule *handle, std::string configurationPath)
-        : nebhandle(handle), configurationPath(std::move(configurationPath)), ls(nullptr), bulkCallback(nullptr),
+        : nebhandle(handle), configurationPath(std::move(configurationPath)), ls(this), bulkCallback(nullptr),
           messageWorkerCallback(nullptr), callbacks() {
-        ls = new LogStream(this);
         configuration = new Configuration(this);
     }
 
@@ -172,6 +171,8 @@ namespace statusengine {
             RegisterCallback<ProcessDataCallback>(this, configuration->GetStartupScheduleMax());
         }
 
+        messageHandler->InitComplete();
+
         return 0;
     }
 
@@ -185,7 +186,6 @@ namespace statusengine {
         delete messageHandler;
 
         Log() << "unloading finished" << LogLevel::Info;
-        delete ls;
     }
 
     void Statusengine::InitEventCallbacks() {
@@ -197,7 +197,7 @@ namespace statusengine {
     }
 
     LogStream &Statusengine::Log() {
-        return *ls;
+        return ls;
     }
 
     void Statusengine::FlushBulkQueue() {

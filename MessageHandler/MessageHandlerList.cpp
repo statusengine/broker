@@ -14,7 +14,9 @@
 
 namespace statusengine {
     MessageHandlerList::MessageHandlerList(Statusengine *se, Configuration *cfg)
-        : se(se), maxBulkSize(0), globalBulkCounter(0) {
+        : se(se), maxBulkSize(0), globalBulkCounter(0), flushInProgress(true) {
+        // flushInProgress is set to true to ensure no messages are sent until initialization is complete
+
         maxBulkSize = cfg->GetBulkMaximum();
         std::map<Queue, std::shared_ptr<std::vector<std::shared_ptr<MessageHandler>>>> handlers;
         auto InsertHandler = [&handlers](Queue queue, std::shared_ptr<MessageHandler> handler) {
@@ -62,14 +64,20 @@ namespace statusengine {
         FlushBulkQueue();
     }
 
+    void MessageHandlerList::InitComplete() {
+        flushInProgress = false;
+    }
+
     void MessageHandlerList::FlushBulkQueue() {
-        if (globalBulkCounter > 0) {
+        if (globalBulkCounter > 0 && !flushInProgress) {
+            flushInProgress = true;
             se->Log() << "Flush Bulk Queues" << LogLevel::Info;
 
             for (auto &handler : mqHandlers) {
                 handler.second->FlushBulkQueue();
             }
             globalBulkCounter = 0;
+            flushInProgress = false;
         }
     }
 

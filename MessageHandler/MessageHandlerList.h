@@ -16,6 +16,8 @@ namespace statusengine {
         MessageHandlerList(Statusengine *se, Configuration *cfg);
         ~MessageHandlerList();
 
+        virtual void InitComplete();
+
         virtual bool Connect();
 
         virtual void FlushBulkQueue();
@@ -30,6 +32,7 @@ namespace statusengine {
         Statusengine *se;
         unsigned long maxBulkSize;
         unsigned long globalBulkCounter;
+        bool flushInProgress;
         unsigned long maxWorkerMessagesPerInterval;
     };
 } // namespace statusengine

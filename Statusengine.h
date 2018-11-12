@@ -53,7 +53,7 @@ namespace statusengine {
         std::string configurationPath;
         Configuration *configuration;
         MessageHandlerList *messageHandler;
-        LogStream *ls;
+        LogStream ls;
         std::multimap<NEBCallbackType, std::shared_ptr<NebmoduleCallback>> callbacks;
         BulkMessageCallback *bulkCallback;
         MessageWorkerCallback *messageWorkerCallback;

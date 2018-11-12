@@ -9,9 +9,9 @@
 namespace statusengine {
     class RabbitmqConfiguration : public MessageHandlerConfiguration {
       public:
-        RabbitmqConfiguration(Statusengine *se);
+        explicit RabbitmqConfiguration(Statusengine *se);
         ~RabbitmqConfiguration();
-        virtual bool Load(const toml::Table &tbl);
+        bool Load(const toml::Table &tbl) override;
         std::string Hostname;
         int Port;
         timeval *Timeout;
