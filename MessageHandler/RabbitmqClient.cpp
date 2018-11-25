@@ -209,10 +209,12 @@ namespace statusengine {
             amqp_bytes_t message_bytes;
             message_bytes.len = message.length();
             char *bytes = nullptr;
+            // we have to copy the message, because we can't use a const char* as void*
             bytes = strdup(message.c_str());
-            message_bytes.bytes = reinterpret_cast<void *>(bytes);
+            message_bytes.bytes = bytes;
             auto pubStatus = amqp_basic_publish(conn, 1, amqp_cstring_bytes(cfg->Exchange.c_str()),
-                                                amqp_cstring_bytes(queueName.c_str()), 0, 0, NULL, message_bytes);
+                                                amqp_cstring_bytes(queueName.c_str()), 0, 0, nullptr, message_bytes);
+            free(bytes);
             if (pubStatus < 0) {
                 connected = false;
                 se->Log() << "Could not send message to rabbitmq: " << amqp_error_string2(pubStatus) << LogLevel::Error;
