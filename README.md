@@ -13,8 +13,13 @@ Visit the [documentation](https://statusengine.org/) for more information about 
 Please compile and install the newest version of naemon or nagios. We need the header files for building the broker.
 
 ### Dependencies
+#### Ubuntu/Debian
 ```bash
 apt install cmake gcc g++ build-essential libglib2.0-dev libgearman-dev uuid-dev libicu-dev libjson-c-dev pkg-config libssl-dev librabbitmq-dev
+```
+#### CentOS
+```bash
+yum install git cmake3 gcc gcc-c++ pkgconfig librabbitmq-devel libgearman-devel libicu-devel json-c-devel openssl-devel glib2-devel
 ```
 
 ### Sources
@@ -28,22 +33,29 @@ cd build
 
 ### Naemon
 
-If you didn't install naemon to /usr or /usr/local you have to create a symlink for naemon.pc, so that cmake can find the header files.
-
-In this example I installed naemon to /opt/naemon:
-```bash
-ln -s /opt/naemon/lib/pkgconfig/naemon.pc /usr/local/lib/pkgconfig/naemon.pc
-```
-
 Then create the make files
+
+#### Ubuntu/Debian
 ```bash
+export PKG_CONFIG_PATH=/opt/naemon/lib/pkgconfig/
 cmake ../broker
+```
+#### RHEL/CentOS
+```bash
+export PKG_CONFIG_PATH=/opt/naemon/lib/pkgconfig/
+cmake3 ../broker
 ```
 
 ### Nagios
 
+#### Ubuntu/Debian
 ```bash
 cmake -DBUILD_NAGIOS=ON -DNAGIOS_INCLUDE_DIR=/opt/nagios/include ../broker
+```
+
+#### RHEL/CentOS
+```bash
+cmake3 -DBUILD_NAGIOS=ON -DNAGIOS_INCLUDE_DIR=/opt/nagios/include ../broker
 ```
 
 ### Build
