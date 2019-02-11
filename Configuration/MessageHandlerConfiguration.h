@@ -8,9 +8,9 @@
 
 #include "Queue.h"
 #include "vendor/toml.hpp"
+#include "IStatusengine.h"
 
 namespace statusengine {
-    class Statusengine;
 
     class MessageHandlerConfiguration {
       public:
@@ -23,9 +23,9 @@ namespace statusengine {
         virtual std::shared_ptr<std::set<WorkerQueue>> GetWorkerQueues() const;
 
       protected:
-        explicit MessageHandlerConfiguration(Statusengine *se);
+        explicit MessageHandlerConfiguration(IStatusengine *se);
 
-        Statusengine *se;
+        IStatusengine *se;
 
         std::shared_ptr<std::map<Queue, std::string>> queues;
         std::shared_ptr<std::map<WorkerQueue, std::string>> workerQueues;

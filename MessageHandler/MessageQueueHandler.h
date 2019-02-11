@@ -6,14 +6,14 @@
 #include "Configuration/Queue.h"
 #include "NagiosObjects/NagiosObject.h"
 #include "MessageHandler.h"
+#include "IStatusengine.h"
 
 namespace statusengine {
     class MessageHandlerList;
-    class Statusengine;
 
     class MessageQueueHandler {
       public:
-        MessageQueueHandler(Statusengine *se, MessageHandlerList *mhlist, unsigned long maxBulkSize,
+        MessageQueueHandler(IStatusengine *se, MessageHandlerList *mhlist, unsigned long maxBulkSize,
                             unsigned long *globalBulkCounter, Queue queue,
                             std::shared_ptr<std::vector<std::shared_ptr<MessageHandler>>> handlers, bool bulk);
         /**
@@ -25,7 +25,7 @@ namespace statusengine {
 
       private:
         MessageHandlerList *mhlist;
-        Statusengine *se;
+        IStatusengine *se;
 
         Queue queue;
         std::shared_ptr<std::vector<std::shared_ptr<MessageHandler>>> handlers;

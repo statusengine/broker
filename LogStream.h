@@ -5,13 +5,11 @@
 #include "Nebmodule.h"
 
 namespace statusengine {
-    class Statusengine;
-
     enum class LogLevel { Info, Warning, Error };
 
     class LogStream {
       public:
-        LogStream(Statusengine *se);
+        explicit LogStream();
         ~LogStream();
 
         LogStream &operator<<(const char *o);
@@ -30,13 +28,11 @@ namespace statusengine {
         LogStream &operator<<(const std::string o);
         LogStream &operator<<(const LogLevel o);
 
-      private:
         LogStream(const LogStream &LogStream) = delete;
         LogStream(LogStream &&LogStream) = delete;
         LogStream &operator=(const LogStream &) = delete;
 
+      private:
         std::stringstream *ss;
-
-        Statusengine *se;
     };
 } // namespace statusengine

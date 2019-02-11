@@ -10,13 +10,13 @@ namespace statusengine {
 
     class GearmanClient : public MessageHandler {
       public:
-        explicit GearmanClient(Statusengine *se, std::shared_ptr<GearmanConfiguration> cfg);
+        explicit GearmanClient(IStatusengine *se, std::shared_ptr<GearmanConfiguration> cfg);
         ~GearmanClient();
 
-        virtual bool Connect();
-        virtual bool Worker(unsigned long &counter);
+        bool Connect() override;
+        bool Worker(unsigned long &counter) override;
 
-        virtual void SendMessage(Queue queue, const std::string &message);
+        void SendMessage(Queue queue, const std::string &message) override;
 
         virtual gearman_return_t WorkerCallback(WorkerQueue queue, gearman_job_st *job);
 

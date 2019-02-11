@@ -2,11 +2,10 @@
 
 #include "GearmanConfiguration.h"
 #include "RabbitmqConfiguration.h"
-#include "Statusengine.h"
 
 namespace statusengine {
 
-    Configuration::Configuration(Statusengine *se) : se(se) {}
+    Configuration::Configuration(IStatusengine *se) : se(se) {}
 
     Configuration::~Configuration() {
         rabbitmq.clear(); // shared_ptr

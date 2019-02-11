@@ -6,30 +6,32 @@
 
 #include "MessageHandler.h"
 #include "MessageQueueHandler.h"
+#include "IMessageHandlerList.h"
+
 
 namespace statusengine {
     class Statusengine;
     class Configuration;
 
-    class MessageHandlerList {
+    class MessageHandlerList : public IMessageHandlerList {
       public:
-        MessageHandlerList(Statusengine *se, Configuration *cfg);
-        ~MessageHandlerList();
+        MessageHandlerList(IStatusengine *se, Configuration *cfg);
+        ~MessageHandlerList() override;
 
-        virtual void InitComplete();
+        void InitComplete() override;
 
-        virtual bool Connect();
+        bool Connect() override;
 
-        virtual void FlushBulkQueue();
-        virtual void Worker();
+        void FlushBulkQueue() override;
+        void Worker() override;
 
-        virtual bool QueueExists(Queue queue);
+        bool QueueExists(Queue queue) override;
         virtual std::shared_ptr<MessageQueueHandler> GetMessageQueueHandler(Queue queue);
 
       private:
         std::vector<std::shared_ptr<MessageHandler>> allHandlers;
         std::map<Queue, std::shared_ptr<MessageQueueHandler>> mqHandlers;
-        Statusengine *se;
+        IStatusengine *se;
         unsigned long maxBulkSize;
         unsigned long globalBulkCounter;
         bool flushInProgress;

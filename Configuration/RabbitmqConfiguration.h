@@ -4,12 +4,11 @@
 #include <string>
 
 #include "MessageHandlerConfiguration.h"
-#include "Statusengine.h"
 
 namespace statusengine {
     class RabbitmqConfiguration : public MessageHandlerConfiguration {
       public:
-        explicit RabbitmqConfiguration(Statusengine *se);
+        explicit RabbitmqConfiguration(IStatusengine *se);
         ~RabbitmqConfiguration();
         bool Load(const toml::Table &tbl) override;
         std::string Hostname;

@@ -1,9 +1,8 @@
 #include "BulkMessageCallback.h"
 
-#include "Statusengine.h"
 
 namespace statusengine {
-    BulkMessageCallback::BulkMessageCallback(Statusengine *se, double interval)
+    BulkMessageCallback::BulkMessageCallback(IStatusengine *se, double interval)
         : EventCallback(se), interval(interval) {}
 
     double BulkMessageCallback::Interval() {

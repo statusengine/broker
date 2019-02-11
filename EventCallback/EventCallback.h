@@ -1,18 +1,20 @@
 #pragma once
 
+#include "IStatusengine.h"
+
+
 namespace statusengine {
-    class Statusengine;
 
     class EventCallback {
       public:
-        EventCallback(Statusengine *se);
-        virtual ~EventCallback();
+        explicit EventCallback(IStatusengine *se);
+        virtual ~EventCallback() = default;
 
         virtual double Interval() = 0;
         virtual void Callback() = 0;
 
       protected:
-        Statusengine *se;
+        IStatusengine *se;
         double interval;
     };
 } // namespace statusengine

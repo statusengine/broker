@@ -6,7 +6,7 @@
 #include "Utility.h"
 
 namespace statusengine {
-    MessageQueueHandler::MessageQueueHandler(Statusengine *se, MessageHandlerList *mhlist, unsigned long maxBulkSize,
+    MessageQueueHandler::MessageQueueHandler(IStatusengine *se, MessageHandlerList *mhlist, unsigned long maxBulkSize,
                                              unsigned long *globalBulkCounter, Queue queue,
                                              std::shared_ptr<std::vector<std::shared_ptr<MessageHandler>>> handlers,
                                              bool bulk)

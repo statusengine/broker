@@ -5,10 +5,10 @@
 namespace statusengine {
     class BulkMessageCallback : public EventCallback {
       public:
-        BulkMessageCallback(Statusengine *se, double interval);
+        explicit BulkMessageCallback(IStatusengine *se, double interval);
 
-        virtual double Interval();
-        virtual void Callback();
+        double Interval() override;
+        void Callback() override;
 
       private:
         double interval;

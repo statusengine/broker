@@ -34,7 +34,7 @@
 namespace statusengine {
 
     Statusengine::Statusengine(nebmodule *handle, std::string configurationPath)
-        : nebhandle(handle), configurationPath(std::move(configurationPath)), ls(this), bulkCallback(nullptr),
+        : nebhandle(handle), configurationPath(std::move(configurationPath)), ls(), bulkCallback(nullptr),
           messageWorkerCallback(nullptr), callbacks() {
         configuration = new Configuration(this);
     }
@@ -223,7 +223,7 @@ namespace statusengine {
         return 0;
     }
 
-    MessageHandlerList *Statusengine::GetMessageHandler() const {
+    IMessageHandlerList *Statusengine::GetMessageHandler() const {
         return messageHandler;
     }
 } // namespace statusengine

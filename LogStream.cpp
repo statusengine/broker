@@ -1,7 +1,7 @@
 #include "LogStream.h"
 
 namespace statusengine {
-    LogStream::LogStream(Statusengine *se) : se(se) {
+    LogStream::LogStream() {
         ss = new std::stringstream();
         *this << "Logstream initalized" << LogLevel::Info;
     }

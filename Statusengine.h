@@ -4,8 +4,8 @@
 #include <string>
 #include <memory>
 
-#include "LogStream.h"
 #include "Nebmodule.h"
+#include "IStatusengine.h"
 
 #include "EventCallback/BulkMessageCallback.h"
 #include "EventCallback/MessageWorkerCallback.h"
@@ -13,10 +13,9 @@
 
 namespace statusengine {
     class Configuration;
-    class MessageHandlerList;
     class Nebmodule;
 
-    class Statusengine {
+    class Statusengine : public IStatusengine {
         friend class Nebmodule;
 
       public:
@@ -27,10 +26,10 @@ namespace statusengine {
         int Init();
         void InitEventCallbacks();
 
-        LogStream &Log();
-        void FlushBulkQueue();
+        LogStream &Log() override;
+        void FlushBulkQueue() override;
         void RegisterEventCallback(EventCallback *ecb);
-        MessageHandlerList *GetMessageHandler() const;
+        IMessageHandlerList *GetMessageHandler() const override;
 
         template<typename T, typename... _Args>
         void RegisterCallback(_Args&&... __args) {
@@ -52,7 +51,7 @@ namespace statusengine {
         nebmodule *nebhandle;
         std::string configurationPath;
         Configuration *configuration;
-        MessageHandlerList *messageHandler;
+        IMessageHandlerList *messageHandler;
         LogStream ls;
         std::multimap<NEBCallbackType, std::shared_ptr<NebmoduleCallback>> callbacks;
         BulkMessageCallback *bulkCallback;

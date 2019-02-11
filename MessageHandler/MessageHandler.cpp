@@ -1,10 +1,9 @@
 #include "MessageHandler.h"
 
-#include "Statusengine.h"
 
 namespace statusengine {
 
-    MessageHandler::MessageHandler(Statusengine *se) : se(se) {}
+    MessageHandler::MessageHandler(IStatusengine *se) : se(se) {}
 
     inline char *get_json_string(json_object *obj) {
         auto jsonChars = json_object_get_string(obj);

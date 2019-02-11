@@ -6,11 +6,12 @@
 #include <vector>
 #include <set>
 #include <utility>
+#include <map>
 
 #include "vendor/toml.hpp"
 
 #include "Queue.h"
-#include "Statusengine.h"
+#include "IStatusengine.h"
 
 namespace statusengine {
     class RabbitmqConfiguration;
@@ -18,7 +19,7 @@ namespace statusengine {
 
     class Configuration {
       public:
-        explicit Configuration(Statusengine *se);
+        explicit Configuration(IStatusengine *se);
         ~Configuration();
         bool Load(std::string);
 
@@ -37,7 +38,7 @@ namespace statusengine {
         static const std::map<WorkerQueue, std::string> WorkerQueueId;
 
       private:
-        Statusengine *se;
+        IStatusengine *se;
         toml::Table cfg;
         toml::Table bulkTable;
         toml::Table schedulerTable;

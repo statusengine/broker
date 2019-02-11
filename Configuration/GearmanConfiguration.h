@@ -7,7 +7,7 @@
 namespace statusengine {
     class GearmanConfiguration : public MessageHandlerConfiguration {
       public:
-        explicit GearmanConfiguration(Statusengine *se);
+        explicit GearmanConfiguration(IStatusengine *se);
 
         virtual bool Load(const toml::Table &tbl);
 

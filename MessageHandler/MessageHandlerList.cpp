@@ -13,7 +13,7 @@
 #endif
 
 namespace statusengine {
-    MessageHandlerList::MessageHandlerList(Statusengine *se, Configuration *cfg)
+    MessageHandlerList::MessageHandlerList(IStatusengine *se, Configuration *cfg)
         : se(se), maxBulkSize(0), globalBulkCounter(0), flushInProgress(true) {
         // flushInProgress is set to true to ensure no messages are sent until initialization is complete
 

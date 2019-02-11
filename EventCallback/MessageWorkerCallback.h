@@ -5,7 +5,7 @@
 namespace statusengine {
     class MessageWorkerCallback : public EventCallback {
       public:
-        MessageWorkerCallback(Statusengine *se, double interval);
+        MessageWorkerCallback(IStatusengine *se, double interval);
 
         virtual double Interval();
         virtual void Callback();

@@ -11,18 +11,18 @@ namespace statusengine {
     class RabbitmqConfiguration;
     class RabbitmqClient : public MessageHandler {
       public:
-        RabbitmqClient(Statusengine *se, std::shared_ptr<RabbitmqConfiguration> cfg);
+        explicit RabbitmqClient(IStatusengine *se, std::shared_ptr<RabbitmqConfiguration> cfg);
         ~RabbitmqClient();
 
-        virtual bool Connect();
-        virtual bool Connect(bool quiet);
-        virtual bool Worker(unsigned long &counter);
-        virtual void SendMessage(Queue queue, const std::string &message);
+        bool Connect() override;
+        bool Connect(bool quiet);
+        bool Worker(unsigned long &counter) override;
+        void SendMessage(Queue queue, const std::string &message) override;
 
       private:
-        virtual bool CheckAMQPReply(char const *context, bool quiet = false);
-        virtual bool CheckAMQPReply(amqp_rpc_reply_t x, char const *context, bool quiet = false);
-        virtual bool CloseConnection(bool quiet = false);
+        bool CheckAMQPReply(char const *context, bool quiet = false);
+        bool CheckAMQPReply(amqp_rpc_reply_t x, char const *context, bool quiet = false);
+        bool CloseConnection(bool quiet = false);
 
         std::shared_ptr<RabbitmqConfiguration> cfg;
         std::shared_ptr<std::map<Queue, std::string>> queueNames;

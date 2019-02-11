@@ -1,9 +1,7 @@
 #include "RabbitmqConfiguration.h"
 
-#include "Statusengine.h"
-
 namespace statusengine {
-    RabbitmqConfiguration::RabbitmqConfiguration(Statusengine *se)
+    RabbitmqConfiguration::RabbitmqConfiguration(IStatusengine *se)
         : MessageHandlerConfiguration(se), Port(5673), Timeout(nullptr), SSL(false), SSLVerify(true),
           Exchange("statusengine") {}
 

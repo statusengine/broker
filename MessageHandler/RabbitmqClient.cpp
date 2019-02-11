@@ -1,12 +1,10 @@
 #include "RabbitmqClient.h"
 
 #include "Configuration/RabbitmqConfiguration.h"
-#include "LogStream.h"
-#include "Statusengine.h"
 
 namespace statusengine {
 
-    RabbitmqClient::RabbitmqClient(Statusengine *se, std::shared_ptr<RabbitmqConfiguration> cfg)
+    RabbitmqClient::RabbitmqClient(IStatusengine *se, std::shared_ptr<RabbitmqConfiguration> cfg)
         : MessageHandler(se), cfg(cfg), connected(false), conn(nullptr), socket(nullptr) {
         queueNames = cfg->GetQueueNames();
         workerQueueNames = cfg->GetWorkerQueueNames();

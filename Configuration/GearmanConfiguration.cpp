@@ -1,9 +1,8 @@
 #include "GearmanConfiguration.h"
 
-#include "Statusengine.h"
 
 namespace statusengine {
-    GearmanConfiguration::GearmanConfiguration(Statusengine *se) : MessageHandlerConfiguration(se) {}
+    GearmanConfiguration::GearmanConfiguration(IStatusengine *se) : MessageHandlerConfiguration(se) {}
 
     bool GearmanConfiguration::Load(const toml::Table &tbl) {
         try {

@@ -1,8 +1,6 @@
 #include "GearmanClient.h"
 
 #include "Configuration/GearmanConfiguration.h"
-#include "LogStream.h"
-#include "Statusengine.h"
 #include "Utility.h"
 
 #include <iostream>
@@ -22,7 +20,7 @@ namespace statusengine {
         return ret;
     }
 
-    GearmanClient::GearmanClient(Statusengine *se, std::shared_ptr<GearmanConfiguration> cfg)
+    GearmanClient::GearmanClient(IStatusengine *se, std::shared_ptr<GearmanConfiguration> cfg)
         : MessageHandler(se), cfg(cfg), client(nullptr), worker(nullptr) {
 
         queueNames = cfg->GetQueueNames();
