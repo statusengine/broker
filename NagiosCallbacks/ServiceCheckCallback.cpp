@@ -31,6 +31,7 @@ namespace statusengine {
 
     void ServiceCheckCallback::Callback(int event_type, void *vdata) {
         auto data = reinterpret_cast<nebstruct_service_check_data *>(vdata);
+        auto temp_service = find_service(data->host_name, data->service_description);
 
         if (data->type == NEBTYPE_SERVICECHECK_PROCESSED) {
             if (servicechecks || ocsp) {
@@ -43,7 +44,7 @@ namespace statusengine {
                     ocspHandler->SendMessage(checkData);
                 }
             }
-            if (service_perfdata) {
+            if (service_perfdata && temp_service->process_performance_data != 0) {
                 NagiosServiceCheckPerfData checkPerfData(data);
                 servicePerfHandler->SendMessage(checkPerfData);
             }
