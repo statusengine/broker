@@ -7,8 +7,7 @@
 #include "Nebmodule.h"
 #include "IStatusengine.h"
 
-#include "EventCallback/BulkMessageCallback.h"
-#include "EventCallback/MessageWorkerCallback.h"
+#include "EventCallback.h"
 #include "NebmoduleCallback.h"
 
 namespace statusengine {

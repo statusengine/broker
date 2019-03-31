@@ -5,7 +5,6 @@
 #include "vendor/toml.hpp"
 
 #include "Configuration/Configuration.h"
-#include "EventCallback/BulkMessageCallback.h"
 #include "LogStream.h"
 #include "MessageHandler/MessageHandlerList.h"
 #include "NebmoduleCallback.h"
@@ -17,7 +16,7 @@ namespace statusengine {
 
     Statusengine::Statusengine(nebmodule *handle, std::string configurationPath)
         : nebhandle(handle), configurationPath(std::move(configurationPath)), ls(), bulkCallback(nullptr),
-          messageWorkerCallback(nullptr), callbacks() {
+          messageWorkerCallback(nullptr), callbacks(), messageHandler(nullptr) {
         configuration = new Configuration(this);
     }
 

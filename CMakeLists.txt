@@ -23,7 +23,6 @@ set (SESources
 	Configuration/Configuration.cpp Configuration/MessageHandlerConfiguration.cpp
 	Configuration/RabbitmqConfiguration.cpp Configuration/GearmanConfiguration.cpp
 	MessageHandler/MessageHandler.cpp MessageHandler/MessageHandlerList.cpp MessageHandler/MessageQueueHandler.cpp
-	EventCallback/EventCallback.cpp EventCallback/BulkMessageCallback.cpp EventCallback/MessageWorkerCallback.cpp
 		)
 
 pkg_check_modules(GEARMAND gearmand)

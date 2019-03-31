@@ -3,7 +3,7 @@
 #include <ctime>
 #include <string>
 
-#include "EventCallback/EventCallback.h"
+#include "EventCallback.h"
 #include "Statusengine.h"
 
 // This is required by naemon
