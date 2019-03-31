@@ -9,30 +9,106 @@ namespace statusengine {
 
     class LogStream {
       public:
-        explicit LogStream();
-        ~LogStream();
+        LogStream() : ss() {
+            *this << "Logstream initalized" << LogLevel::Info;
+        }
 
-        LogStream &operator<<(const char *o);
-        LogStream &operator<<(const bool o);
-        LogStream &operator<<(const short o);
-        LogStream &operator<<(const unsigned short o);
-        LogStream &operator<<(const int o);
-        LogStream &operator<<(const unsigned int o);
-        LogStream &operator<<(const long o);
-        LogStream &operator<<(const unsigned long o);
-        LogStream &operator<<(const long long o);
-        LogStream &operator<<(const unsigned long long o);
-        LogStream &operator<<(const float o);
-        LogStream &operator<<(const double o);
-        LogStream &operator<<(const long double o);
-        LogStream &operator<<(const std::string o);
-        LogStream &operator<<(const LogLevel o);
+        ~LogStream() = default;
+
+        LogStream &operator<<(const char *o) {
+            ss << o;
+            return *this;
+        }
+
+        LogStream &operator<<(const bool o) {
+            ss << o;
+            return *this;
+        }
+
+        LogStream &operator<<(const short o) {
+            ss << o;
+            return *this;
+        }
+
+        LogStream &operator<<(const unsigned short o) {
+            ss << o;
+            return *this;
+        }
+
+        LogStream &operator<<(const int o) {
+            ss << o;
+            return *this;
+        }
+
+        LogStream &operator<<(const unsigned int o) {
+            ss << o;
+            return *this;
+        }
+
+        LogStream &operator<<(const long o) {
+            ss << o;
+            return *this;
+        }
+
+        LogStream &operator<<(const unsigned long o) {
+            ss << o;
+            return *this;
+        }
+
+        LogStream &operator<<(const long long o) {
+            ss << o;
+            return *this;
+        }
+
+        LogStream &operator<<(const unsigned long long o) {
+            ss << o;
+            return *this;
+        }
+
+        LogStream &operator<<(const float o) {
+            ss << o;
+            return *this;
+        }
+
+        LogStream &operator<<(const double o) {
+            ss << o;
+            return *this;
+        }
+
+        LogStream &operator<<(const long double o) {
+            ss << o;
+            return *this;
+        }
+
+        LogStream &operator<<(const std::string o) {
+            ss << o;
+            return *this;
+        }
+
+        LogStream &operator<<(const LogLevel o) {
+            int logLevel;
+            switch (o) {
+                case LogLevel::Error:
+                    logLevel = NSLOG_RUNTIME_ERROR;
+                    break;
+                case LogLevel::Warning:
+                    logLevel = NSLOG_RUNTIME_WARNING;
+                    break;
+                default:
+                    logLevel = NSLOG_INFO_MESSAGE;
+                    break;
+            }
+            nm_log(logLevel, "%s", ("Statusengine: " + ss.str()).c_str());
+            ss.str("");
+            ss.clear();
+            return *this;
+        }
 
         LogStream(const LogStream &LogStream) = delete;
         LogStream(LogStream &&LogStream) = delete;
         LogStream &operator=(const LogStream &) = delete;
 
       private:
-        std::stringstream *ss;
+        std::stringstream ss;
     };
 } // namespace statusengine
