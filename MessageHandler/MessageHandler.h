@@ -15,7 +15,7 @@ namespace statusengine {
 
         explicit MessageHandler(IStatusengine *se) : se(se) {}
 
-        inline char *get_json_string(json_object *obj) {
+        inline static char *get_json_string(json_object *obj) {
             auto jsonChars = json_object_get_string(obj);
             auto jsonCharsLen = json_object_get_string_len(obj);
             char *chars = new char[jsonCharsLen + 1];
@@ -262,11 +262,10 @@ namespace statusengine {
             delete service_description;
         }
 
-        void ParseRaw(json_object *obj) {
+        inline static void ParseRaw(json_object *obj) {
             auto cmd = get_json_string(obj);
             process_external_command1(cmd);
             delete cmd;
         }
-
     };
 } // namespace statusengine

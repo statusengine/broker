@@ -54,7 +54,7 @@ namespace statusengine {
 
         callbacks.emplace();
 
-        messageHandler = new MessageHandlerList(this, configuration);
+        messageHandler = new MessageHandlerList(*this, *configuration);
         if (!messageHandler->Connect()) {
             return 1;
         }

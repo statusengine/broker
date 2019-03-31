@@ -6,29 +6,71 @@
 
 #include "IStatusengine.h"
 #include "IMessageHandler.h"
+#include "Configuration.h"
+
 
 namespace statusengine {
-    class Configuration;
 
     class MessageHandlerList : public IMessageHandlerList {
       public:
-        MessageHandlerList(IStatusengine *se, Configuration *cfg);
-        ~MessageHandlerList() override;
+        MessageHandlerList(IStatusengine &se, Configuration &cfg);
 
-        void InitComplete() override;
+        ~MessageHandlerList() override {
+            FlushBulkQueue();
+        }
 
-        bool Connect() override;
+        void InitComplete() override {
+            flushInProgress = false;
+        }
 
-        void FlushBulkQueue() override;
-        void Worker() override;
+        void FlushBulkQueue() override {
+            if (globalBulkCounter > 0 && !flushInProgress) {
+                flushInProgress = true;
+                se.Log() << "Flush Bulk Queues" << LogLevel::Info;
 
-        bool QueueExists(Queue queue) override;
-        std::shared_ptr<IMessageQueueHandler> GetMessageQueueHandler(Queue queue) override;
+                for (auto &handler : mqHandlers) {
+                    handler.second->FlushBulkQueue();
+                }
+                globalBulkCounter = 0;
+                flushInProgress = false;
+            }
+        }
+
+        bool Connect() override {
+            for (auto &handler : allHandlers) {
+                if (!handler->Connect()) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        std::shared_ptr<IMessageQueueHandler> GetMessageQueueHandler(Queue queue) override {
+            return mqHandlers.at(queue);
+        }
+
+        bool QueueExists(Queue queue) override {
+            return mqHandlers.find(queue) != mqHandlers.end();
+        }
+
+        void Worker() override {
+            unsigned long counter = 0ul;
+            bool moreMessages;
+            do {
+                moreMessages = false;
+                for (auto &handler : allHandlers) {
+                    if (handler->Worker(counter)) {
+                        moreMessages = true;
+                    }
+                }
+            } while (moreMessages && (counter < maxWorkerMessagesPerInterval));
+        }
+
 
       private:
         std::vector<std::shared_ptr<IMessageHandler>> allHandlers;
         std::map<Queue, std::shared_ptr<IMessageQueueHandler>> mqHandlers;
-        IStatusengine *se;
+        IStatusengine &se;
         unsigned long maxBulkSize;
         unsigned long globalBulkCounter;
         bool flushInProgress;
