@@ -152,7 +152,7 @@ namespace statusengine {
                     else {
                         delay = check_interval - (now - temp_host->last_check);
                     }
-                    Nebmodule::ScheduleHostCheckDelay(temp_host, delay);
+                    Nebmodule::Instance().ScheduleHostCheckDelay(temp_host, delay);
                 }
 
                 for (auto temp_service = service_list; temp_service != nullptr; temp_service = temp_service->next) {
@@ -165,7 +165,7 @@ namespace statusengine {
                     else {
                         delay = check_interval - (now - temp_service->last_check);
                     }
-                    Nebmodule::ScheduleServiceCheckDelay(temp_service, delay);
+                    Nebmodule::Instance().ScheduleServiceCheckDelay(temp_service, delay);
                 }
                 se.Log() << "Reschedule complete" << LogLevel::Info;
             }

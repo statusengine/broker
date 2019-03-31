@@ -35,7 +35,7 @@ namespace statusengine {
             std::shared_ptr<NebmoduleCallback> cb  = std::static_pointer_cast<NebmoduleCallback>(std::make_shared<T>(std::forward<_Args>(__args)...));
             NEBCallbackType cbType = cb->GetCallbackType();
             if (callbacks.find(cbType) == callbacks.end())
-                Nebmodule::RegisterCallback(cbType);
+                Nebmodule::Instance().RegisterCallback(cbType);
             callbacks.insert(std::make_pair(cbType, cb));
         }
 

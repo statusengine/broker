@@ -190,7 +190,7 @@ namespace statusengine {
     }
 
     void Statusengine::RegisterEventCallback(EventCallback *ecb) {
-        Nebmodule::RegisterEventCallback(ecb);
+        Nebmodule::Instance().RegisterEventCallback(ecb);
     }
 
     int Statusengine::Callback(int event_type, void *data) {

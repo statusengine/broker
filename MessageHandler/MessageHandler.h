@@ -250,7 +250,7 @@ namespace statusengine {
                     se->Log() << "Received schedule_check command for unknown host " << hostname << LogLevel::Warning;
                     return;
                 }
-                Nebmodule::ScheduleHostCheckFixed(temp_host, schedule_time);
+                Nebmodule::Instance().ScheduleHostCheckFixed(temp_host, schedule_time);
             }
             else {
                 service *temp_service = find_service(hostname, service_description);
@@ -259,7 +259,7 @@ namespace statusengine {
                               << LogLevel::Warning;
                     return;
                 }
-                Nebmodule::ScheduleServiceCheckFixed(temp_service, schedule_time);
+                Nebmodule::Instance().ScheduleServiceCheckFixed(temp_service, schedule_time);
             }
             delete hostname;
             delete service_description;

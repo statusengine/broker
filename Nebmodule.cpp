@@ -12,7 +12,6 @@ NEB_API_VERSION(CURRENT_NEB_API_VERSION);
 }
 
 namespace statusengine {
-    Statusengine *Nebmodule::se = nullptr;
 
     int Nebmodule::Init(nebmodule *handle, std::string args) {
         se = new Statusengine(handle, std::move(args));
@@ -96,15 +95,15 @@ namespace statusengine {
 } // namespace statusengine
 
 extern "C" int nebmodule_init(int flags, char *args, nebmodule *handle) {
-    return statusengine::Nebmodule::Init(handle, std::string(args));
+    return statusengine::Nebmodule::Instance().Init(handle, std::string(args));
 }
 
 extern "C" int nebmodule_deinit(int flags, int reason) {
-    return statusengine::Nebmodule::Deinit(reason);
+    return statusengine::Nebmodule::Instance().Deinit(reason);
 }
 
 int nebmodule_callback(int event_type, void *data) {
-    return statusengine::Nebmodule::Callback(event_type, data);
+    return statusengine::Nebmodule::Instance().Callback(event_type, data);
 }
 
 #ifndef BUILD_NAGIOS
@@ -112,7 +111,7 @@ void nebmodule_event_callback(struct nm_event_execution_properties *properties) 
     auto ecb = reinterpret_cast<statusengine::EventCallback *>(properties->user_data);
     ecb->Callback();
     if (!(sigshutdown || sigrestart)) {
-        statusengine::Nebmodule::RegisterEventCallback(ecb);
+        statusengine::Nebmodule::Instance().RegisterEventCallback(ecb);
     }
 }
 #else

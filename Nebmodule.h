@@ -36,26 +36,33 @@ namespace statusengine {
 
     class Nebmodule {
       public:
-        static int Init(nebmodule *handle, std::string args);
+        static Nebmodule &Instance() {
+            static Nebmodule inst;
+            return inst;
+        }
 
-        static int Deinit(int reason);
+        int Init(nebmodule *handle, std::string args);
 
-        static int Callback(int event_type, void *data);
+        int Deinit(int reason);
 
-        static bool RegisterCallback(NEBCallbackType cbType);
+        int Callback(int event_type, void *data);
 
-        static void RegisterEventCallback(EventCallback *ecb);
+        bool RegisterCallback(NEBCallbackType cbType);
 
-        static void ScheduleHostCheckDelay(host *temp_host, time_t delay);
+        void RegisterEventCallback(EventCallback *ecb);
 
-        static void ScheduleHostCheckFixed(host *temp_host, time_t fixed);
+        void ScheduleHostCheckDelay(host *temp_host, time_t delay);
 
-        static void ScheduleServiceCheckDelay(service *temp_service, time_t delay);
+        void ScheduleHostCheckFixed(host *temp_host, time_t fixed);
 
-        static void ScheduleServiceCheckFixed(service *temp_service, time_t fixed);
+        void ScheduleServiceCheckDelay(service *temp_service, time_t delay);
+
+        void ScheduleServiceCheckFixed(service *temp_service, time_t fixed);
 
       private:
-        static Statusengine *se;
+        explicit Nebmodule() : se(nullptr) {}
+
+        Statusengine *se;
     };
 } // namespace statusengine
 
