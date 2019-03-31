@@ -31,7 +31,7 @@ namespace statusengine {
 
     void ServiceCheckCallback::Callback(int event_type, void *vdata) {
         auto data = reinterpret_cast<nebstruct_service_check_data *>(vdata);
-        auto temp_service = find_service(data->host_name, data->service_description);
+        auto temp_service = reinterpret_cast<service*>(data->object_ptr);
 
         if (data->type == NEBTYPE_SERVICECHECK_PROCESSED) {
             if (servicechecks || ocsp) {
