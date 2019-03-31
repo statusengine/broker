@@ -1,7 +1,7 @@
 #pragma once
 
 #include "LogStream.h"
-#include "MessageHandler/IMessageHandlerList.h"
+#include "MessageHandler/IMessageHandler.h"
 
 
 namespace statusengine {

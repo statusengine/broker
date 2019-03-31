@@ -4,9 +4,8 @@
 #include <memory>
 #include <vector>
 
-#include "MessageHandler.h"
+#include "IMessageHandler.h"
 #include "MessageQueueHandler.h"
-#include "IMessageHandlerList.h"
 
 
 namespace statusengine {
@@ -29,7 +28,7 @@ namespace statusengine {
         std::shared_ptr<IMessageQueueHandler> GetMessageQueueHandler(Queue queue) override;
 
       private:
-        std::vector<std::shared_ptr<MessageHandler>> allHandlers;
+        std::vector<std::shared_ptr<IMessageHandler>> allHandlers;
         std::map<Queue, std::shared_ptr<IMessageQueueHandler>> mqHandlers;
         IStatusengine *se;
         unsigned long maxBulkSize;

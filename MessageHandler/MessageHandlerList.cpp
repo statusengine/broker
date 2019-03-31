@@ -2,6 +2,7 @@
 
 #include "Configuration.h"
 
+
 #ifdef WITH_GEARMAN
 #include "GearmanClient.h"
 #endif
@@ -16,14 +17,14 @@ namespace statusengine {
         // flushInProgress is set to true to ensure no messages are sent until initialization is complete
 
         maxBulkSize = cfg->GetBulkMaximum();
-        std::map<Queue, std::shared_ptr<std::vector<std::shared_ptr<MessageHandler>>>> handlers;
-        auto InsertHandler = [&handlers](Queue queue, std::shared_ptr<MessageHandler> handler) {
-            std::shared_ptr<std::vector<std::shared_ptr<MessageHandler>>> queueHandlers;
+        std::map<Queue, std::shared_ptr<std::vector<std::shared_ptr<IMessageHandler>>>> handlers;
+        auto InsertHandler = [&handlers](Queue queue, std::shared_ptr<IMessageHandler> handler) {
+            std::shared_ptr<std::vector<std::shared_ptr<IMessageHandler>>> queueHandlers;
             try {
                 queueHandlers = handlers.at(queue);
             }
             catch (std::out_of_range &oor) {
-                queueHandlers = std::make_shared<std::vector<std::shared_ptr<MessageHandler>>>();
+                queueHandlers = std::make_shared<std::vector<std::shared_ptr<IMessageHandler>>>();
                 handlers[queue] = queueHandlers;
             }
             queueHandlers->push_back(handler);

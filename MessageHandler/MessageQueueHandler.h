@@ -5,8 +5,7 @@
 
 #include "Queue.h"
 #include "NagiosObject.h"
-#include "IMessageQueueHandler.h"
-#include "MessageHandler.h"
+#include "IMessageHandler.h"
 #include "IStatusengine.h"
 
 namespace statusengine  {
@@ -16,7 +15,7 @@ namespace statusengine  {
       public:
         MessageQueueHandler(IStatusengine *se, MessageHandlerList *mhlist, unsigned long maxBulkSize,
                             unsigned long *globalBulkCounter, Queue queue,
-                            std::shared_ptr<std::vector<std::shared_ptr<MessageHandler>>> handlers, bool bulk);
+                            std::shared_ptr<std::vector<std::shared_ptr<IMessageHandler>>> handlers, bool bulk);
         /**
          * SendMessage
          * @param JsonObjectContainer contains json object that will be deleted after sending the message
@@ -29,7 +28,7 @@ namespace statusengine  {
         IStatusengine *se;
 
         Queue queue;
-        std::shared_ptr<std::vector<std::shared_ptr<MessageHandler>>> handlers;
+        std::shared_ptr<std::vector<std::shared_ptr<IMessageHandler>>> handlers;
         std::vector<NagiosObject *> bulkMessages;
 
         unsigned long maxBulkSize;

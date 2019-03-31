@@ -20,7 +20,7 @@ find_package(PkgConfig REQUIRED)
 
 set (SESources
 	Nebmodule.cpp Statusengine.cpp
-		MessageHandler/MessageHandler.cpp MessageHandler/MessageHandlerList.cpp MessageHandler/MessageQueueHandler.cpp
+        MessageHandler/MessageHandlerList.cpp MessageHandler/MessageQueueHandler.cpp
 		)
 
 pkg_check_modules(GEARMAND gearmand)

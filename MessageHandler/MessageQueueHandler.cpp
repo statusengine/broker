@@ -8,7 +8,7 @@
 namespace statusengine {
     MessageQueueHandler::MessageQueueHandler(IStatusengine *se, MessageHandlerList *mhlist, unsigned long maxBulkSize,
                                              unsigned long *globalBulkCounter, Queue queue,
-                                             std::shared_ptr<std::vector<std::shared_ptr<MessageHandler>>> handlers,
+                                             std::shared_ptr<std::vector<std::shared_ptr<IMessageHandler>>> handlers,
                                              bool bulk)
         : se(se), mhlist(mhlist), maxBulkSize(maxBulkSize), globalBulkCounter(globalBulkCounter), queue(queue),
           handlers(std::move(handlers)), bulk(bulk) {}

@@ -144,7 +144,7 @@ namespace statusengine {
             return false;
         }
 
-        auto socketStatus = amqp_socket_open_noblock(socket, cfg->Hostname.c_str(), cfg->Port, cfg->Timeout);
+        auto socketStatus = amqp_socket_open_noblock(socket, cfg->Hostname.c_str(), cfg->Port, &cfg->Timeout);
         if (socketStatus != AMQP_STATUS_OK) {
             if (!quiet) {
                 se->Log() << "Could not connect to rabbitmq: " << socketStatus << LogLevel::Error;

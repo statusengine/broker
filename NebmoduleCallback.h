@@ -5,7 +5,7 @@
 
 #include "Nebmodule.h"
 #include "IStatusengine.h"
-#include "MessageHandler/IMessageQueueHandler.h"
+#include "MessageHandler/IMessageHandler.h"
 #include "NagiosObject.h"
 
 
