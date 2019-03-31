@@ -1,8 +1,7 @@
 #include "ServiceCheckCallback.h"
 
 #include "MessageHandler/MessageHandlerList.h"
-#include "NagiosObjects/NagiosServiceCheckData.h"
-#include "NagiosObjects/NagiosServiceCheckPerfData.h"
+#include "NagiosObject.h"
 #include "Statusengine.h"
 
 namespace statusengine {

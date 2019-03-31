@@ -24,34 +24,11 @@ set (SESources
 	Configuration/RabbitmqConfiguration.cpp Configuration/GearmanConfiguration.cpp
 	MessageHandler/MessageHandler.cpp MessageHandler/MessageHandlerList.cpp MessageHandler/MessageQueueHandler.cpp
 	EventCallback/EventCallback.cpp EventCallback/BulkMessageCallback.cpp EventCallback/MessageWorkerCallback.cpp
-	NagiosObjects/NagiosObject.cpp
-	NagiosObjects/NagiosHost.cpp
-	NagiosObjects/NagiosHostStatusData.cpp
-	NagiosObjects/NagiosHostCheckData.cpp
-	NagiosObjects/NagiosService.cpp
-	NagiosObjects/NagiosServiceStatusData.cpp
-	NagiosObjects/NagiosServiceCheckData.cpp
-	NagiosObjects/NagiosServiceCheckPerfData.cpp
-	NagiosObjects/NagiosStateChangeData.cpp
-	NagiosObjects/NagiosLogData.cpp
-	NagiosObjects/NagiosSystemCommandData.cpp
-	NagiosObjects/NagiosCommentData.cpp
-	NagiosCallbacks/NebmoduleCallback.cpp
+		NagiosCallbacks/NebmoduleCallback.cpp
 	NagiosCallbacks/HostCheckCallback.cpp
 	NagiosCallbacks/ServiceCheckCallback.cpp
-	NagiosObjects/NagiosExternalCommandData.cpp
-	NagiosObjects/NagiosAcknowledgementData.cpp
-	NagiosObjects/NagiosFlappingData.cpp
-	NagiosObjects/NagiosDowntimeData.cpp
-	NagiosObjects/NagiosNotificationData.cpp
-	NagiosObjects/NagiosProgramStatusData.cpp
-	NagiosObjects/NagiosContactStatusData.cpp
-	NagiosObjects/NagiosContactNotificationData.cpp
-	NagiosObjects/NagiosContactNotificationMethodData.cpp
-	NagiosObjects/NagiosEventHandlerData.cpp
-	NagiosCallbacks/ProcessDataCallback.cpp
-	NagiosObjects/NagiosProcessData.cpp
-)
+		NagiosCallbacks/ProcessDataCallback.cpp
+		)
 
 pkg_check_modules(GEARMAND gearmand)
 pkg_check_modules(RABBITMQC librabbitmq)

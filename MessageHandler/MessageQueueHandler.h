@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "Configuration/Queue.h"
-#include "NagiosObjects/NagiosObject.h"
+#include "NagiosObject.h"
 #include "IMessageQueueHandler.h"
 #include "MessageHandler.h"
 #include "IStatusengine.h"

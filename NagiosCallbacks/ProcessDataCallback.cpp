@@ -3,7 +3,6 @@
 #include <algorithm>
 
 #include "MessageHandler/MessageHandlerList.h"
-#include "NagiosObjects/NagiosProcessData.h"
 #include "Statusengine.h"
 
 namespace statusengine {
@@ -32,9 +31,9 @@ namespace statusengine {
         if (data->type == NEBTYPE_PROCESS_START) {
             se->InitEventCallbacks();
             if (restartData) {
-                NagiosObject restartData;
-                restartData.SetData<>("object_type", static_cast<int>(NEBTYPE_PROCESS_RESTART));
-                restartHandler->SendMessage(restartData);
+                NagiosObject msgObj;
+                msgObj.SetData("object_type", static_cast<int>(NEBTYPE_PROCESS_RESTART));
+                restartHandler->SendMessage(msgObj);
             }
         }
 

@@ -1,7 +1,7 @@
 #include "HostCheckCallback.h"
 
 #include "MessageHandler/MessageHandlerList.h"
-#include "NagiosObjects/NagiosHostCheckData.h"
+#include "NagiosObject.h"
 #include "Statusengine.h"
 
 namespace statusengine {

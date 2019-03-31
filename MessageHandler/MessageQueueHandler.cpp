@@ -2,7 +2,7 @@
 
 #include "Configuration/Configuration.h"
 #include "MessageHandlerList.h"
-#include "NagiosObjects/NagiosObject.h"
+#include "NagiosObject.h"
 #include "Utility.h"
 
 namespace statusengine {
@@ -37,8 +37,8 @@ namespace statusengine {
                 json_object_array_add(arr, obj->GetDataCopy());
             }
 
-            msgObj.SetData<>("messages", arr);
-            msgObj.SetData<>("format", "none");
+            msgObj.SetData("messages", arr);
+            msgObj.SetData("format", "none");
 
             std::string msg = msgObj.ToString();
             for (auto &handler : *handlers) {

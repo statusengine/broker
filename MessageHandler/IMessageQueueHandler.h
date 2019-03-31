@@ -1,6 +1,6 @@
 #pragma once
 
-#include "NagiosObjects/NagiosObject.h"
+#include "NagiosObject.h"
 
 namespace statusengine {
     class IMessageQueueHandler {
