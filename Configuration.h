@@ -103,12 +103,10 @@ namespace statusengine {
     class RabbitmqConfiguration : public MessageHandlerConfiguration {
     public:
         explicit RabbitmqConfiguration(IStatusengine &se)
-                : MessageHandlerConfiguration(se), Port(5673), Timeout(nullptr), SSL(false), SSLVerify(true),
+                : MessageHandlerConfiguration(se), Port(5673), Timeout(), SSL(false), SSLVerify(true),
                   Exchange("statusengine") {}
 
-        ~RabbitmqConfiguration() {
-            delete Timeout;
-        }
+        ~RabbitmqConfiguration() = default;
 
         bool Load(const toml::Table &tbl) override {
             Hostname = GetTomlDefault<>(tbl, "Hostname", std::string(""));
@@ -128,9 +126,8 @@ namespace statusengine {
             }
 
             int tov = GetTomlDefault<>(tbl, "Timeout", 30);
-            Timeout = new timeval;
-            Timeout->tv_sec = tov;
-            Timeout->tv_usec = 0;
+            Timeout.tv_sec = tov;
+            Timeout.tv_usec = 0;
 
             Exchange = GetTomlDefault<>(tbl, "Exchange", std::string("statusengine"));
 
@@ -149,7 +146,7 @@ namespace statusengine {
 
         std::string Hostname;
         int Port;
-        timeval *Timeout;
+        timeval Timeout;
         std::string Vhost;
         std::string Username;
         std::string Password;
