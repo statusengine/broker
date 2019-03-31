@@ -7,26 +7,26 @@ namespace statusengine {
 
     class EventCallback {
       public:
-        explicit EventCallback(IStatusengine *se) : se(se) {}
+        explicit EventCallback(IStatusengine &se) : se(se) {}
         virtual ~EventCallback() = default;
 
         virtual double Interval() = 0;
         virtual void Callback() = 0;
 
       protected:
-        IStatusengine *se;
+        IStatusengine &se;
     };
 
     class MessageWorkerCallback : public EventCallback {
     public:
-        MessageWorkerCallback(IStatusengine *se, double interval)
+        MessageWorkerCallback(IStatusengine &se, double interval)
                 : EventCallback(se), interval(interval) {}
 
         double Interval() override {
             return interval;
         }
         void Callback() override {
-            se->GetMessageHandler()->Worker();
+            se.GetMessageHandler()->Worker();
         }
 
     private:
@@ -35,14 +35,14 @@ namespace statusengine {
 
     class BulkMessageCallback : public EventCallback {
     public:
-        explicit BulkMessageCallback(IStatusengine *se, double interval)
+        explicit BulkMessageCallback(IStatusengine &se, double interval)
                 : EventCallback(se), interval(interval) {}
 
         double Interval() override {
             return interval;
         }
         void Callback() override {
-            se->FlushBulkQueue();
+            se.FlushBulkQueue();
         }
 
     private:

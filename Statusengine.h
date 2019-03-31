@@ -45,7 +45,7 @@ namespace statusengine {
 
         int Callback(int event_type, void *data);
 
-        void SetModuleInfo(int modinfo, std::string text);
+        void SetModuleInfo(int modinfo, const std::string &text);
 
         nebmodule *nebhandle;
         std::string configurationPath;
