@@ -1,6 +1,6 @@
 #include "MessageHandlerList.h"
 
-#include "MessageQueueHandler.h"
+#include "MessageHandler.h"
 
 
 #ifdef WITH_GEARMAN
