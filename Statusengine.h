@@ -3,15 +3,16 @@
 #include <map>
 #include <string>
 #include <memory>
+#include <vector>
 
 #include "Nebmodule.h"
 #include "IStatusengine.h"
 
 #include "EventCallback.h"
 #include "NebmoduleCallback.h"
+#include "Configuration.h"
 
 namespace statusengine {
-    class Configuration;
     class Nebmodule;
 
     class Statusengine : public IStatusengine {
@@ -30,13 +31,26 @@ namespace statusengine {
         void RegisterEventCallback(EventCallback *ecb);
         IMessageHandlerList *GetMessageHandler() const override;
 
-        template<typename T, typename... _Args>
-        void RegisterCallback(_Args&&... __args) {
-            std::shared_ptr<NebmoduleCallback> cb  = std::static_pointer_cast<NebmoduleCallback>(std::make_shared<T>(std::forward<_Args>(__args)...));
-            NEBCallbackType cbType = cb->GetCallbackType();
-            if (callbacks.find(cbType) == callbacks.end())
-                Nebmodule::Instance().RegisterCallback(cbType);
-            callbacks.insert(std::make_pair(cbType, cb));
+        template<typename T>
+        void RegisterCallback(const std::vector<Queue> &queueList) {
+            bool queueExists = false;
+            for (auto q : queueList) {
+                if(messageHandler->QueueExists(q)) {
+                    queueExists = true;
+                    break;
+                }
+            }
+            if (queueExists) {
+                auto cb  = new T(*this);
+                NEBCallbackType cbType = cb->GetCallbackType();
+                if (callbacks.find(cbType) == callbacks.end())
+                    Nebmodule::Instance().RegisterCallback(cbType);
+                callbacks.insert(std::make_pair(cbType, std::unique_ptr<NebmoduleCallback>(cb)));
+            }
+        }
+
+        time_t GetStartupScheduleMax() const override {
+            return configuration->GetStartupScheduleMax();
         }
 
       private:
@@ -52,7 +66,7 @@ namespace statusengine {
         Configuration *configuration;
         IMessageHandlerList *messageHandler;
         LogStream ls;
-        std::multimap<NEBCallbackType, std::shared_ptr<NebmoduleCallback>> callbacks;
+        std::multimap<NEBCallbackType, std::unique_ptr<NebmoduleCallback>> callbacks;
         BulkMessageCallback *bulkCallback;
         MessageWorkerCallback *messageWorkerCallback;
     };

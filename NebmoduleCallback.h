@@ -109,9 +109,9 @@ namespace statusengine {
 
     class ProcessDataCallback : public NebmoduleCallback {
     public:
-        explicit ProcessDataCallback(IStatusengine &se, time_t startupSchedulerMax)
+        explicit ProcessDataCallback(IStatusengine &se)
                 : NebmoduleCallback(NEBCALLBACK_PROCESS_DATA, se), restartData(false), processData(false),
-                  startupSchedulerMax(startupSchedulerMax) {
+                  startupSchedulerMax(se.GetStartupScheduleMax()) {
             auto mHandler = se.GetMessageHandler();
             if (mHandler->QueueExists(Queue::RestartData)) {
                 restartHandler = mHandler->GetMessageQueueHandler(Queue::RestartData);
