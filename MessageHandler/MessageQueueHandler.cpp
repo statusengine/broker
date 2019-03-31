@@ -1,6 +1,6 @@
 #include "MessageQueueHandler.h"
 
-#include "Configuration/Configuration.h"
+#include "Configuration.h"
 #include "MessageHandlerList.h"
 #include "NagiosObject.h"
 #include "Utility.h"
@@ -45,8 +45,9 @@ namespace statusengine {
                 handler->SendMessage(queue, msg);
             }
 
+            auto QueueId = QueueNameHandler::Instance().QueueIds();
             se->Log() << "Sent bulk message (" << bulkMessages.size() << ") for queue "
-                      << Configuration::QueueId.at(queue) << LogLevel::Info;
+                      << QueueId.at(queue) << LogLevel::Info;
 
             clearContainer<>(&bulkMessages);
         }

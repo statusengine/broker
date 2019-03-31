@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include "Configuration/Queue.h"
+#include "Queue.h"
 #include "NagiosObject.h"
 #include "IMessageQueueHandler.h"
 #include "MessageHandler.h"

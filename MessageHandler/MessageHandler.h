@@ -6,8 +6,8 @@
 #include <set>
 #include <string>
 
-#include "Configuration/MessageHandlerConfiguration.h"
-#include "Configuration/Queue.h"
+#include "Configuration.h"
+#include "Queue.h"
 #include "IStatusengine.h"
 
 

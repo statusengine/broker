@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Configuration/Queue.h"
+#include "Queue.h"
 #include "IMessageQueueHandler.h"
 
 #include <memory>

@@ -1,6 +1,6 @@
 #include "GearmanClient.h"
 
-#include "Configuration/GearmanConfiguration.h"
+#include "Configuration.h"
 #include "Utility.h"
 
 #include <iostream>

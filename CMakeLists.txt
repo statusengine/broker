@@ -20,9 +20,7 @@ find_package(PkgConfig REQUIRED)
 
 set (SESources
 	Nebmodule.cpp Statusengine.cpp LogStream.cpp
-	Configuration/Configuration.cpp Configuration/MessageHandlerConfiguration.cpp
-	Configuration/RabbitmqConfiguration.cpp Configuration/GearmanConfiguration.cpp
-	MessageHandler/MessageHandler.cpp MessageHandler/MessageHandlerList.cpp MessageHandler/MessageQueueHandler.cpp
+		MessageHandler/MessageHandler.cpp MessageHandler/MessageHandlerList.cpp MessageHandler/MessageQueueHandler.cpp
 		)
 
 pkg_check_modules(GEARMAND gearmand)

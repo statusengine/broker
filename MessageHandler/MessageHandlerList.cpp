@@ -1,8 +1,6 @@
 #include "MessageHandlerList.h"
 
-#include "Configuration/Configuration.h"
-#include "Configuration/GearmanConfiguration.h"
-#include "Configuration/RabbitmqConfiguration.h"
+#include "Configuration.h"
 
 #ifdef WITH_GEARMAN
 #include "GearmanClient.h"
@@ -56,7 +54,7 @@ namespace statusengine {
 #endif
         for (auto &qHandlerPair : handlers) {
             mqHandlers[qHandlerPair.first] = std::make_shared<MessageQueueHandler>(
-                se, this, maxBulkSize, &globalBulkCounter, qHandlerPair.first, qHandlerPair.second, cfg->isBulkQueue(qHandlerPair.first));
+                se, this, maxBulkSize, &globalBulkCounter, qHandlerPair.first, qHandlerPair.second, cfg->IsBulkQueue(qHandlerPair.first));
         }
     }
 

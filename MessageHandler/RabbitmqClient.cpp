@@ -1,6 +1,6 @@
 #include "RabbitmqClient.h"
 
-#include "Configuration/RabbitmqConfiguration.h"
+#include "Configuration.h"
 
 namespace statusengine {
 
