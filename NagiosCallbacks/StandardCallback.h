@@ -2,8 +2,7 @@
 
 #include "NebmoduleCallback.h"
 
-#include "MessageHandler/MessageHandlerList.h"
-#include "MessageHandler/MessageQueueHandler.h"
+#include "MessageHandler/IMessageQueueHandler.h"
 #include "Statusengine.h"
 
 namespace statusengine {
@@ -24,6 +23,6 @@ namespace statusengine {
         }
 
       protected:
-        std::shared_ptr<MessageQueueHandler> qHandler;
+        std::shared_ptr<IMessageQueueHandler> qHandler;
     };
 } // namespace statusengine

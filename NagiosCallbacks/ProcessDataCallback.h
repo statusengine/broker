@@ -3,7 +3,7 @@
 #include <ctime>
 #include <memory>
 
-#include "MessageHandler/MessageQueueHandler.h"
+#include "MessageHandler/IMessageQueueHandler.h"
 #include "Nebmodule.h"
 
 #include "NebmoduleCallback.h"
@@ -21,7 +21,7 @@ namespace statusengine {
         bool processData;
         time_t startupSchedulerMax;
 
-        std::shared_ptr<MessageQueueHandler> restartHandler;
-        std::shared_ptr<MessageQueueHandler> processHandler;
+        std::shared_ptr<IMessageQueueHandler> restartHandler;
+        std::shared_ptr<IMessageQueueHandler> processHandler;
     };
 } // namespace statusengine

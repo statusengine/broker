@@ -4,7 +4,7 @@
 
 #include "Nebmodule.h"
 
-#include "MessageHandler/MessageQueueHandler.h"
+#include "MessageHandler/IMessageQueueHandler.h"
 #include "NebmoduleCallback.h"
 
 namespace statusengine {
@@ -19,7 +19,7 @@ namespace statusengine {
         bool hostchecks;
         bool ochp;
 
-        std::shared_ptr<MessageQueueHandler> hostCheckHandler;
-        std::shared_ptr<MessageQueueHandler> ochpHandler;
+        std::shared_ptr<IMessageQueueHandler> hostCheckHandler;
+        std::shared_ptr<IMessageQueueHandler> ochpHandler;
     };
 } // namespace statusengine

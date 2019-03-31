@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "MessageHandler/MessageQueueHandler.h"
+#include "MessageHandler/IMessageQueueHandler.h"
 #include "Nebmodule.h"
 #include "NebmoduleCallback.h"
 
@@ -18,8 +18,8 @@ namespace statusengine {
         bool servicechecks;
         bool ocsp;
         bool service_perfdata;
-        std::shared_ptr<MessageQueueHandler> serviceCheckHandler;
-        std::shared_ptr<MessageQueueHandler> ocspHandler;
-        std::shared_ptr<MessageQueueHandler> servicePerfHandler;
+        std::shared_ptr<IMessageQueueHandler> serviceCheckHandler;
+        std::shared_ptr<IMessageQueueHandler> ocspHandler;
+        std::shared_ptr<IMessageQueueHandler> servicePerfHandler;
     };
 } // namespace statusengine

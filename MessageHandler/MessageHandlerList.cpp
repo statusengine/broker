@@ -90,7 +90,7 @@ namespace statusengine {
         return true;
     }
 
-    std::shared_ptr<MessageQueueHandler> MessageHandlerList::GetMessageQueueHandler(Queue queue) {
+    std::shared_ptr<IMessageQueueHandler> MessageHandlerList::GetMessageQueueHandler(Queue queue) {
         return mqHandlers.at(queue);
     }
 

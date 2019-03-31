@@ -26,11 +26,11 @@ namespace statusengine {
         void Worker() override;
 
         bool QueueExists(Queue queue) override;
-        virtual std::shared_ptr<MessageQueueHandler> GetMessageQueueHandler(Queue queue);
+        std::shared_ptr<IMessageQueueHandler> GetMessageQueueHandler(Queue queue) override;
 
       private:
         std::vector<std::shared_ptr<MessageHandler>> allHandlers;
-        std::map<Queue, std::shared_ptr<MessageQueueHandler>> mqHandlers;
+        std::map<Queue, std::shared_ptr<IMessageQueueHandler>> mqHandlers;
         IStatusengine *se;
         unsigned long maxBulkSize;
         unsigned long globalBulkCounter;

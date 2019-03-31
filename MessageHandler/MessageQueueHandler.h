@@ -5,13 +5,14 @@
 
 #include "Configuration/Queue.h"
 #include "NagiosObjects/NagiosObject.h"
+#include "IMessageQueueHandler.h"
 #include "MessageHandler.h"
 #include "IStatusengine.h"
 
-namespace statusengine {
+namespace statusengine  {
     class MessageHandlerList;
 
-    class MessageQueueHandler {
+    class MessageQueueHandler : public IMessageQueueHandler {
       public:
         MessageQueueHandler(IStatusengine *se, MessageHandlerList *mhlist, unsigned long maxBulkSize,
                             unsigned long *globalBulkCounter, Queue queue,
@@ -20,8 +21,8 @@ namespace statusengine {
          * SendMessage
          * @param JsonObjectContainer contains json object that will be deleted after sending the message
          */
-        void SendMessage(NagiosObject &obj);
-        void FlushBulkQueue();
+        void SendMessage(NagiosObject &obj) override;
+        void FlushBulkQueue() override;
 
       private:
         MessageHandlerList *mhlist;
