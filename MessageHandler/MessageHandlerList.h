@@ -4,12 +4,10 @@
 #include <memory>
 #include <vector>
 
+#include "IStatusengine.h"
 #include "IMessageHandler.h"
-#include "MessageQueueHandler.h"
-
 
 namespace statusengine {
-    class Statusengine;
     class Configuration;
 
     class MessageHandlerList : public IMessageHandlerList {

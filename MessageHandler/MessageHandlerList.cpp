@@ -1,6 +1,7 @@
 #include "MessageHandlerList.h"
 
 #include "Configuration.h"
+#include "MessageQueueHandler.h"
 
 
 #ifdef WITH_GEARMAN
@@ -55,7 +56,7 @@ namespace statusengine {
 #endif
         for (auto &qHandlerPair : handlers) {
             mqHandlers[qHandlerPair.first] = std::make_shared<MessageQueueHandler>(
-                se, this, maxBulkSize, &globalBulkCounter, qHandlerPair.first, qHandlerPair.second, cfg->IsBulkQueue(qHandlerPair.first));
+                *se, *this, maxBulkSize, &globalBulkCounter, qHandlerPair.first, qHandlerPair.second, cfg->IsBulkQueue(qHandlerPair.first));
         }
     }
 

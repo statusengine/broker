@@ -1,6 +1,5 @@
 #pragma once
 
-#include "vendor/toml.hpp"
 #include <memory>
 #include <set>
 #include <string>
