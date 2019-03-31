@@ -24,8 +24,7 @@ set (SESources
 	Configuration/RabbitmqConfiguration.cpp Configuration/GearmanConfiguration.cpp
 	MessageHandler/MessageHandler.cpp MessageHandler/MessageHandlerList.cpp MessageHandler/MessageQueueHandler.cpp
 	EventCallback/EventCallback.cpp EventCallback/BulkMessageCallback.cpp EventCallback/MessageWorkerCallback.cpp
-		NagiosCallbacks/NebmoduleCallback.cpp
-	NagiosCallbacks/HostCheckCallback.cpp
+        NagiosCallbacks/HostCheckCallback.cpp
 	NagiosCallbacks/ServiceCheckCallback.cpp
 		NagiosCallbacks/ProcessDataCallback.cpp
 		)

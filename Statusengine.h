@@ -24,7 +24,7 @@ namespace statusengine {
         Statusengine &operator=(const Statusengine &) = delete;
 
         int Init();
-        void InitEventCallbacks();
+        void InitEventCallbacks() override;
 
         LogStream &Log() override;
         void FlushBulkQueue() override;

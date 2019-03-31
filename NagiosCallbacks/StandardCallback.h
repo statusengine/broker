@@ -3,13 +3,13 @@
 #include "NebmoduleCallback.h"
 
 #include "MessageHandler/IMessageQueueHandler.h"
-#include "Statusengine.h"
+#include "IStatusengine.h"
 
 namespace statusengine {
     template <typename N, typename D, NEBCallbackType CBT, Queue queue>
     class StandardCallback : public NebmoduleCallback {
       public:
-        explicit StandardCallback(Statusengine *se) : NebmoduleCallback(CBT, se) {
+        explicit StandardCallback(IStatusengine *se) : NebmoduleCallback(CBT, se) {
             qHandler = se->GetMessageHandler()->GetMessageQueueHandler(queue);
         }
 

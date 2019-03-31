@@ -10,7 +10,7 @@
 namespace statusengine {
     class HostCheckCallback : public NebmoduleCallback {
       public:
-        explicit HostCheckCallback(Statusengine *se);
+        explicit HostCheckCallback(IStatusengine *se);
         HostCheckCallback(HostCheckCallback && other) noexcept;
 
         void Callback(int event_type, void *vdata) override;

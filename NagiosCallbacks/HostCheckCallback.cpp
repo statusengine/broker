@@ -2,10 +2,10 @@
 
 #include "MessageHandler/MessageHandlerList.h"
 #include "NagiosObject.h"
-#include "Statusengine.h"
+
 
 namespace statusengine {
-    HostCheckCallback::HostCheckCallback(Statusengine *se)
+    HostCheckCallback::HostCheckCallback(IStatusengine *se)
         : NebmoduleCallback(NEBCALLBACK_HOST_CHECK_DATA, se), hostchecks(false), ochp(false) {
         auto mHandler = se->GetMessageHandler();
         if (mHandler->QueueExists(Queue::HostCheck)) {

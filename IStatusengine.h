@@ -10,6 +10,8 @@ namespace statusengine {
         virtual LogStream &Log() = 0;
         virtual void FlushBulkQueue() = 0;
         virtual IMessageHandlerList *GetMessageHandler() const = 0;
+        virtual void InitEventCallbacks() = 0;
+
     };
 }
 

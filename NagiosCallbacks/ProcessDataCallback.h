@@ -11,7 +11,7 @@
 namespace statusengine {
     class ProcessDataCallback : public NebmoduleCallback {
       public:
-        explicit ProcessDataCallback(Statusengine *se, time_t startupSchedulerMax);
+        explicit ProcessDataCallback(IStatusengine *se, time_t startupSchedulerMax);
         ProcessDataCallback(ProcessDataCallback &&other) noexcept;
 
         void Callback(int event_type, void *vdata) override;

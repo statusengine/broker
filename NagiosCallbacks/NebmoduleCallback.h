@@ -1,22 +1,27 @@
 #pragma once
 
 #include "Nebmodule.h"
+#include "IStatusengine.h"
 
 namespace statusengine {
-    class Statusengine;
 
     class NebmoduleCallback {
       public:
-        explicit NebmoduleCallback(NEBCallbackType cbType, Statusengine *se);
-        NebmoduleCallback(NebmoduleCallback &&other) noexcept;
+        explicit NebmoduleCallback(NEBCallbackType cbType, IStatusengine *se) : cbType(cbType), se(se) {}
+
+        NebmoduleCallback(statusengine::NebmoduleCallback &&other) noexcept
+                : cbType(other.cbType), se(other.se) {}
+
         virtual ~NebmoduleCallback() = default;
 
-        virtual NEBCallbackType GetCallbackType();
+        virtual NEBCallbackType GetCallbackType() {
+            return cbType;
+        }
 
         virtual void Callback(int event_type, void *data) = 0;
 
       protected:
-        Statusengine *se;
+        IStatusengine *se;
         NEBCallbackType cbType;
     };
 

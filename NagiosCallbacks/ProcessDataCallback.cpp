@@ -3,10 +3,10 @@
 #include <algorithm>
 
 #include "MessageHandler/MessageHandlerList.h"
-#include "Statusengine.h"
+
 
 namespace statusengine {
-    ProcessDataCallback::ProcessDataCallback(Statusengine *se, time_t startupSchedulerMax)
+    ProcessDataCallback::ProcessDataCallback(IStatusengine *se, time_t startupSchedulerMax)
         : NebmoduleCallback(NEBCALLBACK_PROCESS_DATA, se), restartData(false), processData(false),
           startupSchedulerMax(startupSchedulerMax) {
         auto mHandler = se->GetMessageHandler();

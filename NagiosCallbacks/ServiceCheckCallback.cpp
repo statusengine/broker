@@ -2,10 +2,10 @@
 
 #include "MessageHandler/MessageHandlerList.h"
 #include "NagiosObject.h"
-#include "Statusengine.h"
+
 
 namespace statusengine {
-    ServiceCheckCallback::ServiceCheckCallback(Statusengine *se)
+    ServiceCheckCallback::ServiceCheckCallback(IStatusengine *se)
         : NebmoduleCallback(NEBCALLBACK_SERVICE_CHECK_DATA, se), servicechecks(false), ocsp(false),
           service_perfdata(false) {
         auto mHandler = se->GetMessageHandler();
