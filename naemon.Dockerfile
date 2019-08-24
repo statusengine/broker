@@ -4,7 +4,7 @@ RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y cmake gcc g++ gdb build-essential libglib2.0-dev libgearman-dev uuid-dev libicu-dev libjson-c-dev pkg-config libssl-dev librabbitmq-dev gearman-job-server gearman-tools automake gperf help2man libtool rabbitmq-server wget tar && \
     apt-get clean
 
-ENV NAEMON_VERSION=1.0.8 NAEMON_CHECKSUM=428294daeae31e5a8316aaa70d91fb9ad1120e1379ed2cb14f5d80e67ed990b6
+ENV NAEMON_VERSION=1.0.10 NAEMON_CHECKSUM=37353dd51a547b9e7f1b7d5e7e0b1716f9ea526d737c797d85431a83874736e5
 
 RUN useradd -d /opt/naemon -m -s /bin/bash --system naemon && \
     wget -O /v${NAEMON_VERSION}.tar.gz https://github.com/naemon/naemon-core/archive/v${NAEMON_VERSION}.tar.gz  && \

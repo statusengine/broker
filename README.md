@@ -1,4 +1,4 @@
-# statusengine naemon/nagios broker module (alpha)
+# statusengine naemon/nagios broker module
 
 For a production ready broker module [click here](https://github.com/statusengine/module).
 
@@ -115,7 +115,7 @@ docker exec -t -i broker_naemon_1 /usr/bin/queuestatus
 ## License
 
     statusengine - the missing event broker
-    Copyright (C) 2018  The statusengine team
+    Copyright (C) 2019  The statusengine team
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
