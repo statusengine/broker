@@ -32,7 +32,7 @@ namespace statusengine {
         Log() << "This is the c++ version of statusengine event broker" << LogLevel::Info;
         Log() << "License:\n"
                  "    statusengine - the missing event broker\n"
-                 "    Copyright (C) 2018  The statusengine team\n"
+                 "    Copyright (C) 2019  The statusengine team\n"
                  "\n"
                  "    This program is free software; you can redistribute it and/or modify\n"
                  "    it under the terms of the GNU General Public License as published by\n"
