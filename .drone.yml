@@ -1,0 +1,19 @@
+kind: pipeline
+type: docker
+name: broker
+
+steps:
+- name: build
+  image: ubuntu:bionic
+  commands:
+  - apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -y install cmake gcc g++ build-essential libglib2.0-dev libgearman-dev uuid-dev libicu-dev libjson-c-dev pkg-config libssl-dev librabbitmq-dev
+  - |
+    set -e
+    mkdir -p /usr/local/lib/pkgconfig /opt/naemon/include
+    ln -s $(readlink -f devtools/ci/naemon) /opt/naemon/include/naemon
+    ln -s $(readlink -f devtools/ci/naemon.pc) /usr/local/lib/pkgconfig/naemon.pc
+  - |
+    mkdir build
+    cd build
+    cmake -DCMAKE_C_COMPILER=/usr/bin/gcc -DCMAKE_CXX_COMPILER=/usr/bin/g++ ..
+    make -j5
