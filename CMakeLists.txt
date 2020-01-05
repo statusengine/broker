@@ -5,18 +5,32 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-if(NOT DEFINED WITH_GEARMAN)
-	set(WITH_GEARMAN ON)
-endif(NOT DEFINED WITH_GEARMAN)
-
-if(NOT DEFINED WITH_RABBITMQ)
-	set(WITH_RABBITMQ ON)
-endif(NOT DEFINED WITH_RABBITMQ)
+option(WITH_GEARMAN "Add gearman message queue support" ON)
+option(WITH_RABBITMQ "Add rabbitmq message queue support" ON)
 
 include(FindPkgConfig)
+include(ExternalProject)
 
 find_package(PkgConfig REQUIRED)
+
+ExternalProject_Add(project_json-c
+  GIT_REPOSITORY git@github.com:json-c/json-c.git
+  PREFIX ${PROJECT_SOURCE_DIR}/vendor/json-c
+  INSTALL_DIR ${PROJECT_SOURCE_DIR}/vendor/json-c/dist
+  CMAKE_ARGS -DBUILD_SHARED_LIBS=OFF -DCMAKE_INSTALL_PREFIX=${PROJECT_SOURCE_DIR}/vendor/json-c/dist -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+  UPDATE_COMMAND ""
+  BUILD_COMMAND cmake --build . --target json-c -- -j2
+  INSTALL_COMMAND cmake --build . --target install/fast -- -j2
+  TEST_COMMAND ""
+)
+
+add_library(json-c STATIC IMPORTED)
+set_property(TARGET json-c PROPERTY IMPORTED_LOCATION ${PROJECT_SOURCE_DIR}/vendor/json-c/dist/lib/libjson-c.a)
+add_dependencies(json-c project_json-c)
+
+set(JSONC_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/vendor/json-c/dist/include/json-c)
 
 set (SESources
 	Nebmodule.cpp Statusengine.cpp
@@ -26,7 +40,6 @@ set (SESources
 pkg_check_modules(GEARMAND gearmand)
 pkg_check_modules(RABBITMQC librabbitmq)
 pkg_check_modules(ICUUC REQUIRED icu-uc)
-pkg_check_modules(JSONC REQUIRED json-c)
 pkg_check_modules(GLIB REQUIRED glib-2.0)
 
 if(WITH_GEARMAN AND NOT GEARMAND_FOUND)
@@ -75,8 +88,7 @@ target_link_libraries(statusengine PRIVATE ${ICUUC_LIBRARIES})
 target_compile_options(statusengine PRIVATE ${ICUUC_CFLAGS_OTHER})
 
 target_include_directories(statusengine PRIVATE ${JSONC_INCLUDE_DIRS})
-target_link_libraries(statusengine PRIVATE ${JSONC_LIBRARIES})
-target_compile_options(statusengine PRIVATE ${JSONC_CFLAGS_OTHER})
+target_link_libraries(statusengine PRIVATE json-c)
 
 target_include_directories(statusengine PRIVATE ${GLIB_INCLUDE_DIRS})
 target_link_libraries(statusengine PRIVATE ${GLIB_LIBRARIES})

@@ -10,3 +10,4 @@
 /devtools/include
 /.idea
 /cmake-build-debug
+/vendor/json-c
