@@ -278,8 +278,8 @@ namespace statusengine {
                                      unsigned long *globalBulkCounter, Queue queue,
                                      std::shared_ptr<std::vector<std::shared_ptr<IMessageHandler>>> handlers,
                                      bool bulk)
-                : se(se), mhlist(mhlist), maxBulkSize(maxBulkSize), globalBulkCounter(globalBulkCounter), queue(queue),
-                  handlers(std::move(handlers)), bulk(bulk) {}
+                : se(se), mhlist(mhlist), queue(queue), handlers(std::move(handlers)),
+                  maxBulkSize(maxBulkSize), globalBulkCounter(globalBulkCounter), bulk(bulk) {}
 
         /**
         * SendMessage
@@ -326,8 +326,8 @@ namespace statusengine {
         }
 
     private:
-        IMessageHandlerList &mhlist;
         IStatusengine &se;
+        IMessageHandlerList &mhlist;
 
         Queue queue;
         std::shared_ptr<std::vector<std::shared_ptr<IMessageHandler>>> handlers;

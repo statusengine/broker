@@ -1,0 +1,4 @@
+# feature is not available on bionic
+option('gearman', type: 'boolean', value: true)
+option('rabbitmq', type: 'boolean', value: true)
+option('nagios', type: 'boolean', value: false)

@@ -13,10 +13,10 @@ namespace statusengine {
 
     class NebmoduleCallback {
       public:
-        explicit NebmoduleCallback(NEBCallbackType cbType, IStatusengine &se) : cbType(cbType), se(se) {}
+        explicit NebmoduleCallback(NEBCallbackType cbType, IStatusengine &se) : se(se), cbType(cbType) {}
 
         NebmoduleCallback(statusengine::NebmoduleCallback &&other) noexcept
-                : cbType(other.cbType), se(other.se) {}
+                : se(other.se), cbType(other.cbType) {}
 
         virtual ~NebmoduleCallback() = default;
 
@@ -41,7 +41,7 @@ namespace statusengine {
         StandardCallback(StandardCallback &&other) noexcept
                 : NebmoduleCallback::NebmoduleCallback(std::move(other)), qHandler(std::move(other.qHandler)) {}
 
-        void Callback(int event_type, void *data) override {
+        void Callback(int, void *data) override {
             auto nData = reinterpret_cast<N *>(data);
             D dData(nData);
             qHandler->SendMessage(dData);
@@ -76,7 +76,7 @@ namespace statusengine {
                   service_perfdata(other.service_perfdata), serviceCheckHandler(std::move(other.serviceCheckHandler)),
                   ocspHandler(std::move(other.ocspHandler)), servicePerfHandler(std::move(other.servicePerfHandler)) {}
 
-        void Callback(int event_type, void *vdata) override {
+        void Callback(int, void *vdata) override {
             auto data = reinterpret_cast<nebstruct_service_check_data *>(vdata);
             auto temp_service = reinterpret_cast<service*>(data->object_ptr);
 
@@ -128,7 +128,7 @@ namespace statusengine {
                   processData(other.processData), startupSchedulerMax(other.startupSchedulerMax),
                   restartHandler(std::move(other.restartHandler)), processHandler(std::move(other.processHandler)) {}
 
-        void Callback(int event_type, void *vdata) override {
+        void Callback(int, void *vdata) override {
             auto data = reinterpret_cast<nebstruct_process_data *>(vdata);
 
             if (data->type == NEBTYPE_PROCESS_START) {
@@ -204,7 +204,7 @@ namespace statusengine {
                 : NebmoduleCallback::NebmoduleCallback(std::move(other)), hostchecks(other.hostchecks), ochp(other.ochp),
                   hostCheckHandler(std::move(other.hostCheckHandler)), ochpHandler(std::move(other.ochpHandler)) {}
 
-        void Callback(int event_type, void *vdata) override {
+        void Callback(int, void *vdata) override {
             auto data = reinterpret_cast<nebstruct_host_check_data *>(vdata);
 
             if (data->type == NEBTYPE_HOSTCHECK_PROCESSED) {

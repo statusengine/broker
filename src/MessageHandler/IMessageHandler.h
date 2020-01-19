@@ -10,6 +10,8 @@
 namespace statusengine {
     class IMessageHandler {
     public:
+        virtual ~IMessageHandler() = default;
+
         virtual void ProcessMessage(WorkerQueue workerQueue, const std::string &message) = 0;
         virtual void ProcessMessage(WorkerQueue workerQueue, json_object *obj) = 0;
 
@@ -20,6 +22,8 @@ namespace statusengine {
 
     class IMessageQueueHandler {
     public:
+        virtual ~IMessageQueueHandler() = default;
+
         virtual void SendMessage(NagiosObject &obj) = 0;
         virtual void FlushBulkQueue() = 0;
     };

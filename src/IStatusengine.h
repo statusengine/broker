@@ -7,6 +7,8 @@
 namespace statusengine {
     class IStatusengine {
       public:
+        virtual ~IStatusengine() = default;
+
         virtual LogStream &Log() = 0;
         virtual void FlushBulkQueue() = 0;
         virtual IMessageHandlerList *GetMessageHandler() const = 0;

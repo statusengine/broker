@@ -111,8 +111,8 @@ namespace statusengine {
         }
 
     protected:
-        json_object *data;
         Nebmodule &nebmodule;
+        json_object *data;
     };
 
     class NagiosProcessData : public NagiosObject {

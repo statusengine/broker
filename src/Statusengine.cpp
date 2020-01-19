@@ -2,8 +2,6 @@
 
 #include <utility>
 
-#include "vendor/toml.hpp"
-
 #include "Configuration.h"
 #include "LogStream.h"
 #include "MessageHandler/MessageHandlerList.h"
@@ -15,8 +13,8 @@
 namespace statusengine {
 
     Statusengine::Statusengine(nebmodule *handle, std::string configurationPath)
-        : nebhandle(handle), configurationPath(std::move(configurationPath)), ls(), bulkCallback(nullptr),
-          messageWorkerCallback(nullptr), callbacks(), messageHandler(nullptr) {
+        : nebhandle(handle), configurationPath(std::move(configurationPath)), messageHandler(nullptr), ls(),
+          callbacks(), bulkCallback(nullptr), messageWorkerCallback(nullptr)  {
         configuration = new Configuration(*this);
     }
 

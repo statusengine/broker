@@ -5,7 +5,7 @@
 namespace statusengine {
 
     RabbitmqClient::RabbitmqClient(IStatusengine *se, std::shared_ptr<RabbitmqConfiguration> cfg)
-        : MessageHandler(se), cfg(cfg), connected(false), conn(nullptr), socket(nullptr) {
+        : MessageHandler(se), cfg(cfg), socket(nullptr), conn(nullptr), connected(false) {
         queueNames = cfg->GetQueueNames();
         workerQueueNames = cfg->GetWorkerQueueNames();
         for (auto &queue : *workerQueueNames) {
@@ -249,6 +249,7 @@ namespace statusengine {
         }
         ProcessMessage(queue, msg);
         amqp_basic_ack(conn, 1, envelope.delivery_tag, false);
+        ++counter;
 
         return true;
     }

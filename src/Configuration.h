@@ -7,8 +7,7 @@
 #include <set>
 #include <utility>
 #include <map>
-
-#include "vendor/toml.hpp"
+#include <toml.hpp>
 
 #include "Queue.h"
 #include "IStatusengine.h"
@@ -76,6 +75,8 @@ namespace statusengine {
 
         virtual bool Load(const toml::Table &tbl) = 0;
 
+        virtual ~MessageHandlerConfiguration() = default;
+
     protected:
         explicit MessageHandlerConfiguration(IStatusengine &se) : se(se) {
             queues = std::make_shared<std::map<Queue, std::string>>();
@@ -103,10 +104,10 @@ namespace statusengine {
     class RabbitmqConfiguration : public MessageHandlerConfiguration {
     public:
         explicit RabbitmqConfiguration(IStatusengine &se)
-                : MessageHandlerConfiguration(se), Port(5673), Timeout(), SSL(false), SSLVerify(true),
-                  Exchange("statusengine") {}
+                : MessageHandlerConfiguration(se), Port(5673), Timeout(), Exchange("statusengine"), SSL(false), SSLVerify(true)
+                   {}
 
-        ~RabbitmqConfiguration() = default;
+        virtual ~RabbitmqConfiguration() = default;
 
         bool Load(const toml::Table &tbl) override {
             Hostname = GetTomlDefault<>(tbl, "Hostname", std::string(""));

@@ -21,7 +21,7 @@ namespace statusengine {
         return se->Init();
     }
 
-    int Nebmodule::Deinit(int reason) {
+    int Nebmodule::Deinit(int) {
         delete se;
         uchardet_delete(uc);
         uc = nullptr;
@@ -57,10 +57,10 @@ namespace statusengine {
     }
 
     void Nebmodule::ScheduleHostCheckDelay(host *temp_host, time_t delay) {
-        time_t schedule_time = std::time(nullptr) + delay;
 #ifndef BUILD_NAGIOS
         schedule_next_host_check(temp_host, delay, CHECK_OPTION_NONE);
 #else
+        time_t schedule_time = std::time(nullptr) + delay;
         schedule_host_check(temp_host, schedule_time, CHECK_OPTION_NONE);
 #endif // BUILD_NAGIOS
     }
@@ -78,10 +78,10 @@ namespace statusengine {
     }
 
     void Nebmodule::ScheduleServiceCheckDelay(service *temp_service, time_t delay) {
-        time_t schedule_time = std::time(nullptr) + delay;
 #ifndef BUILD_NAGIOS
         schedule_next_service_check(temp_service, delay, CHECK_OPTION_NONE);
 #else
+        time_t schedule_time = std::time(nullptr) + delay;
         schedule_service_check(temp_service, schedule_time, CHECK_OPTION_NONE);
 #endif // BUILD_NAGIOS
     }
@@ -127,11 +127,11 @@ namespace statusengine {
     }
 } // namespace statusengine
 
-extern "C" int nebmodule_init(int flags, char *args, nebmodule *handle) {
+extern "C" int nebmodule_init(int, char *args, nebmodule *handle) {
     return statusengine::Nebmodule::Instance().Init(handle, std::string(args));
 }
 
-extern "C" int nebmodule_deinit(int flags, int reason) {
+extern "C" int nebmodule_deinit(int, int reason) {
     return statusengine::Nebmodule::Instance().Deinit(reason);
 }
 

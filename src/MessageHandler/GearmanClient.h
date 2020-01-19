@@ -21,10 +21,11 @@ namespace statusengine {
         virtual gearman_return_t WorkerCallback(WorkerQueue queue, gearman_job_st *job);
 
       private:
+        std::shared_ptr<GearmanConfiguration> cfg;
+
         gearman_client_st *client;
         gearman_worker_st *worker;
 
-        std::shared_ptr<GearmanConfiguration> cfg;
         std::shared_ptr<std::map<Queue, std::string>> queueNames;
         std::shared_ptr<std::map<WorkerQueue, std::string>> workerQueueNames;
         std::map<WorkerQueue, GearmanWorkerContext *> workerContexts;
