@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <uchardet.h>
 
 #ifndef BUILD_NAGIOS
 extern "C" {
@@ -59,10 +60,13 @@ namespace statusengine {
 
         void ScheduleServiceCheckFixed(service *temp_service, time_t fixed);
 
+        std::string EncodeString(char *data);
+
       private:
-        explicit Nebmodule() : se(nullptr) {}
+        explicit Nebmodule() : se(nullptr), uc(nullptr) {}
 
         Statusengine *se;
+        uchardet_t uc;
     };
 } // namespace statusengine
 

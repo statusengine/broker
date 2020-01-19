@@ -3,7 +3,6 @@
 #include <string>
 
 #include <json.h>
-#include <unicode/unistr.h>
 
 #include "Nebmodule.h"
 
@@ -11,7 +10,7 @@
 namespace statusengine {
     class NagiosObject {
       public:
-        explicit NagiosObject() {
+        explicit NagiosObject() : nebmodule(Nebmodule::Instance()) {
             data = json_object_new_object();
         }
 
@@ -19,12 +18,12 @@ namespace statusengine {
          * This is like a copy constructor, it increments the counter for data
          * @param data
          */
-        explicit NagiosObject(json_object *data) : data(json_object_get(data)) {}
+        explicit NagiosObject(json_object *data) : nebmodule(Nebmodule::Instance()), data(json_object_get(data)) {}
         /**
          * This is like a copy constructor, it increments the counter for obj->data
          * @param data
          */
-        explicit NagiosObject(statusengine::NagiosObject *obj) : data(json_object_get(obj->data)) {}
+        explicit NagiosObject(statusengine::NagiosObject *obj) : nebmodule(Nebmodule::Instance()), data(json_object_get(obj->data)) {}
 
         ~NagiosObject() {
             json_object_put(data);
@@ -40,12 +39,6 @@ namespace statusengine {
          */
         json_object *GetDataCopy() {
             return json_object_get(data);
-        }
-
-        inline static std::string EncodeString(char *value) {
-            std::string result;
-            icu::UnicodeString(value, "UTF-8").toUTF8String(result);
-            return result;
         }
 
         inline void SetData(const char *name, const std::string &value) {
@@ -119,6 +112,7 @@ namespace statusengine {
 
     protected:
         json_object *data;
+        Nebmodule &nebmodule;
     };
 
     class NagiosProcessData : public NagiosObject {
@@ -198,8 +192,8 @@ namespace statusengine {
             NagiosObject contactnotificationdata;
             contactnotificationdata.SetData("host_name", contactNotificationData->host_name);
             contactnotificationdata.SetData("service_description", contactNotificationData->service_description);
-            contactnotificationdata.SetData("output", EncodeString(contactNotificationData->output));
-            contactnotificationdata.SetData("long_output", EncodeString(contactNotificationData->output));
+            contactnotificationdata.SetData("output", nebmodule.EncodeString(contactNotificationData->output));
+            contactnotificationdata.SetData("long_output", nebmodule.EncodeString(contactNotificationData->output));
             contactnotificationdata.SetData("ack_author", contactNotificationData->ack_author);
             contactnotificationdata.SetData("ack_data", contactNotificationData->ack_data);
             contactnotificationdata.SetData("contact_name", contactNotificationData->contact_name);
@@ -225,7 +219,7 @@ namespace statusengine {
             NagiosObject contactnotificationmethod;
             contactnotificationmethod.SetData("host_name", contactNotificationMethodData->host_name);
             contactnotificationmethod.SetData("service_description", contactNotificationMethodData->service_description);
-            contactnotificationmethod.SetData("output", EncodeString(contactNotificationMethodData->output));
+            contactnotificationmethod.SetData("output", nebmodule.EncodeString(contactNotificationMethodData->output));
             contactnotificationmethod.SetData("ack_author", contactNotificationMethodData->ack_author);
             contactnotificationmethod.SetData("ack_data", contactNotificationMethodData->ack_data);
             contactnotificationmethod.SetData("contact_name", contactNotificationMethodData->contact_name);
@@ -302,8 +296,8 @@ namespace statusengine {
             NagiosObject eventhandler;
             eventhandler.SetData("host_name", eventHandlerData->host_name);
             eventhandler.SetData("service_description", eventHandlerData->service_description);
-            eventhandler.SetData("output", EncodeString(eventHandlerData->output));
-            eventhandler.SetData("long_output", EncodeString(eventHandlerData->output));
+            eventhandler.SetData("output", nebmodule.EncodeString(eventHandlerData->output));
+            eventhandler.SetData("long_output", nebmodule.EncodeString(eventHandlerData->output));
             eventhandler.SetData("command_name", eventHandlerData->command_name);
             eventhandler.SetData("command_args", eventHandlerData->command_args);
             eventhandler.SetData("command_line", eventHandlerData->command_line);
@@ -372,10 +366,10 @@ namespace statusengine {
     public:
         explicit NagiosHost(const host *data) {
             SetData("name", data->name);
-            SetData("plugin_output", EncodeString(data->plugin_output));
-            SetData("long_plugin_output", EncodeString(data->long_plugin_output));
+            SetData("plugin_output", nebmodule.EncodeString(data->plugin_output));
+            SetData("long_plugin_output", nebmodule.EncodeString(data->long_plugin_output));
             SetData("event_handler", data->event_handler);
-            SetData("perf_data", EncodeString(data->perf_data));
+            SetData("perf_data", nebmodule.EncodeString(data->perf_data));
             SetData("check_command", data->check_command);
             SetData("check_period", data->check_period);
             SetData("current_state", data->current_state);
@@ -436,9 +430,9 @@ namespace statusengine {
             hostcheck.SetData("host_name", hostCheckData->host_name);
             hostcheck.SetData("command_line", raw_command != nullptr ? raw_command : nullptr);
             hostcheck.SetData("command_name", nag_host->check_command != nullptr ? nag_host->check_command : nullptr);
-            hostcheck.SetData("output", EncodeString(hostCheckData->output));
-            hostcheck.SetData("long_output", EncodeString(hostCheckData->long_output));
-            hostcheck.SetData("perf_data", EncodeString(hostCheckData->perf_data));
+            hostcheck.SetData("output", nebmodule.EncodeString(hostCheckData->output));
+            hostcheck.SetData("long_output", nebmodule.EncodeString(hostCheckData->long_output));
+            hostcheck.SetData("perf_data", nebmodule.EncodeString(hostCheckData->perf_data));
             hostcheck.SetData("check_type", hostCheckData->check_type);
             hostcheck.SetData("current_attempt", hostCheckData->current_attempt);
             hostcheck.SetData("max_attempts", hostCheckData->max_attempts);
@@ -500,8 +494,8 @@ namespace statusengine {
 
             notification_data.SetData("host_name", notificationData->host_name);
             notification_data.SetData("service_description", notificationData->service_description);
-            notification_data.SetData("output", EncodeString(notificationData->output));
-            notification_data.SetData("long_output", EncodeString(notificationData->output));
+            notification_data.SetData("output", nebmodule.EncodeString(notificationData->output));
+            notification_data.SetData("long_output", nebmodule.EncodeString(notificationData->output));
             notification_data.SetData("ack_author", notificationData->ack_author);
             notification_data.SetData("ack_data", notificationData->ack_data);
             notification_data.SetData("notification_type", notificationData->notification_type);
@@ -555,10 +549,10 @@ namespace statusengine {
         explicit NagiosService(const service *data) {
             SetData("host_name", data->host_name);
             SetData("description", data->description);
-            SetData("plugin_output", EncodeString(data->plugin_output));
-            SetData("long_plugin_output", EncodeString(data->long_plugin_output));
+            SetData("plugin_output", nebmodule.EncodeString(data->plugin_output));
+            SetData("long_plugin_output", nebmodule.EncodeString(data->long_plugin_output));
             SetData("event_handler", data->event_handler);
-            SetData("perf_data", EncodeString(data->perf_data));
+            SetData("perf_data", nebmodule.EncodeString(data->perf_data));
             SetData("check_command", data->check_command);
             SetData("check_period", data->check_period);
             SetData("current_state", data->current_state);
@@ -621,9 +615,9 @@ namespace statusengine {
             servicecheck.SetData("command_line", (raw_command != nullptr ? raw_command : nullptr));
             servicecheck.SetData("command_name",
                                    (nag_service->check_command != nullptr ? nag_service->check_command : nullptr));
-            servicecheck.SetData("output", EncodeString(serviceCheckData->output));
-            servicecheck.SetData("long_output", EncodeString(serviceCheckData->long_output));
-            servicecheck.SetData("perf_data", EncodeString(serviceCheckData->perf_data));
+            servicecheck.SetData("output", nebmodule.EncodeString(serviceCheckData->output));
+            servicecheck.SetData("long_output", nebmodule.EncodeString(serviceCheckData->long_output));
+            servicecheck.SetData("perf_data", nebmodule.EncodeString(serviceCheckData->perf_data));
             servicecheck.SetData("check_type", serviceCheckData->check_type);
             servicecheck.SetData("current_attempt", serviceCheckData->current_attempt);
             servicecheck.SetData("max_attempts", serviceCheckData->max_attempts);
@@ -652,7 +646,7 @@ namespace statusengine {
 
             servicecheck.SetData("host_name", serviceCheckData->host_name);
             servicecheck.SetData("service_description", serviceCheckData->service_description);
-            servicecheck.SetData("perf_data", EncodeString(serviceCheckData->perf_data));
+            servicecheck.SetData("perf_data", nebmodule.EncodeString(serviceCheckData->perf_data));
             servicecheck.SetData("start_time", serviceCheckData->start_time.tv_sec);
             SetData("servicecheck", &servicecheck);
         }
@@ -696,8 +690,8 @@ namespace statusengine {
 
             statechange.SetData("host_name", stateChangeData->host_name);
             statechange.SetData("service_description", stateChangeData->service_description);
-            statechange.SetData("output", EncodeString(stateChangeData->output));
-            statechange.SetData("long_output", EncodeString(stateChangeData->output));
+            statechange.SetData("output", nebmodule.EncodeString(stateChangeData->output));
+            statechange.SetData("long_output", nebmodule.EncodeString(stateChangeData->output));
             statechange.SetData("statechange_type", stateChangeData->statechange_type);
             statechange.SetData("state", stateChangeData->state);
             statechange.SetData("state_type", stateChangeData->state_type);
@@ -721,8 +715,8 @@ namespace statusengine {
             NagiosObject systemcommand;
 
             systemcommand.SetData("command_line", systemCommandData->command_line);
-            systemcommand.SetData("output", EncodeString(systemCommandData->output));
-            systemcommand.SetData("long_output", EncodeString(systemCommandData->output));
+            systemcommand.SetData("output", nebmodule.EncodeString(systemCommandData->output));
+            systemcommand.SetData("long_output", nebmodule.EncodeString(systemCommandData->output));
             systemcommand.SetData("start_time", systemCommandData->start_time.tv_sec);
             systemcommand.SetData("end_time", systemCommandData->end_time.tv_sec);
             systemcommand.SetData("timeout", systemCommandData->timeout);

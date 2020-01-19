@@ -11,3 +11,6 @@
 /.idea
 /cmake-build-debug
 /vendor/json-c
+/vendor/iconv
+/vendor/yaml_cpp
+/build

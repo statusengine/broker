@@ -2,6 +2,8 @@
 
 #include <ctime>
 #include <string>
+#include <cstring>
+#include <iconv.h>
 
 #include "EventCallback.h"
 #include "Statusengine.h"
@@ -15,11 +17,14 @@ namespace statusengine {
 
     int Nebmodule::Init(nebmodule *handle, std::string args) {
         se = new Statusengine(handle, std::move(args));
+        uc = uchardet_new();
         return se->Init();
     }
 
     int Nebmodule::Deinit(int reason) {
         delete se;
+        uchardet_delete(uc);
+        uc = nullptr;
         return 0;
     }
 
@@ -91,6 +96,34 @@ namespace statusengine {
 #else
         schedule_service_check(temp_service, schedule_time, CHECK_OPTION_NONE);
 #endif // BUILD_NAGIOS
+    }
+
+    std::string Nebmodule::EncodeString(char *inputData) {
+        if(inputData == nullptr) {
+            return std::string();
+        }
+        auto lendata = strlen(inputData); // we can't use strnlen here, we don't have any idea of the length here...
+        uchardet_handle_data(uc, inputData, lendata); //TODO error handling
+        uchardet_data_end(uc);
+        auto charset = uchardet_get_charset(uc);
+        uchardet_reset(uc);
+
+        if(strcmp(charset, "UTF-8")) {
+            // We don't have to convert it, if it is already UTF-8
+            return std::string(inputData, lendata);
+        }
+        auto outputDataLength = lendata*4;
+        char *outputData = new char[outputDataLength]; // utf-8 possibly needs up to 4 bytes for a single character :/
+        
+        auto cd = iconv_open("UTF-8", charset);
+        auto outputLength = iconv(cd, &inputData, &lendata, &outputData, &outputDataLength);
+        std::string result(outputData, outputLength);
+        iconv_close(cd);
+
+        delete [] outputData;
+        delete [] charset;
+
+        return result;
     }
 } // namespace statusengine
 
