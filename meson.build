@@ -10,7 +10,12 @@ librabbitmq_dep = dependency('librabbitmq', required: get_option('rabbitmq'))
 jsonc_dep = dependency('json-c')
 naemon_full_dep = dependency('naemon')
 # We don't want to link against libnaemon
-naemon_dep = declare_dependency(include_directories: include_directories(naemon_full_dep.get_pkgconfig_variable('includedir')))
+
+if get_option('nagios')
+    nagios_dep = declare_dependency(include_directories: include_directories(get_option('nagios_include_dir')))
+else
+    naemon_dep = declare_dependency(include_directories: include_directories(naemon_full_dep.get_pkgconfig_variable('includedir')))
+endif 
 toml_dep = declare_dependency(include_directories: include_directories('vendor', is_system: true))
 
 subdir('src')

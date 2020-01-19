@@ -15,11 +15,11 @@ Please compile and install the newest version of naemon or nagios. We need the h
 ### Dependencies
 #### Ubuntu/Debian
 ```bash
-apt install cmake gcc g++ build-essential libglib2.0-dev libgearman-dev uuid-dev libicu-dev libjson-c-dev pkg-config libssl-dev librabbitmq-dev
+apt install meson gcc g++ build-essential libglib2.0-dev libgearman-dev uuid-dev libicu-dev libjson-c-dev pkg-config libssl-dev librabbitmq-dev
 ```
 #### CentOS
 ```bash
-yum install git cmake3 gcc gcc-c++ pkgconfig librabbitmq-devel libgearman-devel libicu-devel json-c-devel openssl-devel glib2-devel
+yum install git meson gcc gcc-c++ pkgconfig librabbitmq-devel libgearman-devel libicu-devel json-c-devel openssl-devel glib2-devel
 ```
 
 ### Sources
@@ -27,60 +27,53 @@ yum install git cmake3 gcc gcc-c++ pkgconfig librabbitmq-devel libgearman-devel 
 ```bash
 cd /tmp
 git clone https://github.com/statusengine/broker
-mkdir build
-cd build
+cd broker
 ```
 
 ### Naemon
 
 Then create the make files
-
-#### Ubuntu/Debian
 ```bash
 export PKG_CONFIG_PATH=/opt/naemon/lib/pkgconfig/
-cmake ../broker
-```
-#### RHEL/CentOS
-```bash
-export PKG_CONFIG_PATH=/opt/naemon/lib/pkgconfig/
-cmake3 ../broker
+meson setup --buildtype=release build
+ninja -C build
 ```
 
 ### Nagios
 
 #### Ubuntu/Debian
 ```bash
-cmake -DBUILD_NAGIOS=ON -DNAGIOS_INCLUDE_DIR=/opt/nagios/include ../broker
+meson setup -Dnagios=true -Dnagios_include_dir=/opt/nagios/include build
 ```
 
 #### RHEL/CentOS
 ```bash
-cmake3 -DBUILD_NAGIOS=ON -DNAGIOS_INCLUDE_DIR=/opt/nagios/include ../broker
+meson setup -Dnagios=true -Dnagios_include_dir=/opt/nagios/include build
 ```
 
 ### Build
 
 ```bash
-make -j2
+ninja -C build
 ```
 
 ### Installation
 
 ```bash
-make install
+ninja -C build install
 ```
 
-## Additional cmake build flags
+## Additional meson build flags
 
 ### Installation path
 
 The default installation path for the library is /usr/local, which means that the so file will be placed under /usr/local/lib/libstatusengine.so.
 
-You can specify -DCMAKE_INSTALL_PREFIX:PATH=/opt/naemon as cmake argument to change the path.
+You can specify --prefix=/opt/naemon as meson argument to change the path.
 
 ### Disable RabbitMQ or Gearman
 
-You can specify -DWITH_GEARMAN=OFF or -DWITH_RABBITMQ=OFF as cmake argument to disable gearman or rabbitmq.
+You can specify -Dgearman=false or -Drabbitmq=false as meson argument to disable gearman or rabbitmq.
 
 
 ## Configuration

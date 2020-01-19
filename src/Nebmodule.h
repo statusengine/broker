@@ -5,20 +5,20 @@
 
 #ifndef BUILD_NAGIOS
 extern "C" {
-#include "naemon/naemon.h"
+#include <naemon/naemon.h>
 }
 #else
 #include <cstring>
 
-#include "nagios/broker.h"
-#include "nagios/comments.h"
-#include "nagios/common.h"
-#include "nagios/downtime.h"
-#include "nagios/macros.h"
-#include "nagios/nagios.h"
-#include "nagios/nebcallbacks.h"
-#include "nagios/nebmodules.h"
-#include "nagios/nebstructs.h"
+#include <nagios/broker.h>
+#include <nagios/comments.h>
+#include <nagios/common.h>
+#include <nagios/downtime.h>
+#include <nagios/macros.h>
+#include <nagios/nagios.h>
+#include <nagios/nebcallbacks.h>
+#include <nagios/nebmodules.h>
+#include <nagios/nebstructs.h>
 
 typedef int NEBCallbackType;
 typedef nagios_comment comment;

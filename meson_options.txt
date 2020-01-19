@@ -2,3 +2,4 @@
 option('gearman', type: 'boolean', value: true)
 option('rabbitmq', type: 'boolean', value: true)
 option('nagios', type: 'boolean', value: false)
+option('nagios_include_dir', type: 'string', value: '')
