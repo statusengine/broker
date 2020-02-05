@@ -13,13 +13,16 @@ Visit the [documentation](https://statusengine.org/) for more information about 
 Please compile and install the newest version of naemon or nagios. We need the header files for building the broker.
 
 ### Dependencies
+#### Meson
+https://mesonbuild.com/Getting-meson.html
+
 #### Ubuntu/Debian
 ```bash
-apt install meson gcc g++ build-essential libglib2.0-dev libgearman-dev uuid-dev libicu-dev libjson-c-dev pkg-config libssl-dev librabbitmq-dev
+apt install meson gcc g++ build-essential libglib2.0-dev libgearman-dev uuid-dev libuchardet-dev libjson-c-dev pkg-config libssl-dev librabbitmq-dev
 ```
 #### CentOS
 ```bash
-yum install git meson gcc gcc-c++ pkgconfig librabbitmq-devel libgearman-devel libicu-devel json-c-devel openssl-devel glib2-devel
+yum install git meson gcc gcc-c++ pkgconfig librabbitmq-devel libgearman-devel libuchardet-devel json-c-devel openssl-devel glib2-devel
 ```
 
 ### Sources
