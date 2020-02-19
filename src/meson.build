@@ -1,13 +1,13 @@
 statusengine_sources = ['Nebmodule.cpp', 'Statusengine.cpp', 'MessageHandler/MessageHandlerList.cpp', 'MessageHandler/GearmanClient.cpp', 'MessageHandler/RabbitmqClient.cpp']
 
-statusengine_deps = [glib_dep, uchardet_dep, jsonc_dep, toml_dep]
+statusengine_deps = [uchardet_dep, jsonc_dep, toml_dep]
 statusengine_cpp_args = []
 
 if get_option('nagios')
     statusengine_deps += [nagios_dep]
     statusengine_cpp_args += ['-DBUILD_NAGIOS']
 else
-    statusengine_deps += [naemon_dep]
+    statusengine_deps += [naemon_dep, glib_dep]
 endif
 
 if gearmand_dep.found() and get_option('gearman')
