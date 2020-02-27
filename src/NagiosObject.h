@@ -421,7 +421,6 @@ namespace statusengine {
 
             host *nag_host = reinterpret_cast<host *>(hostCheckData->object_ptr);
 
-            char *raw_command = nullptr;
             auto globalMacros = get_global_macros();
             get_raw_command_line_r(globalMacros, nag_host->check_command_ptr, nag_host->check_command, &raw_command, 0);
 
@@ -450,6 +449,12 @@ namespace statusengine {
 
             clear_volatile_macros_r(globalMacros);
         }
+
+        ~NagiosHostCheckData() {
+            free(raw_command);
+        }
+    private:
+        char *raw_command = nullptr;
     };
 
     class NagiosHostStatusData : public NagiosObject {
@@ -605,8 +610,8 @@ namespace statusengine {
 
             service *nag_service = reinterpret_cast<service *>(serviceCheckData->object_ptr);
 
-            char *raw_command = nullptr;
-            get_raw_command_line_r(get_global_macros(), nag_service->check_command_ptr, nag_service->check_command,
+            auto globalMacros = get_global_macros();
+            get_raw_command_line_r(globalMacros, nag_service->check_command_ptr, nag_service->check_command,
                                    &raw_command, 0);
 
             NagiosObject servicecheck;
@@ -631,7 +636,16 @@ namespace statusengine {
             servicecheck.SetData("latency", serviceCheckData->latency);
             servicecheck.SetData("return_code", serviceCheckData->return_code);
             SetData("servicecheck", &servicecheck);
+
+            clear_volatile_macros_r(globalMacros);
         }
+
+        ~NagiosServiceCheckData() {
+            free(raw_command);
+        }
+
+    private:
+        char *raw_command = nullptr;
     };
 
     class NagiosServiceCheckPerfData : public NagiosObject {
