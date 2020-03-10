@@ -50,8 +50,6 @@ namespace statusengine {
             return 1;
         }
 
-        callbacks.emplace();
-
         messageHandler = new MessageHandlerList(*this, *configuration);
         if (!messageHandler->Connect()) {
             return 1;
