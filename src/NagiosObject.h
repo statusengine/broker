@@ -122,6 +122,7 @@ namespace statusengine {
             SetData("flags", processData->flags);
             SetData("attr", processData->attr);
             SetData("timestamp", processData->timestamp.tv_sec);
+            SetData("timestamp_usec", processData->timestamp.tv_usec);
 
             NagiosObject processdata;
             processdata.SetData("programmname", std::string("Naemon"));
@@ -140,6 +141,7 @@ namespace statusengine {
             SetData("flags", acknowledgementData->flags);
             SetData("attr", acknowledgementData->attr);
             SetData("timestamp", acknowledgementData->timestamp.tv_sec);
+            SetData("timestamp_usec", acknowledgementData->timestamp.tv_usec);
 
             NagiosObject acknowledgement;
             acknowledgement.SetData("host_name", acknowledgementData->host_name);
@@ -163,6 +165,7 @@ namespace statusengine {
             SetData("flags", commentData->flags);
             SetData("attr", commentData->attr);
             SetData("timestamp", commentData->timestamp.tv_sec);
+            SetData("timestamp_usec", commentData->timestamp.tv_usec);
 
             NagiosObject comment;
             comment.SetData("host_name", commentData->host_name);
@@ -188,6 +191,7 @@ namespace statusengine {
             SetData("flags", contactNotificationData->flags);
             SetData("attr", contactNotificationData->attr);
             SetData("timestamp", contactNotificationData->timestamp.tv_sec);
+            SetData("timestamp_usec", contactNotificationData->timestamp.tv_usec);
 
             NagiosObject contactnotificationdata;
             contactnotificationdata.SetData("host_name", contactNotificationData->host_name);
@@ -215,6 +219,7 @@ namespace statusengine {
             SetData("flags", contactNotificationMethodData->flags);
             SetData("attr", contactNotificationMethodData->attr);
             SetData("timestamp", contactNotificationMethodData->timestamp.tv_sec);
+            SetData("timestamp_usec", contactNotificationMethodData->timestamp.tv_usec);
 
             NagiosObject contactnotificationmethod;
             contactnotificationmethod.SetData("host_name", contactNotificationMethodData->host_name);
@@ -241,6 +246,7 @@ namespace statusengine {
             SetData("flags", contactStatusData->flags);
             SetData("attr", contactStatusData->attr);
             SetData("timestamp", contactStatusData->timestamp.tv_sec);
+            SetData("timestamp_usec", contactStatusData->timestamp.tv_usec);
 
             auto tmpContact = reinterpret_cast<contact *>(contactStatusData->object_ptr);
 
@@ -265,6 +271,7 @@ namespace statusengine {
             SetData("flags", downtimeData->flags);
             SetData("attr", downtimeData->attr);
             SetData("timestamp", downtimeData->timestamp.tv_sec);
+            SetData("timestamp_usec", downtimeData->timestamp.tv_usec);
 
             NagiosObject downtime;
             downtime.SetData("host_name", downtimeData->host_name);
@@ -292,6 +299,7 @@ namespace statusengine {
             SetData("flags", eventHandlerData->flags);
             SetData("attr", eventHandlerData->attr);
             SetData("timestamp", eventHandlerData->timestamp.tv_sec);
+            SetData("timestamp_usec", eventHandlerData->timestamp.tv_usec);
 
             NagiosObject eventhandler;
             eventhandler.SetData("host_name", eventHandlerData->host_name);
@@ -321,6 +329,7 @@ namespace statusengine {
             SetData("flags", externalCommandData->flags);
             SetData("attr", externalCommandData->attr);
             SetData("timestamp", externalCommandData->timestamp.tv_sec);
+            SetData("timestamp_usec", externalCommandData->timestamp.tv_usec);
 
             NagiosObject externalcommand;
             externalcommand.SetData("command_string", externalCommandData->command_string);
@@ -339,6 +348,7 @@ namespace statusengine {
             SetData("flags", flappingData->flags);
             SetData("attr", flappingData->attr);
             SetData("timestamp", flappingData->timestamp.tv_sec);
+            SetData("timestamp_usec", flappingData->timestamp.tv_usec);
 
             comment *tmpComment = nullptr;
             if (flappingData->flapping_type == SERVICE_FLAPPING) {
@@ -418,6 +428,7 @@ namespace statusengine {
             SetData("flags", hostCheckData->flags);
             SetData("attr", hostCheckData->attr);
             SetData("timestamp", hostCheckData->timestamp.tv_sec);
+            SetData("timestamp_usec", hostCheckData->timestamp.tv_usec);
 
             host *nag_host = reinterpret_cast<host *>(hostCheckData->object_ptr);
 
@@ -464,6 +475,8 @@ namespace statusengine {
             SetData("flags", hostStatusData->flags);
             SetData("attr", hostStatusData->attr);
             SetData("timestamp", hostStatusData->timestamp.tv_sec);
+            SetData("timestamp_usec", hostStatusData->timestamp.tv_usec);
+
             NagiosHost hostStatus(reinterpret_cast<host *>(hostStatusData->object_ptr));
             SetData("hoststatus", &hostStatus);
         }
@@ -476,6 +489,7 @@ namespace statusengine {
             SetData("flags", logData->flags);
             SetData("attr", logData->attr);
             SetData("timestamp", logData->timestamp.tv_sec);
+            SetData("timestamp_usec", logData->timestamp.tv_usec);
 
             NagiosObject logentry;
 
@@ -494,6 +508,7 @@ namespace statusengine {
             SetData("flags", notificationData->flags);
             SetData("attr", notificationData->attr);
             SetData("timestamp", notificationData->timestamp.tv_sec);
+            SetData("timestamp_usec", notificationData->timestamp.tv_usec);
 
             NagiosObject notification_data;
 
@@ -522,6 +537,7 @@ namespace statusengine {
             SetData("flags", programmStatusData->flags);
             SetData("attr", programmStatusData->attr);
             SetData("timestamp", programmStatusData->timestamp.tv_sec);
+            SetData("timestamp_usec", programmStatusData->timestamp.tv_usec);
 
             NagiosObject programmstatus;
             programmstatus.SetData("global_host_event_handler", programmStatusData->global_host_event_handler);
@@ -607,6 +623,7 @@ namespace statusengine {
             SetData("flags", serviceCheckData->flags);
             SetData("attr", serviceCheckData->attr);
             SetData("timestamp", serviceCheckData->timestamp.tv_sec);
+            SetData("timestamp_usec", serviceCheckData->timestamp.tv_usec);
 
             service *nag_service = reinterpret_cast<service *>(serviceCheckData->object_ptr);
 
@@ -655,6 +672,7 @@ namespace statusengine {
             SetData("flags", serviceCheckData->flags);
             SetData("attr", serviceCheckData->attr);
             SetData("timestamp", serviceCheckData->timestamp.tv_sec);
+            SetData("timestamp_usec", serviceCheckData->timestamp.tv_usec);
 
             NagiosObject servicecheck;
 
@@ -673,6 +691,8 @@ namespace statusengine {
             SetData("flags", serviceStatusData->flags);
             SetData("attr", serviceStatusData->attr);
             SetData("timestamp", serviceStatusData->timestamp.tv_sec);
+            SetData("timestamp_usec", serviceStatusData->timestamp.tv_usec);
+
             NagiosService serviceStatus(reinterpret_cast<service *>(serviceStatusData->object_ptr));
             SetData("servicestatus", &serviceStatus);
         }
@@ -685,6 +705,7 @@ namespace statusengine {
             SetData("flags", stateChangeData->flags);
             SetData("attr", stateChangeData->attr);
             SetData("timestamp", stateChangeData->timestamp.tv_sec);
+            SetData("timestamp_usec", stateChangeData->timestamp.tv_usec);
 
             int last_state;
             int last_hard_state;
@@ -725,6 +746,7 @@ namespace statusengine {
             SetData("flags", systemCommandData->flags);
             SetData("attr", systemCommandData->attr);
             SetData("timestamp", systemCommandData->timestamp.tv_sec);
+            SetData("timestamp_usec", systemCommandData->timestamp.tv_usec);
 
             NagiosObject systemcommand;
 
