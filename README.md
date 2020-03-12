@@ -18,11 +18,13 @@ https://mesonbuild.com/Getting-meson.html
 
 #### Ubuntu/Debian
 ```bash
-apt install meson gcc g++ cmake build-essential libglib2.0-dev libgearman-dev uuid-dev libuchardet-dev libjson-c-dev pkg-config libssl-dev librabbitmq-dev
+apt install git python3-pip gcc g++ cmake build-essential libglib2.0-dev libgearman-dev uuid-dev libuchardet-dev libjson-c-dev pkg-config libssl-dev librabbitmq-dev
+pip3 install meson
 ```
 #### CentOS
 ```bash
-yum install git meson gcc gcc-c++ cmake3 pkgconfig librabbitmq-devel libgearman-devel libuchardet-devel json-c-devel openssl-devel glib2-devel
+yum install git python-pip gcc gcc-c++ cmake3 pkgconfig librabbitmq-devel libgearman-devel libuchardet-devel json-c-devel openssl-devel glib2-devel
+pip install meson
 ```
 
 ### Sources
