@@ -50,6 +50,8 @@ namespace statusengine {
             return 1;
         }
 
+        ls.SetLogLevel(configuration->GetLogLevel());
+
         messageHandler = new MessageHandlerList(*this, *configuration);
         if (!messageHandler->Connect()) {
             return 1;

@@ -94,3 +94,8 @@ StartupScheduleMax = 30
 #FlushInterval = 10
 ## List of queue identifier which should be created as bulk message. This is a global option for all connections
 Queues = ["HostStatus", "HostCheck", "ServiceStatus", "ServiceCheck", "ServicePerfData", "StateChange", "OCHP", "OCSP", "LogData"]
+
+[Log]
+#Level = Warning
+### Level = Info
+### Level = Error

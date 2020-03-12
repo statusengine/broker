@@ -183,7 +183,7 @@ namespace statusengine {
 
     class Configuration {
       public:
-        explicit Configuration(IStatusengine &se) : se(se), maxWorkerMessagesPerInterval(0) {}
+        explicit Configuration(IStatusengine &se) : se(se), maxWorkerMessagesPerInterval(0), logLevel(LogLevel::Warning) {}
         ~Configuration() {
             rabbitmq.clear(); // shared_ptr
         }
@@ -208,6 +208,30 @@ namespace statusengine {
             }
             catch (const toml::type_error &tte) {
                 se.Log() << "Invalid configuration: Bulk isn't a table!" << LogLevel::Error;
+                return false;
+            }
+
+            try {
+                auto logTable = cfg.at("Log").cast<toml::value_t::Table>();
+                auto logLevelStr = toml::get_or<std::string>(logTable, "Level", "Warning");
+                if (logLevelStr == "Info") {
+                    logLevel = LogLevel::Info;
+                }
+                else if(logLevelStr == "Warning") {
+                    logLevel = LogLevel::Warning;
+                }
+                else if(logLevelStr == "Error") {
+                    logLevel = LogLevel::Error;
+                }
+                else {
+                    se.Log() << "Invalid configuration: Unknown log level: " << logLevelStr << LogLevel::Error;
+                    return false;
+                }
+            }
+            catch (std::out_of_range &oor) {
+            }
+            catch (const toml::type_error &tte) {
+                se.Log() << "Invalid configuration: Log isn't a table!" << LogLevel::Error;
                 return false;
             }
 
@@ -340,6 +364,10 @@ namespace statusengine {
             return maxWorkerMessagesPerInterval;
         }
 
+        LogLevel GetLogLevel() const {
+            return logLevel;
+        }
+
       private:
         IStatusengine &se;
         toml::Table cfg;
@@ -351,6 +379,8 @@ namespace statusengine {
         std::set<Queue> bulkQueues;
 
         unsigned long maxWorkerMessagesPerInterval;
+
+        LogLevel logLevel;
 
         template <typename T> T GetTomlDefault(const toml::Table &tab, const char *ky, T &&opt) const {
             try {

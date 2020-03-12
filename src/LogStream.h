@@ -9,7 +9,7 @@ namespace statusengine {
 
     class LogStream {
       public:
-        LogStream() : ss() {
+        LogStream() : ss(), level(LogLevel::Info) {
             *this << "Logstream initalized" << LogLevel::Info;
         }
 
@@ -86,19 +86,22 @@ namespace statusengine {
         }
 
         LogStream &operator<<(const LogLevel o) {
-            int logLevel;
-            switch (o) {
-                case LogLevel::Error:
-                    logLevel = NSLOG_RUNTIME_ERROR;
-                    break;
-                case LogLevel::Warning:
-                    logLevel = NSLOG_RUNTIME_WARNING;
-                    break;
-                default:
-                    logLevel = NSLOG_INFO_MESSAGE;
-                    break;
+            int logLevel = -1;
+
+            if (o == LogLevel::Error) {
+                logLevel = NSLOG_RUNTIME_ERROR;
             }
-            nm_log(logLevel, "%s", ("Statusengine: " + ss.str()).c_str());
+            else if(o == LogLevel::Info && level == LogLevel::Info) {
+                logLevel = NSLOG_INFO_MESSAGE;
+            }
+            else if(o == LogLevel::Warning && (level == LogLevel::Warning || level == LogLevel::Error)) {
+                logLevel = NSLOG_RUNTIME_WARNING;
+            }
+
+            if (logLevel != -1) {
+                nm_log(logLevel, "%s", ("Statusengine: " + ss.str()).c_str());
+            }
+
             ss.str("");
             ss.clear();
             return *this;
@@ -108,7 +111,12 @@ namespace statusengine {
         LogStream(LogStream &&LogStream) = delete;
         LogStream &operator=(const LogStream &) = delete;
 
+        void SetLogLevel(LogLevel ll) {
+            level = ll;
+        }
+
       private:
         std::stringstream ss;
+        LogLevel level;
     };
 } // namespace statusengine

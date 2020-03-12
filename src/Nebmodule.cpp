@@ -10,7 +10,7 @@
 
 // This is required by naemon
 extern "C" {
-NEB_API_VERSION(CURRENT_NEB_API_VERSION);
+NEB_API_VERSION(CURRENT_NEB_API_VERSION)
 }
 
 namespace statusengine {
