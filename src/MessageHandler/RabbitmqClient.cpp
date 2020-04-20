@@ -66,6 +66,7 @@ namespace statusengine {
                                                      static_cast<int>(m->reply_text.len))
                                       << LogLevel::Error;
                         }
+                        break;
                     }
                     case AMQP_CHANNEL_CLOSE_METHOD: {
                         amqp_channel_close_t *m = (amqp_channel_close_t *)x.reply.decoded;
