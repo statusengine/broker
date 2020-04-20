@@ -23,11 +23,11 @@ extern "C" {
 typedef int NEBCallbackType;
 typedef nagios_comment comment;
 
-inline void nm_log(long unsigned logLevel, const char *_, const char *message) {
+inline void nm_log(long unsigned logLevel, const char *, const char *message) {
     char *temp = nullptr;
     temp = strdup(message);
     write_to_all_logs(temp, logLevel);
-    delete temp;
+    free(temp);
 }
 #endif
 
@@ -59,6 +59,8 @@ namespace statusengine {
         void ScheduleServiceCheckDelay(service *temp_service, time_t delay);
 
         void ScheduleServiceCheckFixed(service *temp_service, time_t fixed);
+
+        void DeleteDowntime(const char *hostname, const char *service_description, time_t start_time, time_t end_time, const char *comment);
 
         std::string EncodeString(char *data);
 

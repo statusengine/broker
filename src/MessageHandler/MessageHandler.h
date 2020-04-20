@@ -3,6 +3,7 @@
 #include <memory>
 #include <set>
 #include <string>
+#include <cstring>
 
 #include "Queue.h"
 #include "NagiosObject.h"
@@ -10,6 +11,7 @@
 #include "IStatusengine.h"
 #include "IMessageHandler.h"
 #include "Utility.h"
+#include "gsl.h"
 
 
 namespace statusengine {
@@ -22,7 +24,7 @@ namespace statusengine {
             auto jsonChars = json_object_get_string(obj);
             auto jsonCharsLen = json_object_get_string_len(obj);
             char *chars = new char[jsonCharsLen + 1];
-            strncpy(chars, jsonChars, jsonCharsLen);
+            std::strncpy(chars, jsonChars, jsonCharsLen);
             chars[jsonCharsLen] = 0; // set last byte to zero
             return chars;
         }
@@ -126,6 +128,9 @@ namespace statusengine {
                         else if (command.compare("schedule_check") == 0) {
                             ParseScheduleCheck(data);
                         }
+                        else if (command.compare("delete_downtime") == 0) {
+                            ParseDeleteDowntime(data);
+                        } 
                         else if (command.compare("raw") == 0) {
                             ParseRaw(data);
                         }
@@ -194,9 +199,9 @@ namespace statusengine {
             }
             else if (output != nullptr && longOutput != nullptr) {
                 // we need a new string with size of strings + newline + zero byte
-                auto strLen = strlen(output) + strlen(longOutput) + 2;
+                auto strLen = std::strlen(output) + std::strlen(longOutput) + 2;
                 fullOutput = new char[strLen];
-                snprintf(fullOutput, strLen, "%s\n%s", output, longOutput);
+                std::snprintf(fullOutput, strLen, "%s\n%s", output, longOutput);
                 cr.output = fullOutput;
             }
             else if (longOutput != nullptr && output == nullptr) {
@@ -226,6 +231,10 @@ namespace statusengine {
             const char *hostname = nullptr;
             const char *service_description = nullptr;
             time_t schedule_time = 0;
+            auto _ = gsl::finally([&] {
+                delete[] hostname;
+                delete[] service_description;
+            });
             json_object_object_foreach(obj, cKey, jsonValue) {
                 std::string jsonKey(cKey);
                 if (jsonKey.compare("host_name") == 0) {
@@ -261,14 +270,52 @@ namespace statusengine {
                 }
                 Nebmodule::Instance().ScheduleServiceCheckFixed(temp_service, schedule_time);
             }
-            delete hostname;
-            delete service_description;
+        }
+
+        void ParseDeleteDowntime(json_object *obj) {
+            const char *hostname = nullptr;
+            const char *service_description = nullptr;
+            time_t start_time = 0;
+            time_t end_time = 0;
+            const char *comment = nullptr;
+            auto _ = gsl::finally([&] {
+                delete[] hostname;
+                delete[] service_description;
+                delete[] comment;
+            });
+            json_object_object_foreach(obj, cKey, jsonValue) {
+                std::string jsonKey(cKey);
+                if (jsonKey.compare("host_name") == 0) {
+                    hostname = get_json_string(jsonValue);
+                }
+                else if (jsonKey.compare("service_description") == 0) {
+                    service_description = get_json_string(jsonValue);
+                }
+                else if (jsonKey.compare("start_time") == 0) {
+                    start_time = json_object_get_int64(jsonValue);
+                }
+                else if (jsonKey.compare("end_time") == 0) {
+                    end_time = json_object_get_int64(jsonValue);
+                }
+                else if (jsonKey.compare("comment") == 0) {
+                    comment = get_json_string(jsonValue);
+                }
+            }
+
+            if (hostname == nullptr) {
+                if (hostname == nullptr) {
+                    se->Log() << "Received delete_downtime command without hostname " << LogLevel::Warning;
+                    return;
+                }
+            }
+
+            Nebmodule::Instance().DeleteDowntime(hostname, service_description, start_time, end_time, comment);
         }
 
         inline static void ParseRaw(json_object *obj) {
             auto cmd = get_json_string(obj);
             process_external_command1(cmd);
-            delete cmd;
+            delete[] cmd;
         }
     };
 
