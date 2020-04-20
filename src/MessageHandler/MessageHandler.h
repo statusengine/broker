@@ -30,8 +30,8 @@ namespace statusengine {
         void ProcessMessage(WorkerQueue workerQueue, const std::string &message) override {
             json_object *obj = json_tokener_parse(message.c_str());
             if (obj == nullptr) {
-                se->Log() << "Received non-json string '''" << message
-                          << "'''; \"'''\" is not part of the received message. Ignoring..." << LogLevel::Warning;
+                se->Log() << "Received non-json string '" << message
+                          << "'. Ignoring..." << LogLevel::Warning;
             }
             else {
                 ProcessMessage(workerQueue, obj);
