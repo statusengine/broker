@@ -68,7 +68,7 @@ namespace statusengine {
     void Nebmodule::ScheduleHostCheckFixed(host *temp_host, time_t schedule_time) {
 #ifndef BUILD_NAGIOS
         time_t delay = schedule_time - std::time(nullptr);
-        if (schedule_time < 0) {
+        if (delay < 0) {
             delay = 0;
         }
         schedule_next_host_check(temp_host, delay, CHECK_OPTION_NONE);
@@ -89,7 +89,7 @@ namespace statusengine {
     void Nebmodule::ScheduleServiceCheckFixed(service *temp_service, time_t schedule_time) {
 #ifndef BUILD_NAGIOS
         time_t delay = schedule_time - std::time(nullptr);
-        if (schedule_time < 0) {
+        if (delay < 0) {
             delay = 0;
         }
         schedule_next_service_check(temp_service, delay, CHECK_OPTION_NONE);
