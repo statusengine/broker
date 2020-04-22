@@ -215,6 +215,11 @@ namespace statusengine {
                 se->Log() << "Received hostcheck without output" << LogLevel::Warning;
             }
             else {
+                if (cr.service_description == nullptr) {
+                    cr.object_check_type = HOST_CHECK;
+                } else {
+                    cr.object_check_type = SERVICE_CHECK;
+                }
                 process_check_result(&cr);
             }
 
