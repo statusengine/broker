@@ -301,10 +301,10 @@ namespace statusengine {
 
             try {
                 maxWorkerMessagesPerInterval = toml::get_or<unsigned long>(toml::get<toml::Table>(cfg.at("Worker")),
-                                                                           "MaxWorkerMessagesPerInterval", 1000ul);
+                                                                           "MaxWorkerMessagesPerInterval", 1000000ul);
             }
             catch (const std::out_of_range &oor) {
-                maxWorkerMessagesPerInterval = 1000ul;
+                maxWorkerMessagesPerInterval = 1000000ul;
             }
             catch (const toml::type_error &tte) {
                 se.Log() << "Invalid configuration: Invalid value for key "
