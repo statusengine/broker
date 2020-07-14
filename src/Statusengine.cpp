@@ -109,7 +109,7 @@ namespace statusengine {
 
         RegisterCallback<HostCheckCallback>({Queue::HostCheck, Queue::OCHP});
 
-        RegisterCallback<ProcessDataCallback>({Queue::RestartData, Queue::ProcessData});
+        RegisterCallback<ProcessDataCallback>();
 
         messageHandler->InitComplete();
 
