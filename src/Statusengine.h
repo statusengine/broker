@@ -41,12 +41,17 @@ namespace statusengine {
                 }
             }
             if (queueExists) {
-                auto cb  = new T(*this);
-                NEBCallbackType cbType = cb->GetCallbackType();
-                if (callbacks.find(cbType) == callbacks.end())
-                    Nebmodule::Instance().RegisterCallback(cbType);
-                callbacks.insert(std::make_pair(cbType, std::unique_ptr<NebmoduleCallback>(cb)));
+                RegisterCallback<T>();
             }
+        }
+
+        template<typename T>
+        void RegisterCallback() {
+            auto cb  = new T(*this);
+            NEBCallbackType cbType = cb->GetCallbackType();
+            if (callbacks.find(cbType) == callbacks.end())
+                Nebmodule::Instance().RegisterCallback(cbType);
+            callbacks.insert(std::make_pair(cbType, std::unique_ptr<NebmoduleCallback>(cb)));
         }
 
         time_t GetStartupScheduleMax() const override {
