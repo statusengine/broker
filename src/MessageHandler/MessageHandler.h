@@ -37,6 +37,7 @@ namespace statusengine {
             }
             else {
                 ProcessMessage(workerQueue, obj);
+                json_object_put(obj);
             }
         }
 
@@ -48,8 +49,8 @@ namespace statusengine {
                         se->Log() << "OCHP::messages is not an array. Ignoring..." << LogLevel::Warning;
                     }
                     else {
-                        auto arrLen = json_object_array_length(messages);
-                        for (auto i = 0; i < arrLen; i++) {
+                        long unsigned int arrLen = json_object_array_length(messages);
+                        for (long unsigned int i = 0; i < arrLen; i++) {
                             json_object *arrObj = json_object_array_get_idx(messages, i);
                             ProcessMessage(WorkerQueue::OCHP, arrObj);
                         }
@@ -73,8 +74,8 @@ namespace statusengine {
                         se->Log() << "OCSP::messages is not an array. Ignoring..." << LogLevel::Warning;
                     }
                     else {
-                        auto arrLen = json_object_array_length(messages);
-                        for (auto i = 0; i < arrLen; i++) {
+                        long unsigned int arrLen = json_object_array_length(messages);
+                        for (long unsigned int i = 0; i < arrLen; i++) {
                             json_object *arrObj = json_object_array_get_idx(messages, i);
                             ProcessMessage(WorkerQueue::OCSP, arrObj);
                         }
@@ -111,8 +112,8 @@ namespace statusengine {
                             se->Log() << "messages doesn't contain an array. Ignoring..." << LogLevel::Warning;
                         }
                         else {
-                            auto arrLen = json_object_array_length(jsonValue);
-                            for (auto i = 0; i < arrLen; i++) {
+                            long unsigned int arrLen = json_object_array_length(jsonValue);
+                            for (long unsigned int i = 0; i < arrLen; i++) {
                                 json_object *arrObj = json_object_array_get_idx(jsonValue, i);
                                 ProcessMessage(WorkerQueue::Command, arrObj);
                             }
@@ -143,8 +144,6 @@ namespace statusengine {
             else {
                 se->Log() << "Received message for unknown worker queue" << LogLevel::Warning;
             }
-
-            json_object_put(obj);
         }
       protected:
         IStatusengine *se;
