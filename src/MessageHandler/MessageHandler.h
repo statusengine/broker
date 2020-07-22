@@ -204,7 +204,7 @@ namespace statusengine {
                     // we need a new string with size of strings + pipe + zero byte
                     auto strLen = std::strlen(output) + std::strlen(perfData) + 2;
                     fullOutput = new char[strLen];
-                    std::snprintf(fullOutput, strLen, "%s|%s", output, perfData);
+                    std::snprintf(fullOutput, strLen, "%s|%s\n", output, perfData);
                     cr.output = fullOutput;
                 }
             }
