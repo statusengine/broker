@@ -154,6 +154,7 @@ namespace statusengine {
             init_check_result(&cr);
             char *output = nullptr;
             char *longOutput = nullptr;
+            char *perfData = nullptr;
             char *fullOutput = nullptr;
 
             json_object_object_foreach(obj, cKey, jsonValue) {
@@ -169,6 +170,9 @@ namespace statusengine {
                 }
                 else if (jsonKey.compare("long_output") == 0) {
                     longOutput = get_json_string(jsonValue);
+                }
+                else if (jsonKey.compare("perf_data") == 0) {
+                    perfData = get_json_string(jsonValue);
                 }
                 else if (jsonKey.compare("check_type") == 0) {
                     cr.check_type = json_object_get_int64(jsonValue);
@@ -194,14 +198,30 @@ namespace statusengine {
             }
 
             if (output != nullptr && longOutput == nullptr) {
-                cr.output = output;
+                if (perfData == nullptr) {
+                    cr.output = output;
+                } else {
+                    // we need a new string with size of strings + pipe + newline + zero byte
+                    auto strLen = std::strlen(output) + std::strlen(perfData) + 3;
+                    fullOutput = new char[strLen];
+                    std::snprintf(fullOutput, strLen, "%s|%s\n", output, perfData);
+                    cr.output = fullOutput;
+                }
             }
             else if (output != nullptr && longOutput != nullptr) {
-                // we need a new string with size of strings + newline + zero byte
-                auto strLen = std::strlen(output) + std::strlen(longOutput) + 2;
-                fullOutput = new char[strLen];
-                std::snprintf(fullOutput, strLen, "%s\n%s", output, longOutput);
-                cr.output = fullOutput;
+                if (perfData == nullptr) {
+                    // we need a new string with size of strings + newline + zero byte
+                    auto strLen = std::strlen(output) + std::strlen(longOutput) + 2;
+                    fullOutput = new char[strLen];
+                    std::snprintf(fullOutput, strLen, "%s\n%s", output, longOutput);
+                    cr.output = fullOutput;
+                } else {
+                    // we need a new string with size of strings + pipe + newline + zero byte
+                    auto strLen = std::strlen(output) + std::strlen(longOutput) + std::strlen(perfData) + 3;
+                    fullOutput = new char[strLen];
+                    std::snprintf(fullOutput, strLen, "%s|%s\n%s", output, perfData, longOutput);
+                    cr.output = fullOutput;
+                }
             }
             else if (longOutput != nullptr && output == nullptr) {
                 cr.output = longOutput;
@@ -224,10 +244,11 @@ namespace statusengine {
 
             // deletes hostname, service_description and output
             free_check_result(&cr);
-            if (output != nullptr && longOutput != nullptr) {
+            if (fullOutput != nullptr) {
                 // free_check_result only frees fulloutput in this case
                 delete output;
                 delete longOutput;
+                delete perfData;
             }
         }
 
