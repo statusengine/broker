@@ -17,8 +17,8 @@ FlappingData = "statusngin_flappings"
 DowntimeData = "statusngin_downtimes"
 ContactNotificationMethodData = "statusngin_contactnotificationmethod"
 RestartData = "statusngin_core_restart"
-OCHP = "statusngin_ochp"
-OCSP = "statusngin_ocsp"
+#OCHP = "statusngin_ochp"
+#OCSP = "statusngin_ocsp"
 # You can run external commands vis this queue.
 WorkerCommand = "statusngin_cmd"
 
