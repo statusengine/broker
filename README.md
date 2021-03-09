@@ -1,12 +1,10 @@
-# statusengine naemon/nagios broker module
-
-For a production ready broker module [click here](https://github.com/statusengine/module).
+# Statusengine naemon/nagios broker module
 
 The Statusengine Broker Module is a small c++ library that gets loaded into your Naemon or Nagios Core.
 
 It will grab all status information, encode them as JSON, and put them into the Gearman Job Server or RabbitMQ. Due to the queuing engine (Gearman or RabbitMQ) your Monitoring Core will not get blocked by a slow database or disk io issues. It is highly recommended to run the Gearman Job Server on the same node as the monitoring core.
 
-Visit the [documentation](https://statusengine.org/) for more information about Statusengine Broker Module
+Visit the [documentation](https://statusengine.org/broker/) for more information about Statusengine C++ Broker Module
 
 ## Build and Installation
 
@@ -36,6 +34,8 @@ cd broker
 ```
 
 ### Naemon
+Please make sure you have set up Naemon like described in the [docs](https://statusengine.org/tutorials/install-naemon-focal/).
+
 
 Then create the make files
 ```bash
@@ -45,6 +45,7 @@ ninja -C build
 ```
 
 ### Nagios
+Please make sure you have set up Nagios like described in the [docs](https://statusengine.org/tutorials/install-nagios4-focal/).
 
 #### Ubuntu/Debian
 ```bash
