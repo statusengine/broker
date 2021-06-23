@@ -1,4 +1,4 @@
-statusengine_sources = ['Nebmodule.cpp', 'Statusengine.cpp', 'MessageHandler/MessageHandlerList.cpp', 'MessageHandler/GearmanClient.cpp', 'MessageHandler/RabbitmqClient.cpp']
+statusengine_sources = ['Nebmodule.cpp', 'Statusengine.cpp', 'MessageHandler/MessageHandlerList.cpp']
 
 statusengine_deps = [uchardet_dep, jsonc_dep, toml_dep]
 statusengine_cpp_args = []
@@ -10,14 +10,16 @@ else
     statusengine_deps += [naemon_dep, glib_dep]
 endif
 
-if gearmand_dep.found() and get_option('gearman')
+if get_option('gearman') and gearmand_dep.found()
     statusengine_deps += [gearmand_dep]
     statusengine_cpp_args += ['-DWITH_GEARMAN']
+    statusengine_sources += ['MessageHandler/GearmanClient.cpp']
 endif
 
-if librabbitmq_dep.found() and get_option('rabbitmq')
+if get_option('rabbitmq') and librabbitmq_dep.found()
     statusengine_deps += [librabbitmq_dep]
     statusengine_cpp_args += ['-DWITH_RABBITMQ']
+    statusengine_sources += ['MessageHandler/RabbitmqClient.cpp']
     if librabbitmq_dep.version().version_compare('<0.6.0')
         statusengine_cpp_args += ['-DWITH_RABBITMQ_CX060']
     endif
