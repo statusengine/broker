@@ -4,11 +4,6 @@ RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y cmake gcc g++ gdb build-essential libglib2.0-dev libgearman-dev uuid-dev libicu-dev libjson-c-dev pkg-config libssl-dev librabbitmq-dev gearman-job-server gearman-tools automake gperf help2man libtool rabbitmq-server wget tar libuchardet-dev && \
     apt-get clean
 
-RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y python3-pip && \
-    apt-get clean && \
-    pip install meson ninja
-
 ENV NAEMON_VERSION=1.3.1
 
 RUN useradd -d /opt/naemon -m -s /bin/bash --system naemon && \
@@ -28,7 +23,11 @@ RUN mkdir -p /broker && chmod +x /usr/bin/wait-for-it.sh /usr/bin/queuestatus
 CMD ["/usr/bin/wait-for-it.sh", "rabbit:5672", "--", "/opt/naemon/bin/naemon", "/opt/naemon/etc/naemon/naemon.cfg"]
 
 COPY --chown=naemon:naemon . /broker/
+RUN chown -R naemon:naemon /broker
 
 USER naemon
-
-RUN cd /broker/ && export PKG_CONFIG_PATH=/opt/naemon/lib/pkgconfig && meson setup builddir && meson compile -C builddir
+RUN rm -rf /broker/build && \
+    mkdir -p /broker/build && \
+    cd /broker/build && \
+    export PKG_CONFIG_PATH=/opt/naemon/lib/pkgconfig && \
+    cmake ..  -DWITH_GEARMAN=ON -DWITH_RABBITMQ=ON && make -j
