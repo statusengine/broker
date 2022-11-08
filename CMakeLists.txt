@@ -21,6 +21,7 @@ if(${CMAKE_VERSION} VERSION_LESS 3.14)
 endif()
 
 find_package(PkgConfig REQUIRED)
+include(FetchContent)
 
 project(
   statusengine
@@ -31,7 +32,7 @@ project(
 pkg_check_modules(UCHARDET REQUIRED uchardet)
 pkg_check_modules(JSONC REQUIRED json-c)
 set(STATUSENGINE_LIBS ${UCHARDET_LIBRARIES} ${JSONC_LIBRARIES})
-set(STATUSENGINE_INCLUDES ${UCHARDET_INCLUDE_DIRS} ${JSONC_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR}/vendor)
+set(STATUSENGINE_INCLUDES ${UCHARDET_INCLUDE_DIRS} ${JSONC_INCLUDE_DIRS})
 
 if(WITH_GEARMAN)
     pkg_check_modules(GEARMAN REQUIRED gearmand)
@@ -63,14 +64,16 @@ if(NOT NAGIOS_INCLUDE_DIR)
     set(STATUSENGINE_INCLUDES ${GLIB2_INCLUDE_DIRS} ${STATUSENGINE_INCLUDES})
 endif()
 
-#FetchContent_Declare(
-#  catch
-#  GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-#  GIT_TAG        v2.13.6
-#)
-#
-## CMake 3.14+
-#FetchContent_MakeAvailable(catch)
+
+set(toml11_BUILD_TEST OFF CACHE INTERNAL "")
+FetchContent_Declare(
+  toml11
+  GIT_REPOSITORY https://github.com/ToruNiina/toml11.git
+  GIT_TAG        v3.7.1
+)
+FetchContent_MakeAvailable(toml11)
+
+set(STATUSENGINE_INCLUDES ${toml11_SOURCE_DIR} ${toml11_SOURCE_DIR}/toml ${STATUSENGINE_INCLUDES})
 
 add_subdirectory(src)
 

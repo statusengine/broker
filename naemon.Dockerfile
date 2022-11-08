@@ -1,7 +1,7 @@
 FROM ubuntu:focal
 
 RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y cmake gcc g++ gdb build-essential libglib2.0-dev libgearman-dev uuid-dev libicu-dev libjson-c-dev pkg-config libssl-dev librabbitmq-dev gearman-job-server gearman-tools automake gperf help2man libtool rabbitmq-server wget tar libuchardet-dev && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y cmake gcc g++ gdb build-essential libglib2.0-dev libgearman-dev uuid-dev libicu-dev libjson-c-dev pkg-config libssl-dev librabbitmq-dev gearman-job-server gearman-tools automake gperf help2man libtool rabbitmq-server wget tar libuchardet-dev git && \
     apt-get clean
 
 ENV NAEMON_VERSION=1.3.1
