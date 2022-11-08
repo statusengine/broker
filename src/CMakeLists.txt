@@ -7,3 +7,7 @@ add_subdirectory(MessageHandler)
 target_link_libraries(statusengine PRIVATE ${STATUSENGINE_LIBS})
 target_include_directories(statusengine PUBLIC ${STATUSENGINE_INCLUDES})
 target_include_directories(statusengine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+
+install(
+    TARGETS statusengine
+)

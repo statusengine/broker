@@ -71,7 +71,12 @@ FetchContent_Declare(
   GIT_REPOSITORY https://github.com/ToruNiina/toml11.git
   GIT_TAG        v3.7.1
 )
-FetchContent_MakeAvailable(toml11)
+
+FetchContent_GetProperties(toml11)
+if(NOT toml11_POPULATED)
+  FetchContent_Populate(toml11)
+  add_subdirectory(${toml11_SOURCE_DIR} ${toml11_BINARY_DIR} EXCLUDE_FROM_ALL)
+endif()
 
 set(STATUSENGINE_INCLUDES ${toml11_SOURCE_DIR} ${toml11_SOURCE_DIR}/toml ${STATUSENGINE_INCLUDES})
 
