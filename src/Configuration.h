@@ -96,11 +96,12 @@ namespace statusengine {
             }
             catch (const toml::type_error &tte) {
                 se.Log() << "Invalid configuration: Invalid value for key " << ky << LogLevel::Error;
+                return std::move(opt);
             }
             catch (const std::out_of_range &oor) {
-                return opt;
+                return std::move(opt);
             }
-            return opt;
+            return std::move(opt);
         }
     };
 

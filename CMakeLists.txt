@@ -38,11 +38,13 @@ if(WITH_GEARMAN)
     pkg_check_modules(GEARMAN REQUIRED gearmand)
     set(STATUSENGINE_LIBS ${GEARMAN_LIBRARIES} ${STATUSENGINE_LIBS})
     set(STATUSENGINE_INCLUDES ${GEARMAN_INCLUDE_DIRS} ${STATUSENGINE_INCLUDES})
+    add_definitions(-DWITH_GEARMAN)
 endif()
 if(WITH_RABBITMQ)
     pkg_check_modules(RABBITMQ REQUIRED librabbitmq)
     set(STATUSENGINE_LIBS ${RABBITMQ_LIBRARIES} ${STATUSENGINE_LIBS})
     set(STATUSENGINE_INCLUDES ${RABBITMQ_INCLUDE_DIRS} ${STATUSENGINE_INCLUDES})
+    add_definitions(-DWITH_RABBITMQ)
 endif()
 
 if(NAGIOS_INCLUDE_DIR)
@@ -79,6 +81,12 @@ if(NOT toml11_POPULATED)
 endif()
 
 set(STATUSENGINE_INCLUDES ${toml11_SOURCE_DIR} ${toml11_SOURCE_DIR}/toml ${STATUSENGINE_INCLUDES})
+
+if(MSVC)
+  add_compile_options(/W4 /WX)
+else()
+  add_compile_options(-Wall -Wextra -Wpedantic -Werror)
+endif()
 
 add_subdirectory(src)
 
