@@ -9,6 +9,7 @@ option(WITH_GEARMAN "enable gearman" OFF)
 option(WITH_RABBITMQ "enable rabbitmq" OFF)
 option(NAGIOS_INCLUDE_DIR "path to nagios include dir" OFF)
 option(NAEMON_INCLUDE_DIR "path to naemon include dir" OFF)
+option(ENABLE_TESTS "enable testing" OFF)
 
 if(${CMAKE_VERSION} VERSION_LESS 3.14)
     macro(FetchContent_MakeAvailable NAME)
@@ -90,3 +91,8 @@ endif()
 
 add_subdirectory(src)
 
+if(ENABLE_TESTS)
+  enable_testing(true)
+  include(CTest)
+  add_subdirectory(tests)
+endif()
