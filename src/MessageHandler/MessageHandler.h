@@ -5,20 +5,20 @@
 #include <string>
 #include <cstring>
 
-#include "Queue.h"
-#include "NagiosObject.h"
-#include "Configuration.h"
-#include "IStatusengine.h"
+#include "../Queue.h"
+#include "../NagiosObject.h"
+#include "../Configuration.h"
+#include "../IStatusengine.h"
 #include "IMessageHandler.h"
-#include "Utility.h"
-#include "gsl.h"
+#include "../Utility.h"
+#include "../gsl.h"
 
 
 namespace statusengine {
     class MessageHandler : public IMessageHandler {
       public:
 
-        explicit MessageHandler(IStatusengine *se) : se(se) {}
+        explicit MessageHandler(IStatusengine &se) : se(se) {}
 
         inline static char *get_json_string(json_object *obj) {
             auto jsonChars = json_object_get_string(obj);
@@ -32,7 +32,7 @@ namespace statusengine {
         void ProcessMessage(WorkerQueue workerQueue, const std::string &message) override {
             json_object *obj = json_tokener_parse(message.c_str());
             if (obj == nullptr) {
-                se->Log() << "Received non-json string '" << message
+                se.Log() << "Received non-json string '" << message
                           << "'. Ignoring..." << LogLevel::Warning;
             }
             else {
@@ -46,7 +46,7 @@ namespace statusengine {
                 json_object *messages;
                 if(json_object_object_get_ex(obj, "messages", &messages)) {
                     if (!json_object_is_type(messages, json_type_array)) {
-                        se->Log() << "OCHP::messages is not an array. Ignoring..." << LogLevel::Warning;
+                        se.Log() << "OCHP::messages is not an array. Ignoring..." << LogLevel::Warning;
                     }
                     else {
                         long unsigned int arrLen = json_object_array_length(messages);
@@ -62,7 +62,7 @@ namespace statusengine {
                         ParseCheckResult(hostcheck);
                     }
                     else {
-                        se->Log() << "OCHP Object doesn't contain a hostcheck value. Ignoring..."
+                        se.Log() << "OCHP Object doesn't contain a hostcheck value. Ignoring..."
                                   << LogLevel::Warning;
                     }
                 }
@@ -71,7 +71,7 @@ namespace statusengine {
                 json_object *messages;
                 if(json_object_object_get_ex(obj, "messages", &messages)) {
                     if (!json_object_is_type(messages, json_type_array)) {
-                        se->Log() << "OCSP::messages is not an array. Ignoring..." << LogLevel::Warning;
+                        se.Log() << "OCSP::messages is not an array. Ignoring..." << LogLevel::Warning;
                     }
                     else {
                         long unsigned int arrLen = json_object_array_length(messages);
@@ -87,7 +87,7 @@ namespace statusengine {
                         ParseCheckResult(servicecheck);
                     }
                     else {
-                        se->Log() << "OCSP Object doesn't contain a servicecheck value. Ignoring..."
+                        se.Log() << "OCSP Object doesn't contain a servicecheck value. Ignoring..."
                                   << LogLevel::Warning;
                     }
                 }
@@ -109,7 +109,7 @@ namespace statusengine {
                     }
                     else if (jsonKey.compare("messages") == 0) {
                         if (!json_object_is_type(jsonValue, json_type_array)) {
-                            se->Log() << "messages doesn't contain an array. Ignoring..." << LogLevel::Warning;
+                            se.Log() << "messages doesn't contain an array. Ignoring..." << LogLevel::Warning;
                         }
                         else {
                             long unsigned int arrLen = json_object_array_length(jsonValue);
@@ -137,17 +137,16 @@ namespace statusengine {
                         }
                     }
                     else {
-                        se->Log() << "Command Object is missing Command or Data. Ignoring..." << LogLevel::Warning;
+                        se.Log() << "Command Object is missing Command or Data. Ignoring..." << LogLevel::Warning;
                     }
                 }
             }
             else {
-                se->Log() << "Received message for unknown worker queue" << LogLevel::Warning;
+                se.Log() << "Received message for unknown worker queue" << LogLevel::Warning;
             }
         }
       protected:
-        IStatusengine *se;
-
+        IStatusengine &se;
 
         void ParseCheckResult(json_object *obj) {
             check_result cr;
@@ -228,10 +227,10 @@ namespace statusengine {
             }
 
             if (cr.host_name == nullptr) {
-                se->Log() << "Received hostcheck without host_name" << LogLevel::Warning;
+                se.Log() << "Received hostcheck without host_name" << LogLevel::Warning;
             }
             else if (cr.output == nullptr) {
-                se->Log() << "Received hostcheck without output" << LogLevel::Warning;
+                se.Log() << "Received hostcheck without output" << LogLevel::Warning;
             }
             else {
                 if (cr.service_description == nullptr) {
@@ -274,26 +273,26 @@ namespace statusengine {
             }
 
             if (hostname == nullptr || schedule_time == 0) {
-                se->Log() << "Received schedule_check command without host_name and schedule_time" << LogLevel::Warning;
+                se.Log() << "Received schedule_check command without host_name and schedule_time" << LogLevel::Warning;
                 return;
             }
 
             if (service_description == nullptr) {
                 host *temp_host = find_host(hostname);
                 if (temp_host == nullptr) {
-                    se->Log() << "Received schedule_check command for unknown host " << hostname << LogLevel::Warning;
+                    se.Log() << "Received schedule_check command for unknown host " << hostname << LogLevel::Warning;
                     return;
                 }
-                Nebmodule::Instance().ScheduleHostCheckFixed(temp_host, schedule_time);
+                se.GetNebmodule().ScheduleHostCheckFixed(temp_host, schedule_time);
             }
             else {
                 service *temp_service = find_service(hostname, service_description);
                 if (temp_service == nullptr) {
-                    se->Log() << "Received schedule_check command for unknown service " << service_description
+                    se.Log() << "Received schedule_check command for unknown service " << service_description
                               << LogLevel::Warning;
                     return;
                 }
-                Nebmodule::Instance().ScheduleServiceCheckFixed(temp_service, schedule_time);
+                se.GetNebmodule().ScheduleServiceCheckFixed(temp_service, schedule_time);
             }
         }
 
@@ -329,12 +328,12 @@ namespace statusengine {
 
             if (hostname == nullptr) {
                 if (hostname == nullptr) {
-                    se->Log() << "Received delete_downtime command without hostname " << LogLevel::Warning;
+                    se.Log() << "Received delete_downtime command without hostname " << LogLevel::Warning;
                     return;
                 }
             }
 
-            Nebmodule::Instance().DeleteDowntime(hostname, service_description, start_time, end_time, comment);
+            se.GetNebmodule().DeleteDowntime(hostname, service_description, start_time, end_time, comment);
         }
 
         inline static void ParseRaw(json_object *obj) {
@@ -374,7 +373,7 @@ namespace statusengine {
 
         void FlushBulkQueue() override {
             if (!bulkMessages.empty()) {
-                NagiosObject msgObj;
+                NagiosObject msgObj(se.GetNebmodule());
                 json_object *arr = json_object_new_array();
 
                 for (auto &obj : bulkMessages) {

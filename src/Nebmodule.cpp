@@ -4,9 +4,11 @@
 #include <string>
 #include <cstring>
 #include <iconv.h>
+#include <memory>
 
 #include "EventCallback.h"
 #include "Statusengine.h"
+#include "Exceptions.h"
 
 // This is required by naemon
 extern "C" {
@@ -15,17 +17,16 @@ NEB_API_VERSION(CURRENT_NEB_API_VERSION)
 
 namespace statusengine {
 
-    int Nebmodule::Init(nebmodule *handle, std::string args) {
-        se = new Statusengine(handle, std::move(args));
+    Nebmodule::Nebmodule(Neb_NebmodulePtr handle, std::string args) : handle(handle) {
+        se = new Statusengine(*this, std::move(args));
         uc = uchardet_new();
-        return se->Init();
+        se->Init();
     }
 
-    int Nebmodule::Deinit(int) {
+    Nebmodule::~Nebmodule() {
         delete se;
         uchardet_delete(uc);
         uc = nullptr;
-        return 0;
     }
 
     int Nebmodule::Callback(int event_type, void *data) {
@@ -33,7 +34,7 @@ namespace statusengine {
     }
 
     bool Nebmodule::RegisterCallback(NEBCallbackType cbType) {
-        int result = neb_register_callback(cbType, se->nebhandle, 0, nebmodule_callback);
+        int result = neb_register_callback(cbType, handle, 0, nebmodule_callback);
 
         if (result != 0) {
             se->Log() << "Could not register nebmodule_callback for Event Type " << cbType << ": " << result
@@ -245,18 +246,34 @@ namespace statusengine {
 
         return result;
     }
+
+    Neb_NebmodulePtr Nebmodule::GetNebNebmodulePtr() {
+        return handle;
+    }
 } // namespace statusengine
 
+static statusengine::INebmodulePtr instance;
+
 extern "C" int nebmodule_init(int, char *args, nebmodule *handle) {
-    return statusengine::Nebmodule::Instance().Init(handle, std::string(args));
+    try {
+        instance = std::make_shared<statusengine::Nebmodule>(handle, std::string(args));
+        return 0;
+    } catch (const statusengine::StatusengineException &e) {
+        return 1;
+    }
 }
 
-extern "C" int nebmodule_deinit(int, int reason) {
-    return statusengine::Nebmodule::Instance().Deinit(reason);
+extern "C" int nebmodule_deinit(int, int) {
+    try {
+        instance.reset();
+        return 0;
+    } catch (const statusengine::StatusengineException &e) {
+        return 1;
+    }
 }
 
 int nebmodule_callback(int event_type, void *data) {
-    return statusengine::Nebmodule::Instance().Callback(event_type, data);
+    return instance->Callback(event_type, data);
 }
 
 #ifndef BUILD_NAGIOS
@@ -264,7 +281,7 @@ void nebmodule_event_callback(struct nm_event_execution_properties *properties) 
     auto ecb = reinterpret_cast<statusengine::EventCallback *>(properties->user_data);
     ecb->Callback();
     if (!(sigshutdown || sigrestart)) {
-        statusengine::Nebmodule::Instance().RegisterEventCallback(ecb);
+        instance->RegisterEventCallback(ecb);
     }
 }
 #else

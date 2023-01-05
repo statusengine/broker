@@ -11,7 +11,7 @@ namespace statusengine {
     class RabbitmqConfiguration;
     class RabbitmqClient : public MessageHandler {
       public:
-        explicit RabbitmqClient(IStatusengine *se, std::shared_ptr<RabbitmqConfiguration> cfg);
+        explicit RabbitmqClient(IStatusengine &se, std::shared_ptr<RabbitmqConfiguration> cfg);
         ~RabbitmqClient();
 
         bool Connect() override;

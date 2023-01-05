@@ -1,19 +1,22 @@
-#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
-#include <catch2/catch_all.hpp>
+#include <gtest/gtest.h>
+#include <vector>
 
 #include "LogStream.h"
 
-void testMemory() {
-    void *test = malloc(16);
-    (void)test;
+
+namespace statusengine {
+
+class LogStreamTest : public ::testing::TestWithParam<LogLevel>
+{};
+
+TEST_P(LogStreamTest, LogLevel) {
+    LogStream subject;
+    auto level = GetParam();
+    subject.SetLogLevel(level);
+    ASSERT_EQ(subject.level, level);
 }
 
+INSTANTIATE_TEST_SUITE_P(LogStream, LogStreamTest,
+                         testing::Values(LogLevel::Error, LogLevel::Info, LogLevel::Warning));
 
-TEST_CASE("Log output") {
-    statusengine::LogStream subject;
-    REQUIRE_NOTHROW( subject.SetLogLevel(statusengine::LogLevel::Error));
-}
-
-TEST_CASE("Memory Test") {
-    REQUIRE_NOTHROW( testMemory() );
 }

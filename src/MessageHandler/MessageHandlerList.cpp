@@ -34,7 +34,7 @@ namespace statusengine {
 #ifdef WITH_GEARMAN
         auto gearmanConfigs = cfg.GetGearmanConfiguration();
         for (auto &gearmanConfig : *gearmanConfigs) {
-            auto gearmanClient = std::make_shared<GearmanClient>(&se, gearmanConfig);
+            auto gearmanClient = std::make_shared<GearmanClient>(se, gearmanConfig);
             allHandlers.push_back(gearmanClient);
             auto queues = gearmanConfig->GetQueues();
             for (auto &queue : *queues) {
@@ -45,7 +45,7 @@ namespace statusengine {
 #ifdef WITH_RABBITMQ
         auto rabbitmqConfigs = cfg.GetRabbitmqConfiguration();
         for (auto &rabbitmqConfig : *rabbitmqConfigs) {
-            auto rabbitmqClient = std::make_shared<RabbitmqClient>(&se, rabbitmqConfig);
+            auto rabbitmqClient = std::make_shared<RabbitmqClient>(se, rabbitmqConfig);
             allHandlers.push_back(rabbitmqClient);
             auto queues = rabbitmqConfig->GetQueues();
             for (auto &queue : *queues) {

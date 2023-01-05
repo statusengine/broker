@@ -2,45 +2,15 @@
 
 #include <string>
 #include <uchardet.h>
+#include <INebmodule.h>
 
-#ifndef BUILD_NAGIOS
-extern "C" {
-#include <naemon/naemon.h>
-}
-#else
-#include <cstring>
-
-#include <nagios/broker.h>
-#include <nagios/comments.h>
-#include <nagios/common.h>
-#include <nagios/downtime.h>
-#include <nagios/macros.h>
-#include <nagios/nagios.h>
-#include <nagios/nebcallbacks.h>
-#include <nagios/nebmodules.h>
-#include <nagios/nebstructs.h>
-
-typedef int NEBCallbackType;
-typedef nagios_comment comment;
-
-inline void nm_log(long unsigned logLevel, const char *, const char *message) {
-    char *temp = nullptr;
-    temp = strdup(message);
-    write_to_all_logs(temp, logLevel);
-    free(temp);
-}
-#endif
 
 namespace statusengine {
-    class Statusengine;
-    class EventCallback;
 
-    class Nebmodule {
+    class Nebmodule : public INebmodule {
       public:
-        static Nebmodule &Instance() {
-            static Nebmodule inst;
-            return inst;
-        }
+        explicit Nebmodule(Neb_NebmodulePtr handle, std::string args);
+        virtual ~Nebmodule();
 
         int Init(nebmodule *handle, std::string args);
 
@@ -64,11 +34,14 @@ namespace statusengine {
 
         std::string EncodeString(char *data);
 
+        Neb_NebmodulePtr GetNebNebmodulePtr(); 
+
       private:
         explicit Nebmodule() : se(nullptr), uc(nullptr) {}
 
         Statusengine *se;
         uchardet_t uc;
+        Neb_NebmodulePtr handle;
     };
 } // namespace statusengine
 

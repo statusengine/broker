@@ -10,7 +10,7 @@ namespace statusengine {
 
     class GearmanClient : public MessageHandler {
       public:
-        explicit GearmanClient(IStatusengine *se, std::shared_ptr<GearmanConfiguration> cfg);
+        explicit GearmanClient(IStatusengine &se, std::shared_ptr<GearmanConfiguration> cfg);
         ~GearmanClient();
 
         bool Connect() override;

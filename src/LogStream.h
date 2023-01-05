@@ -2,12 +2,14 @@
 
 #include <sstream>
 
+#include "Utility.h"
 #include "Nebmodule.h"
 
 namespace statusengine {
     enum class LogLevel { Info, Warning, Error };
 
     class LogStream {
+      FRIEND_TEST(LogStreamTest, LogLevel);
       public:
         LogStream() : ss(), level(LogLevel::Info) {
             *this << "Logstream initalized" << LogLevel::Info;

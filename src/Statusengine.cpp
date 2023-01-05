@@ -12,8 +12,8 @@
 
 namespace statusengine {
 
-    Statusengine::Statusengine(nebmodule *handle, std::string configurationPath)
-        : nebhandle(handle), configurationPath(std::move(configurationPath)), messageHandler(nullptr), ls(),
+    Statusengine::Statusengine(INebmodule &neb, std::string configurationPath)
+        : neb(neb), configurationPath(std::move(configurationPath)), messageHandler(nullptr), ls(),
           callbacks(), bulkCallback(nullptr), messageWorkerCallback(nullptr)  {
         configuration = new Configuration(*this);
     }
@@ -118,7 +118,7 @@ namespace statusengine {
 
     Statusengine::~Statusengine() {
         Log() << "unloading..." << LogLevel::Info;
-        neb_deregister_module_callbacks(nebhandle);
+        neb_deregister_module_callbacks(neb.GetNebNebmodulePtr());
         callbacks.clear();
         delete bulkCallback;
         delete messageWorkerCallback;
@@ -145,11 +145,11 @@ namespace statusengine {
     }
 
     void Statusengine::SetModuleInfo(int modinfo, const std::string &text) {
-        neb_set_module_info(nebhandle, modinfo, const_cast<char *>(text.c_str()));
+        neb_set_module_info(neb.GetNebNebmodulePtr(), modinfo, const_cast<char *>(text.c_str()));
     }
 
     void Statusengine::RegisterEventCallback(EventCallback *ecb) {
-        Nebmodule::Instance().RegisterEventCallback(ecb);
+        neb.RegisterEventCallback(ecb);
     }
 
     int Statusengine::Callback(int event_type, void *data) {

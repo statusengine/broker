@@ -20,7 +20,7 @@ namespace statusengine {
         return ret;
     }
 
-    GearmanClient::GearmanClient(IStatusengine *se, std::shared_ptr<GearmanConfiguration> cfg)
+    GearmanClient::GearmanClient(IStatusengine &se, std::shared_ptr<GearmanConfiguration> cfg)
         : MessageHandler(se), cfg(cfg), client(nullptr), worker(nullptr) {
 
         queueNames = cfg->GetQueueNames();
@@ -37,12 +37,12 @@ namespace statusengine {
 
     GearmanClient::~GearmanClient() {
         if (client != nullptr) {
-            se->Log() << "Destroy gearman client" << LogLevel::Info;
+            se.Log() << "Destroy gearman client" << LogLevel::Info;
             gearman_client_free(client);
         }
 
         if (worker != nullptr) {
-            se->Log() << "Destroy gearman worker" << LogLevel::Info;
+            se.Log() << "Destroy gearman worker" << LogLevel::Info;
             gearman_worker_free(worker);
             clearContainer<>(&workerContexts);
         }
@@ -52,10 +52,10 @@ namespace statusengine {
         if (!queueNames->empty()) {
             auto ret = gearman_client_add_servers(client, cfg->URL.c_str());
             if (gearman_success(ret)) {
-                se->Log() << "Added gearman client server connection" << LogLevel::Info;
+                se.Log() << "Added gearman client server connection" << LogLevel::Info;
             }
             else {
-                se->Log() << "Could not add client gearman server: " << gearman_client_error(client) << LogLevel::Error;
+                se.Log() << "Could not add client gearman server: " << gearman_client_error(client) << LogLevel::Error;
                 return false;
             }
         }
@@ -63,10 +63,10 @@ namespace statusengine {
         if (!workerQueueNames->empty()) {
             auto ret = gearman_worker_add_servers(worker, cfg->URL.c_str());
             if (gearman_success(ret)) {
-                se->Log() << "Added gearman worker server connection" << LogLevel::Info;
+                se.Log() << "Added gearman worker server connection" << LogLevel::Info;
             }
             else {
-                se->Log() << "Could not add worker gearman server: " << gearman_client_error(client) << LogLevel::Error;
+                se.Log() << "Could not add worker gearman server: " << gearman_client_error(client) << LogLevel::Error;
                 return false;
             }
             for (auto &queue : *workerQueueNames) {
@@ -75,10 +75,10 @@ namespace statusengine {
                 auto cbfn = gearman_function_create_v2(se_gearman_worker_callback);
                 ret = gearman_worker_define_function(worker, queue.second.c_str(), queue.second.size(), cbfn, 0, ctx);
                 if (gearman_success(ret)) {
-                    se->Log() << "Added gearman worker function " << queue.second << LogLevel::Info;
+                    se.Log() << "Added gearman worker function " << queue.second << LogLevel::Info;
                 }
                 else {
-                    se->Log() << "Could not add gearman worker function " << queue.second << ": "
+                    se.Log() << "Could not add gearman worker function " << queue.second << ": "
                               << gearman_client_error(client) << LogLevel::Error;
                     return false;
                 }
@@ -92,7 +92,7 @@ namespace statusengine {
         auto ret = gearman_client_do_background(client, queueName.c_str(), nullptr, message.c_str(), message.length(),
                                                 nullptr);
         if (!gearman_success(ret)) {
-            se->Log() << "Could not write message to gearman queue: " << gearman_client_error(client)
+            se.Log() << "Could not write message to gearman queue: " << gearman_client_error(client)
                       << LogLevel::Error;
         }
     }
@@ -119,10 +119,10 @@ namespace statusengine {
                     moreJobs = true;
                     break;
                 case GEARMAN_NO_ACTIVE_FDS:
-                    se->Log() << "Gearman worker is not connected to server" << LogLevel::Error;
+                    se.Log() << "Gearman worker is not connected to server" << LogLevel::Error;
                     break;
                 default:
-                    se->Log() << "Unknown gearman worker error: " << ret << LogLevel::Error;
+                    se.Log() << "Unknown gearman worker error: " << ret << LogLevel::Error;
             }
         }
         return moreJobs;

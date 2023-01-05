@@ -10,20 +10,23 @@
 namespace statusengine {
     class NagiosObject {
       public:
-        explicit NagiosObject() : nebmodule(Nebmodule::Instance()) {
+        explicit NagiosObject(INebmodule &neb) : nebmodule(neb) {
             data = json_object_new_object();
         }
 
         /**
          * This is like a copy constructor, it increments the counter for data
          * @param data
-         */
+        
         explicit NagiosObject(json_object *data) : nebmodule(Nebmodule::Instance()), data(json_object_get(data)) {}
+         */
+        explicit NagiosObject(json_object *data) = delete;
+
         /**
          * This is like a copy constructor, it increments the counter for obj->data
          * @param data
          */
-        explicit NagiosObject(statusengine::NagiosObject *obj) : nebmodule(Nebmodule::Instance()), data(json_object_get(obj->data)) {}
+        explicit NagiosObject(statusengine::NagiosObject *obj) : nebmodule(obj->nebmodule), data(json_object_get(obj->data)) {}
 
         ~NagiosObject() {
             json_object_put(data);
@@ -111,20 +114,20 @@ namespace statusengine {
         }
 
     protected:
-        Nebmodule &nebmodule;
+        INebmodule &nebmodule;
         json_object *data;
     };
 
     class NagiosProcessData : public NagiosObject {
     public:
-        explicit NagiosProcessData(const nebstruct_process_data *processData) {
+        explicit NagiosProcessData(INebmodule &neb, const nebstruct_process_data *processData) : NagiosObject(neb) {
             SetData("type", processData->type);
             SetData("flags", processData->flags);
             SetData("attr", processData->attr);
             SetData("timestamp", processData->timestamp.tv_sec);
             SetData("timestamp_usec", processData->timestamp.tv_usec);
 
-            NagiosObject processdata;
+            NagiosObject processdata(neb);
             processdata.SetData("programmname", std::string("Naemon"));
             processdata.SetData("modification_data", std::string("removed"));
             processdata.SetData("programmversion", std::string(get_program_version()));
@@ -136,14 +139,14 @@ namespace statusengine {
 
     class NagiosAcknowledgementData : public NagiosObject {
     public:
-        explicit NagiosAcknowledgementData(const nebstruct_acknowledgement_data *acknowledgementData) {
+        explicit NagiosAcknowledgementData(INebmodule &neb, const nebstruct_acknowledgement_data *acknowledgementData) : NagiosObject(neb) {
             SetData("type", acknowledgementData->type);
             SetData("flags", acknowledgementData->flags);
             SetData("attr", acknowledgementData->attr);
             SetData("timestamp", acknowledgementData->timestamp.tv_sec);
             SetData("timestamp_usec", acknowledgementData->timestamp.tv_usec);
 
-            NagiosObject acknowledgement;
+            NagiosObject acknowledgement(neb);
             acknowledgement.SetData("host_name", acknowledgementData->host_name);
             acknowledgement.SetData("service_description", acknowledgementData->service_description);
             acknowledgement.SetData("author_name", acknowledgementData->author_name);
@@ -160,14 +163,14 @@ namespace statusengine {
 
     class NagiosCommentData : public NagiosObject {
     public:
-        explicit NagiosCommentData(const nebstruct_comment_data *commentData) {
+        explicit NagiosCommentData(INebmodule &neb, const nebstruct_comment_data *commentData) : NagiosObject(neb) {
             SetData("type", commentData->type);
             SetData("flags", commentData->flags);
             SetData("attr", commentData->attr);
             SetData("timestamp", commentData->timestamp.tv_sec);
             SetData("timestamp_usec", commentData->timestamp.tv_usec);
 
-            NagiosObject comment;
+            NagiosObject comment(neb);
             comment.SetData("host_name", commentData->host_name);
             comment.SetData("service_description", commentData->service_description);
             comment.SetData("author_name", commentData->author_name);
@@ -186,14 +189,14 @@ namespace statusengine {
 
     class NagiosContactNotificationData : public NagiosObject {
     public:
-        explicit NagiosContactNotificationData(const nebstruct_contact_notification_data *contactNotificationData) {
+        explicit NagiosContactNotificationData(INebmodule &neb, const nebstruct_contact_notification_data *contactNotificationData) : NagiosObject(neb) {
             SetData("type", contactNotificationData->type);
             SetData("flags", contactNotificationData->flags);
             SetData("attr", contactNotificationData->attr);
             SetData("timestamp", contactNotificationData->timestamp.tv_sec);
             SetData("timestamp_usec", contactNotificationData->timestamp.tv_usec);
 
-            NagiosObject contactnotificationdata;
+            NagiosObject contactnotificationdata(neb);
             contactnotificationdata.SetData("host_name", contactNotificationData->host_name);
             contactnotificationdata.SetData("service_description", contactNotificationData->service_description);
             contactnotificationdata.SetData("output", nebmodule.EncodeString(contactNotificationData->output));
@@ -213,15 +216,15 @@ namespace statusengine {
 
     class NagiosContactNotificationMethodData : public NagiosObject {
     public:
-        explicit NagiosContactNotificationMethodData(
-                const nebstruct_contact_notification_method_data *contactNotificationMethodData) {
+        explicit NagiosContactNotificationMethodData(INebmodule &neb, 
+                const nebstruct_contact_notification_method_data *contactNotificationMethodData) : NagiosObject(neb) {
             SetData("type", contactNotificationMethodData->type);
             SetData("flags", contactNotificationMethodData->flags);
             SetData("attr", contactNotificationMethodData->attr);
             SetData("timestamp", contactNotificationMethodData->timestamp.tv_sec);
             SetData("timestamp_usec", contactNotificationMethodData->timestamp.tv_usec);
 
-            NagiosObject contactnotificationmethod;
+            NagiosObject contactnotificationmethod(neb);
             contactnotificationmethod.SetData("host_name", contactNotificationMethodData->host_name);
             contactnotificationmethod.SetData("service_description", contactNotificationMethodData->service_description);
             contactnotificationmethod.SetData("output", nebmodule.EncodeString(contactNotificationMethodData->output));
@@ -241,7 +244,7 @@ namespace statusengine {
 
     class NagiosContactStatusData : public NagiosObject {
     public:
-        explicit NagiosContactStatusData(const nebstruct_contact_status_data *contactStatusData) {
+        explicit NagiosContactStatusData(INebmodule &neb, const nebstruct_contact_status_data *contactStatusData) : NagiosObject(neb) {
             SetData("type", contactStatusData->type);
             SetData("flags", contactStatusData->flags);
             SetData("attr", contactStatusData->attr);
@@ -250,7 +253,7 @@ namespace statusengine {
 
             auto tmpContact = reinterpret_cast<contact *>(contactStatusData->object_ptr);
 
-            NagiosObject contactstatus;
+            NagiosObject contactstatus(neb);
             contactstatus.SetData("contact_name", tmpContact->name);
             contactstatus.SetData("host_notifications_enabled", tmpContact->host_notifications_enabled);
             contactstatus.SetData("service_notifications_enabled", tmpContact->service_notifications_enabled);
@@ -266,14 +269,14 @@ namespace statusengine {
 
     class NagiosDowntimeData : public NagiosObject {
     public:
-        explicit NagiosDowntimeData(const nebstruct_downtime_data *downtimeData) {
+        explicit NagiosDowntimeData(INebmodule &neb, const nebstruct_downtime_data *downtimeData) : NagiosObject(neb) {
             SetData("type", downtimeData->type);
             SetData("flags", downtimeData->flags);
             SetData("attr", downtimeData->attr);
             SetData("timestamp", downtimeData->timestamp.tv_sec);
             SetData("timestamp_usec", downtimeData->timestamp.tv_usec);
 
-            NagiosObject downtime;
+            NagiosObject downtime(neb);
             downtime.SetData("host_name", downtimeData->host_name);
             downtime.SetData("service_description", downtimeData->service_description);
             downtime.SetData("author_name", downtimeData->author_name);
@@ -294,14 +297,14 @@ namespace statusengine {
 
     class NagiosEventHandlerData : public NagiosObject {
     public:
-        explicit NagiosEventHandlerData(const nebstruct_event_handler_data *eventHandlerData) {
+        explicit NagiosEventHandlerData(INebmodule &neb, const nebstruct_event_handler_data *eventHandlerData) : NagiosObject(neb) {
             SetData("type", eventHandlerData->type);
             SetData("flags", eventHandlerData->flags);
             SetData("attr", eventHandlerData->attr);
             SetData("timestamp", eventHandlerData->timestamp.tv_sec);
             SetData("timestamp_usec", eventHandlerData->timestamp.tv_usec);
 
-            NagiosObject eventhandler;
+            NagiosObject eventhandler(neb);
             eventhandler.SetData("host_name", eventHandlerData->host_name);
             eventhandler.SetData("service_description", eventHandlerData->service_description);
             eventhandler.SetData("output", nebmodule.EncodeString(eventHandlerData->output));
@@ -324,14 +327,14 @@ namespace statusengine {
 
     class NagiosExternalCommandData : public NagiosObject {
     public:
-        explicit NagiosExternalCommandData(const nebstruct_external_command_data *externalCommandData) {
+        explicit NagiosExternalCommandData(INebmodule &neb, const nebstruct_external_command_data *externalCommandData) : NagiosObject(neb) {
             SetData("type", externalCommandData->type);
             SetData("flags", externalCommandData->flags);
             SetData("attr", externalCommandData->attr);
             SetData("timestamp", externalCommandData->timestamp.tv_sec);
             SetData("timestamp_usec", externalCommandData->timestamp.tv_usec);
 
-            NagiosObject externalcommand;
+            NagiosObject externalcommand(neb);
             externalcommand.SetData("command_string", externalCommandData->command_string);
             externalcommand.SetData("command_args", externalCommandData->command_args);
             externalcommand.SetData("command_type", externalCommandData->command_type);
@@ -343,7 +346,7 @@ namespace statusengine {
 
     class NagiosFlappingData : public NagiosObject {
     public:
-        explicit NagiosFlappingData(const nebstruct_flapping_data *flappingData) {
+        explicit NagiosFlappingData(INebmodule &neb, const nebstruct_flapping_data *flappingData) : NagiosObject(neb) {
             SetData("type", flappingData->type);
             SetData("flags", flappingData->flags);
             SetData("attr", flappingData->attr);
@@ -358,7 +361,7 @@ namespace statusengine {
                 tmpComment = find_host_comment(flappingData->comment_id);
             }
 
-            NagiosObject flapping;
+            NagiosObject flapping(neb);
             flapping.SetData("host_name", flappingData->host_name);
             flapping.SetData("service_description", flappingData->service_description);
             flapping.SetData("flapping_type", flappingData->flapping_type);
@@ -374,7 +377,7 @@ namespace statusengine {
 
     class NagiosHost : public NagiosObject {
     public:
-        explicit NagiosHost(const host *data) {
+        explicit NagiosHost(INebmodule &neb, const host *data) : NagiosObject(neb) {
             SetData("name", data->name);
             SetData("plugin_output", nebmodule.EncodeString(data->plugin_output));
             SetData("long_plugin_output", nebmodule.EncodeString(data->long_plugin_output));
@@ -423,7 +426,7 @@ namespace statusengine {
 
     class NagiosHostCheckData : public NagiosObject {
     public:
-        explicit NagiosHostCheckData(const nebstruct_host_check_data *hostCheckData) {
+        explicit NagiosHostCheckData(INebmodule &neb, const nebstruct_host_check_data *hostCheckData) : NagiosObject(neb) {
             SetData("type", hostCheckData->type);
             SetData("flags", hostCheckData->flags);
             SetData("attr", hostCheckData->attr);
@@ -435,7 +438,7 @@ namespace statusengine {
             auto globalMacros = get_global_macros();
             get_raw_command_line_r(globalMacros, nag_host->check_command_ptr, nag_host->check_command, &raw_command, 0);
 
-            NagiosObject hostcheck;
+            NagiosObject hostcheck(neb);
 
             hostcheck.SetData("host_name", hostCheckData->host_name);
             hostcheck.SetData("command_line", raw_command != nullptr ? raw_command : nullptr);
@@ -470,28 +473,28 @@ namespace statusengine {
 
     class NagiosHostStatusData : public NagiosObject {
     public:
-        explicit NagiosHostStatusData(const nebstruct_host_status_data *hostStatusData) {
+        explicit NagiosHostStatusData(INebmodule &neb, const nebstruct_host_status_data *hostStatusData) : NagiosObject(neb) {
             SetData("type", hostStatusData->type);
             SetData("flags", hostStatusData->flags);
             SetData("attr", hostStatusData->attr);
             SetData("timestamp", hostStatusData->timestamp.tv_sec);
             SetData("timestamp_usec", hostStatusData->timestamp.tv_usec);
 
-            NagiosHost hostStatus(reinterpret_cast<host *>(hostStatusData->object_ptr));
+            NagiosHost hostStatus(neb, reinterpret_cast<host *>(hostStatusData->object_ptr));
             SetData("hoststatus", &hostStatus);
         }
     };
 
     class NagiosLogData : public NagiosObject {
     public:
-        explicit NagiosLogData(const nebstruct_log_data *logData) {
+        explicit NagiosLogData(INebmodule &neb, const nebstruct_log_data *logData) : NagiosObject(neb) {
             SetData("type", logData->type);
             SetData("flags", logData->flags);
             SetData("attr", logData->attr);
             SetData("timestamp", logData->timestamp.tv_sec);
             SetData("timestamp_usec", logData->timestamp.tv_usec);
 
-            NagiosObject logentry;
+            NagiosObject logentry(neb);
 
             logentry.SetData("entry_time", logData->entry_time);
             logentry.SetData("data_type", logData->data_type);
@@ -503,14 +506,14 @@ namespace statusengine {
 
     class NagiosNotificationData : public NagiosObject {
     public:
-        explicit NagiosNotificationData(const nebstruct_notification_data *notificationData) {
+        explicit NagiosNotificationData(INebmodule &neb, const nebstruct_notification_data *notificationData) : NagiosObject(neb) {
             SetData("type", notificationData->type);
             SetData("flags", notificationData->flags);
             SetData("attr", notificationData->attr);
             SetData("timestamp", notificationData->timestamp.tv_sec);
             SetData("timestamp_usec", notificationData->timestamp.tv_usec);
 
-            NagiosObject notification_data;
+            NagiosObject notification_data(neb);
 
             notification_data.SetData("host_name", notificationData->host_name);
             notification_data.SetData("service_description", notificationData->service_description);
@@ -532,14 +535,14 @@ namespace statusengine {
 
     class NagiosProgramStatusData : public NagiosObject {
     public:
-        explicit NagiosProgramStatusData(const nebstruct_program_status_data *programmStatusData) {
+        explicit NagiosProgramStatusData(INebmodule &neb, const nebstruct_program_status_data *programmStatusData) : NagiosObject(neb) {
             SetData("type", programmStatusData->type);
             SetData("flags", programmStatusData->flags);
             SetData("attr", programmStatusData->attr);
             SetData("timestamp", programmStatusData->timestamp.tv_sec);
             SetData("timestamp_usec", programmStatusData->timestamp.tv_usec);
 
-            NagiosObject programmstatus;
+            NagiosObject programmstatus(neb);
             programmstatus.SetData("global_host_event_handler", programmStatusData->global_host_event_handler);
             programmstatus.SetData("global_service_event_handler", programmStatusData->global_service_event_handler);
             programmstatus.SetData("program_start", programmStatusData->program_start);
@@ -567,7 +570,7 @@ namespace statusengine {
 
     class NagiosService : public NagiosObject {
     public:
-        explicit NagiosService(const service *data) {
+        explicit NagiosService(INebmodule &neb, const service *data) : NagiosObject(neb) {
             SetData("host_name", data->host_name);
             SetData("description", data->description);
             SetData("plugin_output", nebmodule.EncodeString(data->plugin_output));
@@ -618,7 +621,7 @@ namespace statusengine {
 
     class NagiosServiceCheckData : public NagiosObject {
     public:
-        explicit NagiosServiceCheckData(const nebstruct_service_check_data *serviceCheckData) {
+        explicit NagiosServiceCheckData(INebmodule &neb, const nebstruct_service_check_data *serviceCheckData) : NagiosObject(neb) {
             SetData("type", serviceCheckData->type);
             SetData("flags", serviceCheckData->flags);
             SetData("attr", serviceCheckData->attr);
@@ -631,7 +634,7 @@ namespace statusengine {
             get_raw_command_line_r(globalMacros, nag_service->check_command_ptr, nag_service->check_command,
                                    &raw_command, 0);
 
-            NagiosObject servicecheck;
+            NagiosObject servicecheck(neb);
             servicecheck.SetData("host_name", serviceCheckData->host_name);
             servicecheck.SetData("service_description", serviceCheckData->service_description);
             servicecheck.SetData("command_line", (raw_command != nullptr ? raw_command : nullptr));
@@ -667,14 +670,14 @@ namespace statusengine {
 
     class NagiosServiceCheckPerfData : public NagiosObject {
     public:
-        explicit NagiosServiceCheckPerfData(const nebstruct_service_check_data *serviceCheckData) {
+        explicit NagiosServiceCheckPerfData(INebmodule &neb, const nebstruct_service_check_data *serviceCheckData) : NagiosObject(neb) {
             SetData("type", serviceCheckData->type);
             SetData("flags", serviceCheckData->flags);
             SetData("attr", serviceCheckData->attr);
             SetData("timestamp", serviceCheckData->timestamp.tv_sec);
             SetData("timestamp_usec", serviceCheckData->timestamp.tv_usec);
 
-            NagiosObject servicecheck;
+            NagiosObject servicecheck(neb);
 
             servicecheck.SetData("host_name", serviceCheckData->host_name);
             servicecheck.SetData("service_description", serviceCheckData->service_description);
@@ -686,21 +689,21 @@ namespace statusengine {
 
     class NagiosServiceStatusData : public NagiosObject {
     public:
-        explicit NagiosServiceStatusData(const nebstruct_service_status_data *serviceStatusData) {
+        explicit NagiosServiceStatusData(INebmodule &neb, const nebstruct_service_status_data *serviceStatusData) : NagiosObject(neb) {
             SetData("type", serviceStatusData->type);
             SetData("flags", serviceStatusData->flags);
             SetData("attr", serviceStatusData->attr);
             SetData("timestamp", serviceStatusData->timestamp.tv_sec);
             SetData("timestamp_usec", serviceStatusData->timestamp.tv_usec);
 
-            NagiosService serviceStatus(reinterpret_cast<service *>(serviceStatusData->object_ptr));
+            NagiosService serviceStatus(neb, reinterpret_cast<service *>(serviceStatusData->object_ptr));
             SetData("servicestatus", &serviceStatus);
         }
     };
 
     class NagiosStateChangeData : public NagiosObject {
     public:
-        explicit NagiosStateChangeData(const nebstruct_statechange_data *stateChangeData) {
+        explicit NagiosStateChangeData(INebmodule &neb, const nebstruct_statechange_data *stateChangeData) : NagiosObject(neb) {
             SetData("type", stateChangeData->type);
             SetData("flags", stateChangeData->flags);
             SetData("attr", stateChangeData->attr);
@@ -721,7 +724,7 @@ namespace statusengine {
                 last_hard_state = tmp_host->last_hard_state;
             }
 
-            NagiosObject statechange;
+            NagiosObject statechange(neb);
 
             statechange.SetData("host_name", stateChangeData->host_name);
             statechange.SetData("service_description", stateChangeData->service_description);
@@ -741,14 +744,14 @@ namespace statusengine {
 
     class NagiosSystemCommandData : public NagiosObject {
     public:
-        explicit NagiosSystemCommandData(const nebstruct_system_command_data *systemCommandData) {
+        explicit NagiosSystemCommandData(INebmodule &neb, const nebstruct_system_command_data *systemCommandData) : NagiosObject(neb) {
             SetData("type", systemCommandData->type);
             SetData("flags", systemCommandData->flags);
             SetData("attr", systemCommandData->attr);
             SetData("timestamp", systemCommandData->timestamp.tv_sec);
             SetData("timestamp_usec", systemCommandData->timestamp.tv_usec);
 
-            NagiosObject systemcommand;
+            NagiosObject systemcommand(neb);
 
             systemcommand.SetData("command_line", systemCommandData->command_line);
             systemcommand.SetData("output", nebmodule.EncodeString(systemCommandData->output));

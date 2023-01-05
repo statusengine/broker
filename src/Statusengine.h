@@ -50,7 +50,7 @@ namespace statusengine {
             auto cb  = new T(*this);
             NEBCallbackType cbType = cb->GetCallbackType();
             if (callbacks.find(cbType) == callbacks.end())
-                Nebmodule::Instance().RegisterCallback(cbType);
+                neb.RegisterCallback(cbType);
             callbacks.insert(std::make_pair(cbType, std::unique_ptr<NebmoduleCallback>(cb)));
         }
 
@@ -58,15 +58,19 @@ namespace statusengine {
             return configuration->GetStartupScheduleMax();
         }
 
+        INebmodule& GetNebmodule() override {
+            return neb;
+        }
+
       private:
-        Statusengine(nebmodule *handle, std::string configurationPath);
+        Statusengine(INebmodule &neb, std::string configurationPath);
         ~Statusengine();
 
         int Callback(int event_type, void *data);
 
         void SetModuleInfo(int modinfo, const std::string &text);
 
-        nebmodule *nebhandle;
+        INebmodule &neb;
         std::string configurationPath;
         Configuration *configuration;
         IMessageHandlerList *messageHandler;

@@ -4,7 +4,7 @@
 
 namespace statusengine {
 
-    RabbitmqClient::RabbitmqClient(IStatusengine *se, std::shared_ptr<RabbitmqConfiguration> cfg)
+    RabbitmqClient::RabbitmqClient(IStatusengine &se, std::shared_ptr<RabbitmqConfiguration> cfg)
         : MessageHandler(se), cfg(cfg), socket(nullptr), conn(nullptr), connected(false) {
         queueNames = cfg->GetQueueNames();
         workerQueueNames = cfg->GetWorkerQueueNames();
@@ -28,7 +28,7 @@ namespace statusengine {
         }
         if (amqp_destroy_connection(conn) < 0) {
             if (!quiet) {
-                se->Log() << "Error ending amqp connection" << LogLevel::Error;
+                se.Log() << "Error ending amqp connection" << LogLevel::Error;
             }
             result = false;
         }
@@ -46,13 +46,13 @@ namespace statusengine {
 
             case AMQP_RESPONSE_NONE:
                 if (!quiet) {
-                    se->Log() << context << ": missing RPC reply type!" << LogLevel::Error;
+                    se.Log() << context << ": missing RPC reply type!" << LogLevel::Error;
                 }
                 break;
 
             case AMQP_RESPONSE_LIBRARY_EXCEPTION:
                 if (!quiet) {
-                    se->Log() << context << ": " << amqp_error_string2(x.library_error) << LogLevel::Error;
+                    se.Log() << context << ": " << amqp_error_string2(x.library_error) << LogLevel::Error;
                 }
                 break;
 
@@ -61,7 +61,7 @@ namespace statusengine {
                     case AMQP_CONNECTION_CLOSE_METHOD: {
                         amqp_connection_close_t *m = (amqp_connection_close_t *)x.reply.decoded;
                         if (!quiet) {
-                            se->Log() << context << ": server connection error " << m->reply_code << ", message: "
+                            se.Log() << context << ": server connection error " << m->reply_code << ", message: "
                                       << std::string(reinterpret_cast<char *>(m->reply_text.bytes),
                                                      static_cast<int>(m->reply_text.len))
                                       << LogLevel::Error;
@@ -71,7 +71,7 @@ namespace statusengine {
                     case AMQP_CHANNEL_CLOSE_METHOD: {
                         amqp_channel_close_t *m = (amqp_channel_close_t *)x.reply.decoded;
                         if (!quiet) {
-                            se->Log() << context << ": server channel error " << m->reply_code << ", message: "
+                            se.Log() << context << ": server channel error " << m->reply_code << ", message: "
                                       << std::string(reinterpret_cast<char *>(m->reply_text.bytes),
                                                      static_cast<int>(m->reply_text.len))
                                       << LogLevel::Error;
@@ -80,7 +80,7 @@ namespace statusengine {
                     }
                     default:
                         if (!quiet) {
-                            se->Log() << context << ": unknown server error, method id " << x.reply.id
+                            se.Log() << context << ": unknown server error, method id " << x.reply.id
                                       << LogLevel::Error;
                         }
                         break;
@@ -108,7 +108,7 @@ namespace statusengine {
             if (cfg->SSLCacert != "") {
                 if (!amqp_ssl_socket_set_cacert(socket, cfg->SSLCacert.c_str())) {
                     if (!quiet) {
-                        se->Log() << "Could not set ssl ca for rabbitmq connection" << LogLevel::Error;
+                        se.Log() << "Could not set ssl ca for rabbitmq connection" << LogLevel::Error;
                     }
                     return false;
                 }
@@ -116,20 +116,20 @@ namespace statusengine {
             if (cfg->SSLCert != "") {
                 if (cfg->SSLKey == "") {
                     if (!quiet) {
-                        se->Log() << "Please specify an ssl key for rabbitmq connection" << LogLevel::Error;
+                        se.Log() << "Please specify an ssl key for rabbitmq connection" << LogLevel::Error;
                     }
                     return false;
                 }
                 if (!amqp_ssl_socket_set_key(socket, cfg->SSLCert.c_str(), cfg->SSLKey.c_str())) {
                     if (!quiet) {
-                        se->Log() << "Could not set ssl cert and key for rabbitmq connection" << LogLevel::Error;
+                        se.Log() << "Could not set ssl cert and key for rabbitmq connection" << LogLevel::Error;
                     }
                     return false;
                 }
             }
             else if (cfg->SSLKey != "") {
                 if (!quiet) {
-                    se->Log() << "Please specify an ssl cert for rabbitmq connection" << LogLevel::Error;
+                    se.Log() << "Please specify an ssl cert for rabbitmq connection" << LogLevel::Error;
                 }
                 return false;
             }
@@ -140,7 +140,7 @@ namespace statusengine {
 
         if (socket == nullptr) {
             if (!quiet) {
-                se->Log() << "Could not create amqp (rabbitmq) socket" << LogLevel::Error;
+                se.Log() << "Could not create amqp (rabbitmq) socket" << LogLevel::Error;
             }
             return false;
         }
@@ -148,7 +148,7 @@ namespace statusengine {
         auto socketStatus = amqp_socket_open_noblock(socket, cfg->Hostname.c_str(), cfg->Port, &cfg->Timeout);
         if (socketStatus != AMQP_STATUS_OK) {
             if (!quiet) {
-                se->Log() << "Could not connect to rabbitmq: " << socketStatus << LogLevel::Error;
+                se.Log() << "Could not connect to rabbitmq: " << socketStatus << LogLevel::Error;
             }
             return false;
         }
@@ -198,7 +198,7 @@ namespace statusengine {
         }
 
         connected = true;
-        se->Log() << "Rabbitmq (re)connected" << LogLevel::Info;
+        se.Log() << "Rabbitmq (re)connected" << LogLevel::Info;
         return true;
     }
 
@@ -216,7 +216,7 @@ namespace statusengine {
             free(bytes);
             if (pubStatus < 0) {
                 connected = false;
-                se->Log() << "Could not send message to rabbitmq: " << amqp_error_string2(pubStatus) << LogLevel::Error;
+                se.Log() << "Could not send message to rabbitmq: " << amqp_error_string2(pubStatus) << LogLevel::Error;
                 CloseConnection(true);
             }
         }
@@ -244,7 +244,7 @@ namespace statusengine {
             queue = workerQueueNameReverse.at(queueName);
         }
         catch (std::out_of_range &oor) {
-            se->Log() << "Received message for unknown queue: " << queueName << LogLevel::Info;
+            se.Log() << "Received message for unknown queue: " << queueName << LogLevel::Info;
             amqp_destroy_envelope(&envelope);
             return false;
         }

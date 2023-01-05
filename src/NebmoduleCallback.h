@@ -31,7 +31,7 @@ namespace statusengine {
         NEBCallbackType cbType;
     };
 
-    template <typename N, typename D, NEBCallbackType CBT, Queue queue>
+    template <typename Nebtype, typename Desttype, NEBCallbackType CBT, Queue queue>
     class StandardCallback : public NebmoduleCallback {
     public:
         explicit StandardCallback(IStatusengine &se) : NebmoduleCallback(CBT, se) {
@@ -42,8 +42,8 @@ namespace statusengine {
                 : NebmoduleCallback::NebmoduleCallback(std::move(other)), qHandler(std::move(other.qHandler)) {}
 
         void Callback(int, void *data) override {
-            auto nData = reinterpret_cast<N *>(data);
-            D dData(nData);
+            auto nData = reinterpret_cast<Nebtype *>(data);
+            Desttype dData(se.GetNebmodule(), nData);
             qHandler->SendMessage(dData);
         }
 
@@ -82,7 +82,7 @@ namespace statusengine {
 
             if (data->type == NEBTYPE_SERVICECHECK_PROCESSED) {
                 if (servicechecks || ocsp) {
-                    NagiosServiceCheckData checkData(data);
+                    NagiosServiceCheckData checkData(se.GetNebmodule(), data);
                     ;
                     if (servicechecks) {
                         serviceCheckHandler->SendMessage(checkData);
@@ -92,7 +92,7 @@ namespace statusengine {
                     }
                 }
                 if (service_perfdata && temp_service->process_performance_data != 0) {
-                    NagiosServiceCheckPerfData checkPerfData(data);
+                    NagiosServiceCheckPerfData checkPerfData(se.GetNebmodule(), data);
                     servicePerfHandler->SendMessage(checkPerfData);
                 }
             }
@@ -134,7 +134,7 @@ namespace statusengine {
             if (data->type == NEBTYPE_PROCESS_START) {
                 se.InitEventCallbacks();
                 if (restartData) {
-                    NagiosObject msgObj;
+                    NagiosObject msgObj(se.GetNebmodule());
                     msgObj.SetData("object_type", static_cast<int>(NEBTYPE_PROCESS_RESTART));
                     restartHandler->SendMessage(msgObj);
                 }
@@ -152,7 +152,7 @@ namespace statusengine {
                     else {
                         delay = check_interval - (now - temp_host->last_check);
                     }
-                    Nebmodule::Instance().ScheduleHostCheckDelay(temp_host, delay);
+                    se.GetNebmodule().ScheduleHostCheckDelay(temp_host, delay);
                 }
 
                 for (auto temp_service = service_list; temp_service != nullptr; temp_service = temp_service->next) {
@@ -165,13 +165,13 @@ namespace statusengine {
                     else {
                         delay = check_interval - (now - temp_service->last_check);
                     }
-                    Nebmodule::Instance().ScheduleServiceCheckDelay(temp_service, delay);
+                    se.GetNebmodule().ScheduleServiceCheckDelay(temp_service, delay);
                 }
                 se.Log() << "Reschedule complete" << LogLevel::Info;
             }
 
             if (processData) {
-                NagiosProcessData processDataMsg(data);
+                NagiosProcessData processDataMsg(se.GetNebmodule(), data);
                 processHandler->SendMessage(processDataMsg);
             }
         }
@@ -208,7 +208,7 @@ namespace statusengine {
             auto data = reinterpret_cast<nebstruct_host_check_data *>(vdata);
 
             if (data->type == NEBTYPE_HOSTCHECK_PROCESSED) {
-                NagiosHostCheckData checkData(data);
+                NagiosHostCheckData checkData(se.GetNebmodule(), data);
                 if (hostchecks) {
                     hostCheckHandler->SendMessage(checkData);
                 }
