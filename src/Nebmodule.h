@@ -2,8 +2,8 @@
 
 #include <string>
 #include <uchardet.h>
-#include <INebmodule.h>
 
+#include "INebmodule.h"
 
 namespace statusengine {
 
@@ -46,9 +46,3 @@ namespace statusengine {
 } // namespace statusengine
 
 int nebmodule_callback(int event_type, void *data);
-
-#ifndef BUILD_NAGIOS
-void nebmodule_event_callback(struct nm_event_execution_properties *properties);
-#else
-void nebmodule_event_callback(statusengine::EventCallback *ecb);
-#endif // BUILD_NAGIOS

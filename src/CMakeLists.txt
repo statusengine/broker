@@ -1,5 +1,11 @@
 file(GLOB STATUSENGINE_SOURCES *.cpp)
 
+if(BUILD_NAGIOS)
+    list(REMOVE_ITEM STATUSENGINE_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/NebmoduleNaemon.cpp)
+else()
+    list(REMOVE_ITEM STATUSENGINE_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/NebmoduleNagios.cpp)
+endif()
+
 add_library(statusengine SHARED ${STATUSENGINE_SOURCES})
 
 add_subdirectory(MessageHandler)
