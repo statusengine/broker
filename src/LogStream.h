@@ -23,22 +23,6 @@ namespace statusengine {
             return *this;
         }
 
-/*
-        LogStream &operator<<(const char *o) {
-            ss << o;
-            return *this;
-        }
-
-        LogStream &operator<<(const std::string o) {
-            ss << o;
-            return *this;
-        }
-
-        LogStream &operator<<(const bool o) {
-            ss << o;
-            return *this;
-        }
-*/
         LogStream &operator<<(const short o) {
             ss << o;
             return *this;
