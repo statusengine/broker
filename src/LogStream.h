@@ -4,7 +4,7 @@
 #include <string_view>
 
 #include "Utility.h"
-#include "Nebmodule.h"
+#include "INebmodule.h"
 
 namespace statusengine {
     enum class LogLevel { Info, Warning, Error };

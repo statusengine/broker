@@ -5,7 +5,7 @@
 #include <memory>
 #include <vector>
 
-#include "Nebmodule.h"
+#include "INebmodule.h"
 #include "IStatusengine.h"
 
 #include "EventCallback.h"

@@ -7,7 +7,7 @@
 #include "MessageHandler/MessageHandlerList.h"
 #include "NebmoduleCallback.h"
 #include "NagiosObject.h"
-#include "Nebmodule.h"
+#include "INebmodule.h"
 #include "Utility.h"
 
 namespace statusengine {

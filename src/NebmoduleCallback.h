@@ -3,7 +3,7 @@
 #include <memory>
 #include <ctime>
 
-#include "Nebmodule.h"
+#include "INebmodule.h"
 #include "IStatusengine.h"
 #include "MessageHandler/IMessageHandler.h"
 #include "NagiosObject.h"

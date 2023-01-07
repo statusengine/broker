@@ -4,7 +4,7 @@
 
 #include <json.h>
 
-#include "Nebmodule.h"
+#include "INebmodule.h"
 
 
 namespace statusengine {
