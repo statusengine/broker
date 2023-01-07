@@ -12,10 +12,6 @@ namespace statusengine {
         explicit Nebmodule(Neb_NebmodulePtr handle, std::string args);
         virtual ~Nebmodule();
 
-        int Init(nebmodule *handle, std::string args);
-
-        int Deinit(int reason);
-
         int Callback(int event_type, void *data);
 
         bool RegisterCallback(NEBCallbackType cbType);
