@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.11)
 
-set(CMAKE_CXX_STANDARD 11 CACHE STRING "The C++ standard to use")
+set(CMAKE_CXX_STANDARD 17 CACHE STRING "The C++ standard to use")
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -82,6 +82,15 @@ if(NOT toml11_POPULATED)
 endif()
 
 set(STATUSENGINE_INCLUDES ${toml11_SOURCE_DIR} ${toml11_SOURCE_DIR}/toml ${STATUSENGINE_INCLUDES})
+
+FetchContent_Declare(
+  wise_enum
+  GIT_REPOSITORY https://github.com/quicknir/wise_enum.git
+  GIT_TAG        3.0.0
+)
+FetchContent_GetProperties(wise_enum)
+FetchContent_MakeAvailable(wise_enum)
+set(STATUSENGINE_INCLUDES ${wise_enum_SOURCE_DIR} ${STATUSENGINE_INCLUDES})
 
 if(MSVC)
   add_compile_options(/W4 /WX)

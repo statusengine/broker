@@ -8,6 +8,7 @@
 #include <utility>
 #include <map>
 #include <toml.hpp>
+#include <wise_enum.h>
 
 #include "Queue.h"
 #include "IStatusengine.h"
@@ -19,11 +20,10 @@ namespace statusengine {
 
         bool InitLoad(const toml::table &tbl) {
             for (auto &tableEntry : tbl) {
-                auto QueueName = QueueNameHandler::Instance().QueueNames();
-                auto qName = QueueName.find(tableEntry.first);
-                if (qName != QueueName.end()) {
+                auto qName = wise_enum::from_string<Queue>(std::string(tableEntry.first).c_str());
+                if (qName.has_value()) {
                     try {
-                        (*queues)[qName->second] = toml::get<std::string>(tableEntry.second);
+                        (*queues)[qName.value()] = toml::get<std::string>(tableEntry.second);
                     }
                     catch (const toml::type_error &tte) {
                         se.Log() << "Invalid configuration: Invalid value for key " << tableEntry.first << LogLevel::Error;
@@ -31,11 +31,10 @@ namespace statusengine {
                     }
                 }
                 else {
-                    auto WorkerQueueName = QueueNameHandler::Instance().WorkerQueueNames();
-                    auto wqName = WorkerQueueName.find(tableEntry.first);
-                    if (wqName != WorkerQueueName.end()) {
+                    auto wqName = wise_enum::from_string<WorkerQueue>(std::string(tableEntry.first).c_str());
+                    if (wqName.has_value()) {
                         try {
-                            (*workerQueues)[wqName->second] = toml::get<std::string>(tableEntry.second);
+                            (*workerQueues)[wqName.value()] = toml::get<std::string>(tableEntry.second);
                         }
                         catch (const toml::type_error &tte) {
                             se.Log() << "Invalid configuration: Invalid value for key " << tableEntry.first
@@ -241,13 +240,12 @@ namespace statusengine {
             }
 
             try {
-                auto QueueName = QueueNameHandler::Instance().QueueNames();
                 std::vector<std::string> bulkQueueList = toml::get<std::vector<std::string>>(bulkTable.at("Queues"));
                 for (auto &bulkQueueItem : bulkQueueList) {
-                    try {
-                        bulkQueues.insert(QueueName.at(bulkQueueItem));
-                    }
-                    catch (std::out_of_range &oor) {
+                    auto queue = wise_enum::from_string<Queue>(bulkQueueItem.c_str());
+                    if (queue.has_value()) {
+                        bulkQueues.insert(queue.value());
+                    } else {
                         se.Log() << "Invalid configuration: Bulk::Queues contains an unknown queue identifier: " << bulkQueueItem << LogLevel::Error;
                         return false;
                     }

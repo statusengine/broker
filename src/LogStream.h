@@ -1,6 +1,7 @@
 #pragma once
 
 #include <sstream>
+#include <string_view>
 
 #include "Utility.h"
 #include "Nebmodule.h"
@@ -17,7 +18,18 @@ namespace statusengine {
 
         ~LogStream() = default;
 
+        LogStream &operator<<(std::string_view o) {
+            ss << o;
+            return *this;
+        }
+
+/*
         LogStream &operator<<(const char *o) {
+            ss << o;
+            return *this;
+        }
+
+        LogStream &operator<<(const std::string o) {
             ss << o;
             return *this;
         }
@@ -26,7 +38,7 @@ namespace statusengine {
             ss << o;
             return *this;
         }
-
+*/
         LogStream &operator<<(const short o) {
             ss << o;
             return *this;
@@ -78,11 +90,6 @@ namespace statusengine {
         }
 
         LogStream &operator<<(const long double o) {
-            ss << o;
-            return *this;
-        }
-
-        LogStream &operator<<(const std::string o) {
             ss << o;
             return *this;
         }

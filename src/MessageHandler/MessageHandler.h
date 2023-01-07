@@ -42,7 +42,7 @@ namespace statusengine {
         }
 
         void ProcessMessage(WorkerQueue workerQueue, json_object *obj) override {
-            if (workerQueue == WorkerQueue::OCHP) {
+            if (workerQueue == WorkerQueue::WorkerOCHP) {
                 json_object *messages;
                 if(json_object_object_get_ex(obj, "messages", &messages)) {
                     if (!json_object_is_type(messages, json_type_array)) {
@@ -52,7 +52,7 @@ namespace statusengine {
                         long unsigned int arrLen = json_object_array_length(messages);
                         for (long unsigned int i = 0; i < arrLen; i++) {
                             json_object *arrObj = json_object_array_get_idx(messages, i);
-                            ProcessMessage(WorkerQueue::OCHP, arrObj);
+                            ProcessMessage(WorkerQueue::WorkerOCHP, arrObj);
                         }
                     }
                 }
@@ -67,7 +67,7 @@ namespace statusengine {
                     }
                 }
             }
-            else if (workerQueue == WorkerQueue::OCSP) {
+            else if (workerQueue == WorkerQueue::WorkerOCSP) {
                 json_object *messages;
                 if(json_object_object_get_ex(obj, "messages", &messages)) {
                     if (!json_object_is_type(messages, json_type_array)) {
@@ -77,7 +77,7 @@ namespace statusengine {
                         long unsigned int arrLen = json_object_array_length(messages);
                         for (long unsigned int i = 0; i < arrLen; i++) {
                             json_object *arrObj = json_object_array_get_idx(messages, i);
-                            ProcessMessage(WorkerQueue::OCSP, arrObj);
+                            ProcessMessage(WorkerQueue::WorkerOCSP, arrObj);
                         }
                     }
                 }
@@ -92,7 +92,7 @@ namespace statusengine {
                     }
                 }
             }
-            else if (workerQueue == WorkerQueue::Command) {
+            else if (workerQueue == WorkerQueue::WorkerCommand) {
                 std::string command;
                 json_object *data = nullptr;
                 bool haveCommand = false, haveData = false, haveList = false;
@@ -115,7 +115,7 @@ namespace statusengine {
                             long unsigned int arrLen = json_object_array_length(jsonValue);
                             for (long unsigned int i = 0; i < arrLen; i++) {
                                 json_object *arrObj = json_object_array_get_idx(jsonValue, i);
-                                ProcessMessage(WorkerQueue::Command, arrObj);
+                                ProcessMessage(WorkerQueue::WorkerCommand, arrObj);
                             }
                         }
                         haveList = true;
@@ -388,9 +388,8 @@ namespace statusengine {
                     handler->SendMessage(queue, msg);
                 }
 
-                auto QueueId = QueueNameHandler::Instance().QueueIds();
                 se.Log() << "Sent bulk message (" << bulkMessages.size() << ") for queue "
-                         << QueueId.at(queue) << LogLevel::Info;
+                         << wise_enum::to_string(queue) << LogLevel::Info;
 
                 clearContainer<>(&bulkMessages);
             }
