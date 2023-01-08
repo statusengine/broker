@@ -10,6 +10,8 @@ option(WITH_RABBITMQ "enable rabbitmq" OFF)
 option(NAGIOS_INCLUDE_DIR "path to nagios include dir" OFF)
 option(NAEMON_INCLUDE_DIR "path to naemon include dir" OFF)
 option(ENABLE_TESTS "enable testing" OFF)
+option(NAEMON_CORE_BUILD "built naemon as external dependency" OFF)
+option(NAEMON_CORE_BUILD_VERSION "set version of naemon to build" "v1.4.0")
 
 if(${CMAKE_VERSION} VERSION_LESS 3.14)
     macro(FetchContent_MakeAvailable NAME)
@@ -48,25 +50,45 @@ if(WITH_RABBITMQ)
     add_definitions(-DWITH_RABBITMQ)
 endif()
 
-if(NAGIOS_INCLUDE_DIR)
-  set(STATUSENGINE_INCLUDES ${NAGIOS_INCLUDE_DIR} ${STATUSENGINE_INCLUDES})
-endif()
+if(NOT NAEMON_CORE_BUILD)
+  if(NAGIOS_INCLUDE_DIR)
+    set(STATUSENGINE_INCLUDES ${NAGIOS_INCLUDE_DIR} ${STATUSENGINE_INCLUDES})
+  endif()
 
-if(NAEMON_INCLUDE_DIR)
-  set(STATUSENGINE_INCLUDES ${NAEMON_INCLUDE_DIR} ${STATUSENGINE_INCLUDES})
-endif()
+  if(NAEMON_INCLUDE_DIR)
+    set(STATUSENGINE_INCLUDES ${NAEMON_INCLUDE_DIR} ${STATUSENGINE_INCLUDES})
+  endif()
 
-if(NOT NAGIOS_INCLUDE_DIR AND NOT NAEMON_INCLUDE_DIR)
-    pkg_check_modules(NAEMON REQUIRED naemon)
-    set(STATUSENGINE_INCLUDES ${NAEMON_INCLUDE_DIRS} ${STATUSENGINE_INCLUDES})
+  if(NOT NAGIOS_INCLUDE_DIR AND NOT NAEMON_INCLUDE_DIR)
+      pkg_check_modules(NAEMON REQUIRED naemon)
+      set(STATUSENGINE_LIBS ${NAEMON_LIBRARIES} ${STATUSENGINE_LIBS})
+      set(STATUSENGINE_INCLUDES ${NAEMON_INCLUDE_DIRS} ${STATUSENGINE_INCLUDES})
+  endif()
 endif()
 
 if(NOT NAGIOS_INCLUDE_DIR)
-    pkg_check_modules(GLIB2 REQUIRED glib-2.0)
-    set(STATUSENGINE_LIBS ${GLIB2_LIBRARIES} ${STATUSENGINE_LIBS})
-    set(STATUSENGINE_INCLUDES ${GLIB2_INCLUDE_DIRS} ${STATUSENGINE_INCLUDES})
+  pkg_check_modules(GLIB2 REQUIRED glib-2.0)
+  set(STATUSENGINE_LIBS ${GLIB2_LIBRARIES} ${STATUSENGINE_LIBS})
+  set(STATUSENGINE_INCLUDES ${GLIB2_INCLUDE_DIRS} ${STATUSENGINE_INCLUDES})
 endif()
 
+if(NAEMON_CORE_BUILD)
+  include(ExternalProject)
+  ExternalProject_Add(
+    naemon-core
+    GIT_REPOSITORY https://github.com/naemon/naemon-core.git
+    GIT_TAG ${NAEMON_CORE_BUILD_VERSION}
+    UPDATE_COMMAND ""
+    CONFIGURE_COMMAND ./autogen.sh --prefix=<INSTALL_DIR>
+    BUILD_COMMAND make -j
+    INSTALL_COMMAND make install
+    BUILD_IN_SOURCE true
+  )
+  ExternalProject_Get_Property(naemon-core INSTALL_DIR)
+  link_directories(${INSTALL_DIR}/lib)
+  set(STATUSENGINE_LIBS naemon ${STATUSENGINE_LIBS})
+  set(STATUSENGINE_INCLUDES ${INSTALL_DIR}/usr/local/include/ ${STATUSENGINE_INCLUDES})
+endif()
 
 set(toml11_BUILD_TEST OFF CACHE INTERNAL "")
 FetchContent_Declare(

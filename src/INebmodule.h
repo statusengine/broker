@@ -37,6 +37,7 @@ namespace statusengine
     class INebmodule
     {
     public:
+        virtual void Init() = 0;
         virtual int Callback(int event_type, void *data) = 0;
         virtual bool RegisterCallback(NEBCallbackType cbType) = 0;
         virtual void RegisterEventCallback(EventCallback *ecb) = 0;

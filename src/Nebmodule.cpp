@@ -15,15 +15,18 @@ NEB_API_VERSION(CURRENT_NEB_API_VERSION)
 namespace statusengine {
 
     Nebmodule::Nebmodule(Neb_NebmodulePtr handle, std::string args) : handle(handle) {
-        se = new Statusengine(*this, std::move(args));
         uc = uchardet_new();
-        se->Init();
+        se = new Statusengine(*this, std::move(args));
     }
 
     Nebmodule::~Nebmodule() {
         delete se;
         uchardet_delete(uc);
         uc = nullptr;
+    }
+
+    void Nebmodule::Init() {
+        se->Init();
     }
 
     int Nebmodule::Callback(int event_type, void *data) {
@@ -82,6 +85,7 @@ static statusengine::INebmodulePtr instance;
 extern "C" int nebmodule_init(int, char *args, nebmodule *handle) {
     try {
         instance = std::make_shared<statusengine::Nebmodule>(handle, std::string(args));
+        instance->Init();
         return 0;
     } catch (const statusengine::StatusengineException &e) {
         return 1;
