@@ -117,7 +117,7 @@ namespace statusengine {
     }
 
     Statusengine::~Statusengine() {
-        Log() << "unloading..." << LogLevel::Info;
+        ls << "unloading..." << LogLevel::Info;
         neb_deregister_module_callbacks(neb.GetNebNebmodulePtr());
         callbacks.clear();
         delete bulkCallback;
@@ -125,7 +125,7 @@ namespace statusengine {
         delete configuration;
         delete messageHandler;
 
-        Log() << "unloading finished" << LogLevel::Info;
+        ls << "unloading finished" << LogLevel::Info;
     }
 
     void Statusengine::InitEventCallbacks() {
