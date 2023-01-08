@@ -11,7 +11,6 @@
 #include "../IStatusengine.h"
 #include "IMessageHandler.h"
 #include "../Utility.h"
-#include "../gsl.h"
 
 
 namespace statusengine {
