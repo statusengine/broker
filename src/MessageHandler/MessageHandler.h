@@ -314,7 +314,7 @@ namespace statusengine {
         inline static void ParseRaw(json_object *obj) {
             auto cmd = get_json_string(obj);
             process_external_command1(cmd);
-            delete[] cmd;
+            free(cmd);
         }
     };
 
