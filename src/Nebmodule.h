@@ -4,6 +4,7 @@
 #include <uchardet.h>
 
 #include "INebmodule.h"
+#include "IStatusengine.h"
 
 namespace statusengine {
 
@@ -32,12 +33,16 @@ namespace statusengine {
 
         std::string EncodeString(char *data) override;
 
-        Neb_NebmodulePtr GetNebNebmodulePtr() override; 
+        Neb_NebmodulePtr GetNebNebmodulePtr() override;
+
+        IStatusengine& GetStatusengine() {
+          return *se;
+        };
 
       private:
         explicit Nebmodule() : se(nullptr), uc(nullptr) {}
 
-        Statusengine *se;
+        IStatusengine *se;
         uchardet_t uc;
         Neb_NebmodulePtr handle;
     };

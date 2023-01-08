@@ -1,7 +1,7 @@
 #include "GearmanClient.h"
 
-#include "Configuration.h"
-#include "Utility.h"
+#include "../Configuration.h"
+#include "../Utility.h"
 
 #include <iostream>
 

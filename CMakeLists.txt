@@ -12,6 +12,7 @@ option(NAEMON_INCLUDE_DIR "path to naemon include dir" OFF)
 option(ENABLE_TESTS "enable testing" OFF)
 option(NAEMON_CORE_BUILD "built naemon as external dependency" OFF)
 option(NAEMON_CORE_BUILD_VERSION "set version of naemon to build" "v1.4.0")
+option(ENABLE_CLANG_TIDY "enable clang tidy for build" OFF)
 
 if(${CMAKE_VERSION} VERSION_LESS 3.14)
     macro(FetchContent_MakeAvailable NAME)
@@ -87,7 +88,7 @@ if(NAEMON_CORE_BUILD)
   ExternalProject_Get_Property(naemon-core INSTALL_DIR)
   link_directories(${INSTALL_DIR}/lib)
   set(STATUSENGINE_LIBS naemon ${STATUSENGINE_LIBS})
-  set(STATUSENGINE_INCLUDES ${INSTALL_DIR}/usr/local/include/ ${STATUSENGINE_INCLUDES})
+  set(STATUSENGINE_INCLUDES ${INSTALL_DIR}/include/ ${STATUSENGINE_INCLUDES})
 endif()
 
 set(toml11_BUILD_TEST OFF CACHE INTERNAL "")
@@ -132,10 +133,37 @@ FetchContent_MakeAvailable(googletest)
 
 set(STATUSENGINE_INCLUDES ${toml11_SOURCE_DIR} ${toml11_SOURCE_DIR}/toml ${STATUSENGINE_INCLUDES})
 
+add_library(statusengine SHARED)
+add_dependencies(statusengine naemon-core)
 add_subdirectory(src)
+target_link_libraries(statusengine PRIVATE ${STATUSENGINE_LIBS})
+target_include_directories(statusengine SYSTEM PRIVATE ${STATUSENGINE_INCLUDES})
+target_include_directories(statusengine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 if(ENABLE_TESTS)
   enable_testing(true)
   include(CTest)
   add_subdirectory(tests)
+endif()
+
+if(ENABLE_CLANG_TIDY)
+    find_program(CLANG_TIDY_COMMAND NAMES clang-tidy)
+
+    if(NOT CLANG_TIDY_COMMAND)
+        message(WARNING "🔴 CMake_RUN_CLANG_TIDY is ON but clang-tidy is not found!")
+        set(CMAKE_CXX_CLANG_TIDY "" CACHE STRING "" FORCE)
+    else()
+        message(STATUS "🟢 CMake_RUN_CLANG_TIDY is ON")
+        set(CLANGTIDY_EXTRA_ARGS
+            "-extra-arg=-Wno-unknown-warning-option"
+    )
+    endif()
+
+    set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_COMMAND};-p=${CMAKE_BINARY_DIR};${CLANGTIDY_EXTRA_ARGS}" CACHE STRING "" FORCE)
+
+    add_custom_target(clang-tidy
+      COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target ${CMAKE_PROJECT_NAME}
+      COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target clang-tidy
+      COMMENT "Running clang-tidy..."
+    )
 endif()

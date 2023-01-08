@@ -23,7 +23,7 @@ namespace statusengine {
         inline static char *get_json_string(json_object *obj) {
             auto jsonChars = json_object_get_string(obj);
             auto jsonCharsLen = json_object_get_string_len(obj);
-            char *chars = new char[jsonCharsLen + 1];
+            char* chars = static_cast<char*>(malloc(jsonCharsLen+1));
             std::strncpy(chars, jsonChars, jsonCharsLen);
             chars[jsonCharsLen] = 0; // set last byte to zero
             return chars;
@@ -154,7 +154,6 @@ namespace statusengine {
             char *output = nullptr;
             char *longOutput = nullptr;
             char *perfData = nullptr;
-            char *fullOutput = nullptr;
 
             json_object_object_foreach(obj, cKey, jsonValue) {
                 std::string jsonKey(cKey);
@@ -196,35 +195,22 @@ namespace statusengine {
                 }
             }
 
-            if (output != nullptr && longOutput == nullptr) {
-                if (perfData == nullptr) {
-                    cr.output = output;
-                } else {
-                    // we need a new string with size of strings + pipe + newline + zero byte
-                    auto strLen = std::strlen(output) + std::strlen(perfData) + 3;
-                    fullOutput = new char[strLen];
-                    std::snprintf(fullOutput, strLen, "%s|%s\n", output, perfData);
-                    cr.output = fullOutput;
-                }
+            std::stringstream fullOutput;
+            if (output != nullptr) {
+                fullOutput << output;
             }
-            else if (output != nullptr && longOutput != nullptr) {
-                if (perfData == nullptr) {
-                    // we need a new string with size of strings + newline + zero byte
-                    auto strLen = std::strlen(output) + std::strlen(longOutput) + 2;
-                    fullOutput = new char[strLen];
-                    std::snprintf(fullOutput, strLen, "%s\n%s", output, longOutput);
-                    cr.output = fullOutput;
-                } else {
-                    // we need a new string with size of strings + pipe + newline + zero byte
-                    auto strLen = std::strlen(output) + std::strlen(longOutput) + std::strlen(perfData) + 3;
-                    fullOutput = new char[strLen];
-                    std::snprintf(fullOutput, strLen, "%s|%s\n%s", output, perfData, longOutput);
-                    cr.output = fullOutput;
-                }
+            if (longOutput != nullptr) {
+                if (output != nullptr)
+                    fullOutput << "\n";
+                fullOutput << longOutput;
             }
-            else if (longOutput != nullptr && output == nullptr) {
-                cr.output = longOutput;
+            if (perfData != nullptr) {
+                fullOutput << "|" << perfData;
             }
+            auto outputStr = fullOutput.str();
+            cr.output = static_cast<char *>(malloc(outputStr.size()+1));
+            std::strncpy(cr.output, outputStr.c_str(), outputStr.size());
+            cr.output[outputStr.size()] = 0;
 
             if (cr.host_name == nullptr) {
                 se.Log() << "Received hostcheck without host_name" << LogLevel::Warning;
@@ -243,29 +229,23 @@ namespace statusengine {
 
             // deletes hostname, service_description and output
             free_check_result(&cr);
-            if (fullOutput != nullptr) {
-                // free_check_result only frees fulloutput in this case
-                delete output;
-                delete longOutput;
-                delete perfData;
-            }
+            free(output);
+            free(longOutput);
+            free(perfData);
         }
 
         void ParseScheduleCheck(json_object *obj) {
-            const char *hostname = nullptr;
-            const char *service_description = nullptr;
+            std::unique_ptr<const char*> hostname;
+            std::unique_ptr<const char*> service_description;
             time_t schedule_time = 0;
-            auto _ = gsl::finally([&] {
-                delete[] hostname;
-                delete[] service_description;
-            });
+
             json_object_object_foreach(obj, cKey, jsonValue) {
                 std::string jsonKey(cKey);
                 if (jsonKey.compare("host_name") == 0) {
-                    hostname = get_json_string(jsonValue);
+                    hostname = std::make_unique<const char*>(get_json_string(jsonValue));
                 }
                 else if (jsonKey.compare("service_description") == 0) {
-                    service_description = get_json_string(jsonValue);
+                    service_description = std::make_unique<const char*>(get_json_string(jsonValue));
                 }
                 else if (jsonKey.compare("schedule_time") == 0) {
                     schedule_time = json_object_get_int64(jsonValue);
@@ -278,17 +258,17 @@ namespace statusengine {
             }
 
             if (service_description == nullptr) {
-                host *temp_host = find_host(hostname);
+                host *temp_host = find_host(*hostname);
                 if (temp_host == nullptr) {
-                    se.Log() << "Received schedule_check command for unknown host " << hostname << LogLevel::Warning;
+                    se.Log() << "Received schedule_check command for unknown host " << *hostname << LogLevel::Warning;
                     return;
                 }
                 se.GetNebmodule().ScheduleHostCheckFixed(temp_host, schedule_time);
             }
             else {
-                service *temp_service = find_service(hostname, service_description);
+                service *temp_service = find_service(*hostname, *service_description);
                 if (temp_service == nullptr) {
-                    se.Log() << "Received schedule_check command for unknown service " << service_description
+                    se.Log() << "Received schedule_check command for unknown service " << *service_description
                               << LogLevel::Warning;
                     return;
                 }
@@ -297,23 +277,19 @@ namespace statusengine {
         }
 
         void ParseDeleteDowntime(json_object *obj) {
-            const char *hostname = nullptr;
-            const char *service_description = nullptr;
+            std::unique_ptr<const char*> hostname;
+            std::unique_ptr<const char*> service_description;
+            std::unique_ptr<const char*> comment;
             time_t start_time = 0;
             time_t end_time = 0;
-            const char *comment = nullptr;
-            auto _ = gsl::finally([&] {
-                delete[] hostname;
-                delete[] service_description;
-                delete[] comment;
-            });
+
             json_object_object_foreach(obj, cKey, jsonValue) {
                 std::string jsonKey(cKey);
                 if (jsonKey.compare("host_name") == 0) {
-                    hostname = get_json_string(jsonValue);
+                    hostname = std::make_unique<const char*>(get_json_string(jsonValue));
                 }
                 else if (jsonKey.compare("service_description") == 0) {
-                    service_description = get_json_string(jsonValue);
+                    service_description = std::make_unique<const char*>(get_json_string(jsonValue));
                 }
                 else if (jsonKey.compare("start_time") == 0) {
                     start_time = json_object_get_int64(jsonValue);
@@ -322,7 +298,7 @@ namespace statusengine {
                     end_time = json_object_get_int64(jsonValue);
                 }
                 else if (jsonKey.compare("comment") == 0) {
-                    comment = get_json_string(jsonValue);
+                    comment = std::make_unique<const char*>(get_json_string(jsonValue));
                 }
             }
 
@@ -333,7 +309,7 @@ namespace statusengine {
                 }
             }
 
-            se.GetNebmodule().DeleteDowntime(hostname, service_description, start_time, end_time, comment);
+            se.GetNebmodule().DeleteDowntime(*hostname, *service_description, start_time, end_time, *comment);
         }
 
         inline static void ParseRaw(json_object *obj) {

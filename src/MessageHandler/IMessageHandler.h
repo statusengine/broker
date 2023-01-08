@@ -3,8 +3,8 @@
 #include <json.h>
 #include <memory>
 
-#include "Queue.h"
-#include "NagiosObject.h"
+#include "../Queue.h"
+#include "../NagiosObject.h"
 
 
 namespace statusengine {

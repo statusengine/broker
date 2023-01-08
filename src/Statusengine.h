@@ -23,7 +23,7 @@ namespace statusengine {
         Statusengine(Statusengine &&Statusengine) = delete;
         Statusengine &operator=(const Statusengine &) = delete;
 
-        int Init();
+        int Init() override;
         void InitEventCallbacks() override;
 
         LogStream &Log() override;
@@ -62,11 +62,12 @@ namespace statusengine {
             return neb;
         }
 
+        int Callback(int event_type, void *data) override;
+
       private:
         Statusengine(INebmodule &neb, std::string configurationPath);
         ~Statusengine();
 
-        int Callback(int event_type, void *data);
 
         void SetModuleInfo(int modinfo, const std::string &text);
 

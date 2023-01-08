@@ -4,9 +4,9 @@
 #include <memory>
 #include <vector>
 
-#include "IStatusengine.h"
+#include "../IStatusengine.h"
 #include "IMessageHandler.h"
-#include "Configuration.h"
+#include "../Configuration.h"
 
 
 namespace statusengine {
