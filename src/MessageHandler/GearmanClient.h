@@ -16,7 +16,7 @@ namespace statusengine {
         bool Connect() override;
         bool Worker(unsigned long &counter) override;
 
-        void SendMessage(Queue queue, const std::string &message) override;
+        void SendMessage(Queue queue, const std::string_view message) override;
 
         virtual gearman_return_t WorkerCallback(WorkerQueue queue, gearman_job_st *job);
 

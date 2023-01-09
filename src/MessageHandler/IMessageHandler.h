@@ -2,6 +2,7 @@
 
 #include <json.h>
 #include <memory>
+#include <string_view>
 
 #include "../Queue.h"
 #include "../NagiosObject.h"
@@ -17,7 +18,7 @@ namespace statusengine {
 
         virtual bool Connect() = 0;
         virtual bool Worker(unsigned long &counter) = 0;
-        virtual void SendMessage(Queue queue, const std::string &message) = 0;
+        virtual void SendMessage(Queue queue, const std::string_view msg) = 0;
     };
 
     class IMessageQueueHandler {
@@ -25,6 +26,7 @@ namespace statusengine {
         virtual ~IMessageQueueHandler() = default;
 
         virtual void SendMessage(NagiosObject &obj) = 0;
+        virtual void SendMessage(std::string_view s) = 0;
         virtual void FlushBulkQueue() = 0;
     };
 

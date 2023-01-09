@@ -7,11 +7,12 @@
 #include "../IStatusengine.h"
 #include "IMessageHandler.h"
 #include "../Configuration.h"
+#include "IBulkMessageCounter.h"
 
 
 namespace statusengine {
 
-    class MessageHandlerList : public IMessageHandlerList {
+    class MessageHandlerList : public IMessageHandlerList, public IBulkMessageCounter {
       public:
         MessageHandlerList(IStatusengine &se, Configuration &cfg);
 
@@ -21,6 +22,12 @@ namespace statusengine {
 
         void InitComplete() override {
             flushInProgress = false;
+        }
+
+        void IncrementCounter() override {
+            if (++globalBulkCounter >= maxBulkSize) {
+                FlushBulkQueue();
+            } 
         }
 
         void FlushBulkQueue() override {

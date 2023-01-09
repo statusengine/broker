@@ -87,9 +87,9 @@ namespace statusengine {
         return true;
     }
 
-    void GearmanClient::SendMessage(Queue queue, const std::string &message) {
+    void GearmanClient::SendMessage(Queue queue, const std::string_view message) {
         auto queueName = queueNames->find(queue)->second;
-        auto ret = gearman_client_do_background(client, queueName.c_str(), nullptr, message.c_str(), message.length(),
+        auto ret = gearman_client_do_background(client, queueName.c_str(), nullptr, message.data(), message.length(),
                                                 nullptr);
         if (!gearman_success(ret)) {
             se.Log() << "Could not write message to gearman queue: " << gearman_client_error(client)

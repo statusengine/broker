@@ -17,7 +17,7 @@ namespace statusengine {
         bool Connect() override;
         bool Connect(bool quiet);
         bool Worker(unsigned long &counter) override;
-        void SendMessage(Queue queue, const std::string &message) override;
+        void SendMessage(Queue queue, const std::string_view message) override;
 
       private:
         bool CheckAMQPReply(char const *context, bool quiet = false);

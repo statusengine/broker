@@ -2,3 +2,4 @@ devtools/**
 !devtools/buildenv/**
 .vscode/**
 .git/**
+build/**

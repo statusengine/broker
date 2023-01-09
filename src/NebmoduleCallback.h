@@ -2,6 +2,8 @@
 
 #include <memory>
 #include <ctime>
+#include <rapidjson/writer.h>
+#include <rapidjson/stringbuffer.h>
 
 #include "INebmodule.h"
 #include "IStatusengine.h"
@@ -134,9 +136,13 @@ namespace statusengine {
             if (data->type == NEBTYPE_PROCESS_START) {
                 se.InitEventCallbacks();
                 if (restartData) {
-                    NagiosObject msgObj(se.GetNebmodule());
-                    msgObj.SetData("object_type", static_cast<int>(NEBTYPE_PROCESS_RESTART));
-                    restartHandler->SendMessage(msgObj);
+                    rapidjson::StringBuffer msgData;
+                    rapidjson::Writer<rapidjson::StringBuffer> msgObj(msgData);
+                    msgObj.StartObject();
+                    msgObj.Key("object_type");
+                    msgObj.Int64(NEBTYPE_PROCESS_RESTART);
+                    msgObj.EndObject();
+                    restartHandler->SendMessage(msgData.GetString());
                 }
             }
 

@@ -1,11 +1,13 @@
 #include <gtest/gtest.h>
 #include <naemon/naemon.h>
 #include <cstring>
+#include <gmock/gmock.h>
 
 #include "NagiosObject.h"
 #include "Nebmodule.h"
 #include "MessageHandler/MessageHandler.h"
 #include "Statusengine.h"
+#include "MessageHandler/IBulkMessageCounter.h"
 
 namespace statusengine {
 
@@ -85,39 +87,20 @@ TEST_F(NagiosTestSuite, NagiosHost) {
     ASSERT_NE(out.find(TARGET_HOST_NAME), std::string::npos);
 }
 
-
-/*
-                if (jsonKey.compare("host_name") == 0) {
-                    cr.host_name = get_json_string(jsonValue);
-                }
-                else if (jsonKey.compare("service_description") == 0) {
-                    cr.service_description = get_json_string(jsonValue);
-                }
-                else if (jsonKey.compare("output") == 0) {
-                    output = get_json_string(jsonValue);
-                }
-                else if (jsonKey.compare("long_output") == 0) {
-                    longOutput = get_json_string(jsonValue);
-                }
-                else if (jsonKey.compare("perf_data") == 0) {
-                    perfData = get_json_string(jsonValue);
-                }
-
-*/
-
 class FakeMessageHandler : public MessageHandler {
     public:
     FakeMessageHandler(IStatusengine &se) : MessageHandler(se) {}
 
     virtual bool Connect() {return true;};
     virtual bool Worker(unsigned long &) {return true;};
-    virtual void SendMessage(Queue, const std::string &) {};
+    virtual void SendMessage(Queue, const std::string_view) {
+    };
 };
 
 
 json_object* check_result_service() {
     json_object *obj = json_object_new_object();
-    json_object_object_add(obj, "exited_ok", json_object_new_int64(0));
+    json_object_object_add(obj, "exited_ok", json_object_new_int64(1));
     json_object_object_add(obj, "early_timeout", json_object_new_int64(0));
     json_object_object_add(obj, "start_time", json_object_new_int64(std::time(nullptr)-2));
     json_object_object_add(obj, "end_time", json_object_new_int64(std::time(nullptr)));
@@ -154,5 +137,46 @@ TEST_F(NagiosTestSuite, ParseScheduleCheckBenchmark) {
     }
     json_object_put(main);
 }
+
+/*
+class FakeBulkCounter : public IBulkMessageCounter {
+public:
+    explicit FakeBulkCounter(MessageQueueHandler &toFlush) : toFlush(toFlush) {
+
+    }
+    void IncrementCounter() override {
+        toFlush.FlushBulkQueue();
+    }
+    MessageQueueHandler &toFlush;
+};
+*/
+
+class MockBulkCounter : public IBulkMessageCounter {
+public:
+    MOCK_METHOD(void, IncrementCounter, (), (override));
+};
+
+TEST_F(NagiosTestSuite, MessageQueueHandler) {
+    Nebmodule neb(nullptr, std::string(""));
+    statusengine::IStatusengine &se = neb.GetStatusengine();
+    std::shared_ptr<IMessageHandler> handler = std::make_shared<FakeMessageHandler>(se);
+    auto msgHndl = std::make_shared<std::vector<std::shared_ptr<IMessageHandler>>>();
+    msgHndl->push_back(handler);
+    MockBulkCounter counter;
+    MessageQueueHandler qHandler(se, counter, Queue::ServiceCheck, msgHndl, true);
+    EXPECT_CALL(counter, IncrementCounter).Times(::testing::Exactly(5));
+    int i = 0;
+    ON_CALL(counter, IncrementCounter).WillByDefault([&i, &qHandler]() {
+        if (i++ % 3 == 0) {
+            qHandler.FlushBulkQueue();
+        }
+    });
+    qHandler.SendMessage("{\"this\": \"test\"}");
+    qHandler.SendMessage("{\"this\": \"test\"}");
+    qHandler.SendMessage("{\"this\": \"test\"}");
+    qHandler.SendMessage("{\"this\": \"test\"}");
+    qHandler.SendMessage("{\"this\": \"test\"}");
+}
+
 
 }

@@ -26,6 +26,7 @@ endif()
 
 find_package(PkgConfig REQUIRED)
 include(FetchContent)
+include(ExternalProject)
 
 project(
   statusengine
@@ -62,6 +63,7 @@ if(NOT NAEMON_CORE_BUILD)
 
   if(NOT NAGIOS_INCLUDE_DIR AND NOT NAEMON_INCLUDE_DIR)
       pkg_check_modules(NAEMON REQUIRED naemon)
+      link_directories(${NAEMON_LIBRARY_DIRS})
       set(STATUSENGINE_LIBS ${NAEMON_LIBRARIES} ${STATUSENGINE_LIBS})
       set(STATUSENGINE_INCLUDES ${NAEMON_INCLUDE_DIRS} ${STATUSENGINE_INCLUDES})
   endif()
@@ -74,7 +76,6 @@ if(NOT NAGIOS_INCLUDE_DIR)
 endif()
 
 if(NAEMON_CORE_BUILD)
-  include(ExternalProject)
   ExternalProject_Add(
     naemon-core
     GIT_REPOSITORY https://github.com/naemon/naemon-core.git
@@ -115,6 +116,20 @@ FetchContent_GetProperties(wise_enum)
 FetchContent_MakeAvailable(wise_enum)
 set(STATUSENGINE_INCLUDES ${wise_enum_SOURCE_DIR} ${STATUSENGINE_INCLUDES})
 
+
+ExternalProject_Add(
+  rapidjson
+  GIT_REPOSITORY https://github.com/Tencent/rapidjson.git
+  GIT_TAG v1.1.0
+  UPDATE_COMMAND ""
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND ""
+  INSTALL_COMMAND ""
+  GIT_SUBMODULES ""
+)
+ExternalProject_Get_Property(rapidjson SOURCE_DIR)
+set(STATUSENGINE_INCLUDES ${SOURCE_DIR}/include ${STATUSENGINE_INCLUDES})
+
 if(MSVC)
   add_compile_options(/W4 /WX)
 else()
@@ -131,11 +146,14 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
-set(STATUSENGINE_INCLUDES ${toml11_SOURCE_DIR} ${toml11_SOURCE_DIR}/toml ${STATUSENGINE_INCLUDES})
-
 add_library(statusengine SHARED)
-add_dependencies(statusengine naemon-core)
+add_dependencies(statusengine rapidjson)
+if(NAEMON_CORE_BUILD)
+  add_dependencies(statusengine naemon-core)
+endif()
+
 add_subdirectory(src)
+
 target_link_libraries(statusengine PRIVATE ${STATUSENGINE_LIBS})
 target_include_directories(statusengine SYSTEM PRIVATE ${STATUSENGINE_INCLUDES})
 target_include_directories(statusengine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

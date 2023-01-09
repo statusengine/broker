@@ -4,12 +4,15 @@
 #include <set>
 #include <string>
 #include <cstring>
+#include <rapidjson/writer.h>
+#include <rapidjson/stringbuffer.h>
 
 #include "../Queue.h"
 #include "../NagiosObject.h"
 #include "../Configuration.h"
 #include "../IStatusengine.h"
 #include "IMessageHandler.h"
+#include "IBulkMessageCounter.h"
 #include "../Utility.h"
 
 
@@ -320,66 +323,65 @@ namespace statusengine {
 
     class MessageQueueHandler : public IMessageQueueHandler {
     public:
-        explicit MessageQueueHandler(IStatusengine &se, IMessageHandlerList &mhlist, unsigned long maxBulkSize,
-                                     unsigned long *globalBulkCounter, Queue queue,
+        explicit MessageQueueHandler(IStatusengine &se, IBulkMessageCounter &bulkCounter, Queue queue,
                                      std::shared_ptr<std::vector<std::shared_ptr<IMessageHandler>>> handlers,
                                      bool bulk)
-                : se(se), mhlist(mhlist), queue(queue), handlers(std::move(handlers)),
-                  maxBulkSize(maxBulkSize), globalBulkCounter(globalBulkCounter), bulk(bulk) {}
+                : se(se), bulkCounter(bulkCounter), queue(queue), handlers(std::move(handlers)), bulk(bulk) {}
 
         /**
         * SendMessage
         * @param JsonObjectContainer contains json object that will be deleted after sending the message
         */
         void SendMessage(NagiosObject &obj) override {
+            SendMessage(obj.ToString());
+        }
+
+        void SendMessage(std::string_view s) override {
             if (bulk) {
-                bulkMessages.push_back(new NagiosObject(&obj));
-                if (++(*globalBulkCounter) >= maxBulkSize) {
-                    mhlist.FlushBulkQueue();
-                }
-            }
-            else {
-                std::string msg = obj.ToString();
+                bulkMessages.push_back(s);
+                bulkCounter.IncrementCounter();
+            } else {
                 for (auto &handler : *handlers) {
-                    handler->SendMessage(queue, msg);
+                    handler->SendMessage(queue, s);
                 }
             }
         }
 
         void FlushBulkQueue() override {
             if (!bulkMessages.empty()) {
-                NagiosObject msgObj(se.GetNebmodule());
-                json_object *arr = json_object_new_array();
-
+                rapidjson::StringBuffer msgData;
+                rapidjson::Writer<rapidjson::StringBuffer> msgObj(msgData);
+                msgObj.StartObject();
+                msgObj.Key("format");
+                msgObj.String("none");
+                msgObj.Key("messages");
+                msgObj.StartArray();
                 for (auto &obj : bulkMessages) {
-                    json_object_array_add(arr, obj->GetDataCopy());
+                    msgObj.RawValue(obj.data(), obj.size(), rapidjson::Type::kObjectType);
                 }
-
-                msgObj.SetData("messages", arr);
-                msgObj.SetData("format", "none");
-
-                std::string msg = msgObj.ToString();
+                msgObj.EndArray();
+                msgObj.EndObject();
+                
                 for (auto &handler : *handlers) {
-                    handler->SendMessage(queue, msg);
+                    handler->SendMessage(queue, msgData.GetString());
                 }
 
                 se.Log() << "Sent bulk message (" << bulkMessages.size() << ") for queue "
                          << wise_enum::to_string(queue) << LogLevel::Info;
 
-                clearContainer<>(&bulkMessages);
+                //clearContainer<>(&bulkMessages);
+                bulkMessages.clear();
             }
         }
 
     private:
         IStatusengine &se;
-        IMessageHandlerList &mhlist;
+        IBulkMessageCounter &bulkCounter;
 
         Queue queue;
         std::shared_ptr<std::vector<std::shared_ptr<IMessageHandler>>> handlers;
-        std::vector<NagiosObject *> bulkMessages;
+        std::vector<std::string_view> bulkMessages;
 
-        unsigned long maxBulkSize;
-        unsigned long *globalBulkCounter;
         bool bulk;
     };
 } // namespace statusengine
