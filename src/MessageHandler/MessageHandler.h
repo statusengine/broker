@@ -336,7 +336,7 @@ namespace statusengine {
             SendMessage(obj.ToString());
         }
 
-        void SendMessage(std::string_view s) override {
+        void SendMessage(std::string s) override {
             if (bulk) {
                 bulkMessages.push_back(s);
                 bulkCounter.IncrementCounter();
@@ -380,7 +380,7 @@ namespace statusengine {
 
         Queue queue;
         std::shared_ptr<std::vector<std::shared_ptr<IMessageHandler>>> handlers;
-        std::vector<std::string_view> bulkMessages;
+        std::vector<std::string> bulkMessages;
 
         bool bulk;
     };

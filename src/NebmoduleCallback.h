@@ -9,6 +9,7 @@
 #include "IStatusengine.h"
 #include "MessageHandler/IMessageHandler.h"
 #include "NagiosObject.h"
+#include "ObjectSerializerImpl.h"
 
 
 namespace statusengine {
@@ -51,6 +52,25 @@ namespace statusengine {
 
     protected:
         std::shared_ptr<IMessageQueueHandler> qHandler;
+    };
+
+    template <typename Nebtype, typename Serializer, NEBCallbackType CBT, Queue queue>
+    class StandardCallbackSerializer : public NebmoduleCallback {
+    public:
+        explicit StandardCallbackSerializer(IStatusengine &se) : NebmoduleCallback(CBT, se), serializer(se.GetNebmodule()) {
+            qHandler = se.GetMessageHandler()->GetMessageQueueHandler(queue);
+        }
+
+        StandardCallbackSerializer(StandardCallbackSerializer &&other) noexcept
+                : NebmoduleCallback::NebmoduleCallback(std::move(other)), qHandler(std::move(other.qHandler)), serializer(std::move(other.serializer)) {}
+
+        void Callback(int, void *data) override {
+            qHandler->SendMessage(serializer.ToJson(*(reinterpret_cast<const Nebtype *>(data))));
+        }
+
+    protected:
+        std::shared_ptr<IMessageQueueHandler> qHandler;
+        Serializer serializer;
     };
 
     class ServiceCheckCallback : public NebmoduleCallback {
@@ -113,7 +133,7 @@ namespace statusengine {
     public:
         explicit ProcessDataCallback(IStatusengine &se)
                 : NebmoduleCallback(NEBCALLBACK_PROCESS_DATA, se), restartData(false), processData(false),
-                  startupSchedulerMax(se.GetStartupScheduleMax()) {
+                  startupSchedulerMax(se.GetStartupScheduleMax()), serializer(se.GetNebmodule()) {
             auto mHandler = se.GetMessageHandler();
             if (mHandler->QueueExists(Queue::RestartData)) {
                 restartHandler = mHandler->GetMessageQueueHandler(Queue::RestartData);
@@ -127,7 +147,7 @@ namespace statusengine {
 
         ProcessDataCallback(ProcessDataCallback &&other) noexcept
                 : NebmoduleCallback::NebmoduleCallback(std::move(other)), restartData(other.restartData),
-                  processData(other.processData), startupSchedulerMax(other.startupSchedulerMax),
+                  processData(other.processData), startupSchedulerMax(other.startupSchedulerMax), serializer(std::move(other.serializer)),
                   restartHandler(std::move(other.restartHandler)), processHandler(std::move(other.processHandler)) {}
 
         void Callback(int, void *vdata) override {
@@ -177,7 +197,7 @@ namespace statusengine {
             }
 
             if (processData) {
-                NagiosProcessData processDataMsg(se.GetNebmodule(), data);
+                auto processDataMsg = serializer.ToJson(*data);
                 processHandler->SendMessage(processDataMsg);
             }
         }
@@ -186,6 +206,7 @@ namespace statusengine {
         bool restartData;
         bool processData;
         time_t startupSchedulerMax;
+        NagiosProcessDataSerializer serializer;
 
         std::shared_ptr<IMessageQueueHandler> restartHandler;
         std::shared_ptr<IMessageQueueHandler> processHandler;

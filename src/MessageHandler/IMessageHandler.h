@@ -26,7 +26,7 @@ namespace statusengine {
         virtual ~IMessageQueueHandler() = default;
 
         virtual void SendMessage(NagiosObject &obj) = 0;
-        virtual void SendMessage(std::string_view s) = 0;
+        virtual void SendMessage(std::string s) = 0;
         virtual void FlushBulkQueue() = 0;
     };
 

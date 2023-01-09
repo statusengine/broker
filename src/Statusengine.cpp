@@ -60,7 +60,7 @@ namespace statusengine {
         RegisterCallback<StandardCallback<nebstruct_host_status_data, NagiosHostStatusData,
                 NEBCALLBACK_HOST_STATUS_DATA, Queue::HostStatus>>({Queue::HostStatus});
 
-        RegisterCallback<StandardCallback<nebstruct_service_status_data, NagiosServiceStatusData,
+        RegisterCallback<StandardCallbackSerializer<nebstruct_service_status_data, NagiosServiceStatusDataSerializer,
                 NEBCALLBACK_SERVICE_STATUS_DATA, Queue::ServiceStatus>>({Queue::ServiceStatus});
 
         RegisterCallback<StandardCallback<nebstruct_log_data, NagiosLogData, NEBCALLBACK_LOG_DATA, Queue::LogData>>({Queue::LogData});

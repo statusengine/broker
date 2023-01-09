@@ -118,6 +118,7 @@ namespace statusengine {
         json_object *data;
     };
 
+/*
     class NagiosProcessData : public NagiosObject {
     public:
         explicit NagiosProcessData(INebmodule &neb, const nebstruct_process_data *processData) : NagiosObject(neb) {
@@ -136,7 +137,7 @@ namespace statusengine {
             SetData("processdata", &processdata);
         }
     };
-
+*/
     class NagiosAcknowledgementData : public NagiosObject {
     public:
         explicit NagiosAcknowledgementData(INebmodule &neb, const nebstruct_acknowledgement_data *acknowledgementData) : NagiosObject(neb) {

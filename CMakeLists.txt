@@ -130,6 +130,11 @@ ExternalProject_Add(
 ExternalProject_Get_Property(rapidjson SOURCE_DIR)
 set(STATUSENGINE_INCLUDES ${SOURCE_DIR}/include ${STATUSENGINE_INCLUDES})
 
+FetchContent_Declare(backward
+        GIT_REPOSITORY https://github.com/bombela/backward-cpp
+        GIT_TAG v1.6)
+FetchContent_MakeAvailable(backward)
+
 if(MSVC)
   add_compile_options(/W4 /WX)
 else()
@@ -146,7 +151,8 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
-add_library(statusengine SHARED)
+add_library(statusengine SHARED ${BACKWARD_ENABLE})
+add_backward(statusengine)
 add_dependencies(statusengine rapidjson)
 if(NAEMON_CORE_BUILD)
   add_dependencies(statusengine naemon-core)
