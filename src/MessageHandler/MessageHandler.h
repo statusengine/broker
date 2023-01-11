@@ -8,7 +8,6 @@
 #include <rapidjson/stringbuffer.h>
 
 #include "../Queue.h"
-#include "../NagiosObject.h"
 #include "../Configuration.h"
 #include "../IStatusengine.h"
 #include "IMessageHandler.h"
@@ -327,14 +326,6 @@ namespace statusengine {
                                      std::shared_ptr<std::vector<std::shared_ptr<IMessageHandler>>> handlers,
                                      bool bulk)
                 : se(se), bulkCounter(bulkCounter), queue(queue), handlers(std::move(handlers)), bulk(bulk) {}
-
-        /**
-        * SendMessage
-        * @param JsonObjectContainer contains json object that will be deleted after sending the message
-        */
-        void SendMessage(NagiosObject &obj) override {
-            SendMessage(obj.ToString());
-        }
 
         void SendMessage(std::string s) override {
             if (bulk) {

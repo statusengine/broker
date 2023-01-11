@@ -6,7 +6,6 @@
 #include "LogStream.h"
 #include "MessageHandler/MessageHandlerList.h"
 #include "NebmoduleCallback.h"
-#include "NagiosObject.h"
 #include "INebmodule.h"
 #include "Utility.h"
 

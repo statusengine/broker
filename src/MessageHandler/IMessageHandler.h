@@ -5,7 +5,6 @@
 #include <string_view>
 
 #include "../Queue.h"
-#include "../NagiosObject.h"
 
 
 namespace statusengine {
@@ -25,7 +24,6 @@ namespace statusengine {
     public:
         virtual ~IMessageQueueHandler() = default;
 
-        virtual void SendMessage(NagiosObject &obj) = 0;
         virtual void SendMessage(std::string s) = 0;
         virtual void FlushBulkQueue() = 0;
     };

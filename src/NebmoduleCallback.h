@@ -8,7 +8,6 @@
 #include "INebmodule.h"
 #include "IStatusengine.h"
 #include "MessageHandler/IMessageHandler.h"
-#include "NagiosObject.h"
 #include "ObjectSerializerImpl.h"
 
 

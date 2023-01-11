@@ -13,22 +13,6 @@
 
 namespace statusengine {
 
-TEST_F(NagiosTestSuite, NagiosService) {
-    Nebmodule neb(nullptr, std::string(""));
-    NagiosService nag(neb, svc);
-    auto out = nag.ToString();
-    ASSERT_NE(out.find(TARGET_SERVICE_NAME), std::string::npos);
-    ASSERT_NE(out.find(TARGET_HOST_NAME), std::string::npos);
-}
-
-TEST_F(NagiosTestSuite, NagiosHost) {
-    Nebmodule neb(nullptr, std::string(""));
-    NagiosHost nag(neb, hst);
-    auto out = nag.ToString();
-    ASSERT_EQ(out.find(TARGET_SERVICE_NAME), std::string::npos);
-    ASSERT_NE(out.find(TARGET_HOST_NAME), std::string::npos);
-}
-
 TEST_F(NagiosTestSuite, NagiosServiceStatusDataSerializer) {
     Nebmodule neb(nullptr, std::string(""));
     NagiosServiceStatusDataSerializer serializer(neb);
