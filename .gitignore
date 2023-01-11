@@ -4,7 +4,6 @@
 /.vs
 /libgearman-1.0
 /CppProperties.json
-/.clang-format
 /.vscode
 /devtools/headers.zip
 /devtools/include
