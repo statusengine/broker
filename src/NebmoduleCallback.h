@@ -77,7 +77,7 @@ namespace statusengine {
     public:
         explicit ServiceCheckCallback(IStatusengine &se)
                 : NebmoduleCallback(NEBCALLBACK_SERVICE_CHECK_DATA, se), servicechecks(false), ocsp(false),
-                  service_perfdata(false) {
+                  service_perfdata(false), checkDataSerializer(se.GetNebmodule()), perfDataSerializer(se.GetNebmodule()) {
             auto mHandler = se.GetMessageHandler();
             if (mHandler->QueueExists(Queue::ServiceCheck)) {
                 serviceCheckHandler = mHandler->GetMessageQueueHandler(Queue::ServiceCheck);
@@ -95,8 +95,9 @@ namespace statusengine {
 
         ServiceCheckCallback(ServiceCheckCallback &&other) noexcept
                 : NebmoduleCallback::NebmoduleCallback(std::move(other)), servicechecks(other.servicechecks), ocsp(other.ocsp),
-                  service_perfdata(other.service_perfdata), serviceCheckHandler(std::move(other.serviceCheckHandler)),
-                  ocspHandler(std::move(other.ocspHandler)), servicePerfHandler(std::move(other.servicePerfHandler)) {}
+                  service_perfdata(other.service_perfdata), checkDataSerializer(std::move(other.checkDataSerializer)), perfDataSerializer(std::move(other.perfDataSerializer)),
+                  serviceCheckHandler(std::move(other.serviceCheckHandler)), ocspHandler(std::move(other.ocspHandler)),
+                  servicePerfHandler(std::move(other.servicePerfHandler)) {}
 
         void Callback(int, void *vdata) override {
             auto data = reinterpret_cast<nebstruct_service_check_data *>(vdata);
@@ -104,8 +105,7 @@ namespace statusengine {
 
             if (data->type == NEBTYPE_SERVICECHECK_PROCESSED) {
                 if (servicechecks || ocsp) {
-                    NagiosServiceCheckData checkData(se.GetNebmodule(), data);
-                    ;
+                    auto checkData = checkDataSerializer.ToJson(*data);
                     if (servicechecks) {
                         serviceCheckHandler->SendMessage(checkData);
                     }
@@ -114,8 +114,7 @@ namespace statusengine {
                     }
                 }
                 if (service_perfdata && temp_service->process_performance_data != 0) {
-                    NagiosServiceCheckPerfData checkPerfData(se.GetNebmodule(), data);
-                    servicePerfHandler->SendMessage(checkPerfData);
+                    servicePerfHandler->SendMessage(perfDataSerializer.ToJson(*data));
                 }
             }
         }
@@ -124,6 +123,8 @@ namespace statusengine {
         bool servicechecks;
         bool ocsp;
         bool service_perfdata;
+        NagiosServiceCheckDataSerializer checkDataSerializer;
+        NagiosServiceCheckPerfDataSerializer perfDataSerializer;
         std::shared_ptr<IMessageQueueHandler> serviceCheckHandler;
         std::shared_ptr<IMessageQueueHandler> ocspHandler;
         std::shared_ptr<IMessageQueueHandler> servicePerfHandler;
@@ -215,7 +216,7 @@ namespace statusengine {
     class HostCheckCallback : public NebmoduleCallback {
     public:
         explicit HostCheckCallback(IStatusengine &se)
-                : NebmoduleCallback(NEBCALLBACK_HOST_CHECK_DATA, se), hostchecks(false), ochp(false) {
+                : NebmoduleCallback(NEBCALLBACK_HOST_CHECK_DATA, se), hostchecks(false), ochp(false), serializer(se.GetNebmodule()) {
             auto mHandler = se.GetMessageHandler();
             if (mHandler->QueueExists(Queue::HostCheck)) {
                 hostCheckHandler = mHandler->GetMessageQueueHandler(Queue::HostCheck);
@@ -228,19 +229,19 @@ namespace statusengine {
         }
 
         HostCheckCallback(HostCheckCallback &&other) noexcept
-                : NebmoduleCallback::NebmoduleCallback(std::move(other)), hostchecks(other.hostchecks), ochp(other.ochp),
+                : NebmoduleCallback::NebmoduleCallback(std::move(other)), hostchecks(other.hostchecks), ochp(other.ochp), serializer(other.serializer),
                   hostCheckHandler(std::move(other.hostCheckHandler)), ochpHandler(std::move(other.ochpHandler)) {}
 
         void Callback(int, void *vdata) override {
             auto data = reinterpret_cast<nebstruct_host_check_data *>(vdata);
 
             if (data->type == NEBTYPE_HOSTCHECK_PROCESSED) {
-                NagiosHostCheckData checkData(se.GetNebmodule(), data);
+                auto msg = serializer.ToJson(*data);
                 if (hostchecks) {
-                    hostCheckHandler->SendMessage(checkData);
+                    hostCheckHandler->SendMessage(msg);
                 }
                 if (ochp) {
-                    ochpHandler->SendMessage(checkData);
+                    ochpHandler->SendMessage(msg);
                 }
             }
         }
@@ -248,6 +249,7 @@ namespace statusengine {
     private:
         bool hostchecks;
         bool ochp;
+        NagiosHostCheckDataSerializer serializer;
 
         std::shared_ptr<IMessageQueueHandler> hostCheckHandler;
         std::shared_ptr<IMessageQueueHandler> ochpHandler;

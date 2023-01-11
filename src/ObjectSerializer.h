@@ -12,9 +12,9 @@ namespace statusengine {
     typedef std::shared_ptr<rapidjson::StringBuffer> StringBufferPtr;
 
     template<class DataType>
-    class GeneralSerializer : public ISerializer<DataType> {
+    class ObjectSerializer : public ISerializer<DataType> {
     public:
-        explicit GeneralSerializer(INebmodule &neb) : neb(neb), buffer(nullptr), writer(nullptr) {}
+        explicit ObjectSerializer(INebmodule &neb) : neb(neb), buffer(nullptr), writer(nullptr) {}
 
         std::string ToJson(DataType data) override {
             buffer = new rapidjson::StringBuffer();
@@ -28,6 +28,7 @@ namespace statusengine {
             return result;
         }
 
+    protected:
         inline void SetData(const char *name, const char *value) {
             writer->Key(name);
             if (value == nullptr) {
@@ -76,7 +77,6 @@ namespace statusengine {
             writer->RawValue(value.data(), value.size(), rapidjson::Type::kObjectType);
         }
 
-    protected:
         virtual void Serializer(DataType &data) = 0;
 
         INebmodule &neb;

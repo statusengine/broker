@@ -57,52 +57,52 @@ namespace statusengine {
             return 1;
         }
 
-        RegisterCallback<StandardCallback<nebstruct_host_status_data, NagiosHostStatusData,
+        RegisterCallback<StandardCallbackSerializer<nebstruct_host_status_data, NagiosHostStatusDataSerializer,
                 NEBCALLBACK_HOST_STATUS_DATA, Queue::HostStatus>>({Queue::HostStatus});
 
         RegisterCallback<StandardCallbackSerializer<nebstruct_service_status_data, NagiosServiceStatusDataSerializer,
                 NEBCALLBACK_SERVICE_STATUS_DATA, Queue::ServiceStatus>>({Queue::ServiceStatus});
 
-        RegisterCallback<StandardCallback<nebstruct_log_data, NagiosLogData, NEBCALLBACK_LOG_DATA, Queue::LogData>>({Queue::LogData});
+        RegisterCallback<StandardCallbackSerializer<nebstruct_log_data, NagiosLogDataSerializer, NEBCALLBACK_LOG_DATA, Queue::LogData>>({Queue::LogData});
 
-        RegisterCallback<StandardCallback<nebstruct_statechange_data, NagiosStateChangeData,
+        RegisterCallback<StandardCallbackSerializer<nebstruct_statechange_data, NagiosStateChangeDataSerializer,
                 NEBCALLBACK_STATE_CHANGE_DATA, Queue::StateChange>>({Queue::StateChange});
 
-        RegisterCallback<StandardCallback<nebstruct_system_command_data, NagiosSystemCommandData,
+        RegisterCallback<StandardCallbackSerializer<nebstruct_system_command_data, NagiosSystemCommandDataSerializer,
                 NEBCALLBACK_SYSTEM_COMMAND_DATA, Queue::SystemCommandData>>({Queue::SystemCommandData});
 
-        RegisterCallback<StandardCallback<nebstruct_external_command_data, NagiosExternalCommandData,
+        RegisterCallback<StandardCallbackSerializer<nebstruct_external_command_data, NagiosExternalCommandDataSerializer,
                 NEBCALLBACK_EXTERNAL_COMMAND_DATA, Queue::ExternalCommandData>>({Queue::ExternalCommandData});
 
-        RegisterCallback<StandardCallback<nebstruct_comment_data, NagiosCommentData, NEBCALLBACK_COMMENT_DATA,
+        RegisterCallback<StandardCallbackSerializer<nebstruct_comment_data, NagiosCommentDataSerializer, NEBCALLBACK_COMMENT_DATA,
                 Queue::CommentData>>({Queue::CommentData});
 
-        RegisterCallback<StandardCallback<nebstruct_acknowledgement_data, NagiosAcknowledgementData,
+        RegisterCallback<StandardCallbackSerializer<nebstruct_acknowledgement_data, NagiosAcknowledgementDataSerializer,
                 NEBCALLBACK_ACKNOWLEDGEMENT_DATA, Queue::AcknowledgementData>>({Queue::AcknowledgementData});
 
-        RegisterCallback<StandardCallback<nebstruct_flapping_data, NagiosFlappingData,
+        RegisterCallback<StandardCallbackSerializer<nebstruct_flapping_data, NagiosFlappingDataSerializer,
                 NEBCALLBACK_FLAPPING_DATA, Queue::FlappingData>>({Queue::FlappingData});
 
-        RegisterCallback<StandardCallback<nebstruct_downtime_data, NagiosDowntimeData,
+        RegisterCallback<StandardCallbackSerializer<nebstruct_downtime_data, NagiosDowntimeDataSerializer,
                 NEBCALLBACK_DOWNTIME_DATA, Queue::DowntimeData>>({Queue::DowntimeData});
 
-        RegisterCallback<StandardCallback<nebstruct_notification_data, NagiosNotificationData,
+        RegisterCallback<StandardCallbackSerializer<nebstruct_notification_data, NagiosNotificationDataSerializer,
                 NEBCALLBACK_NOTIFICATION_DATA, Queue::NotificationData>>({Queue::NotificationData});
 
-        RegisterCallback<StandardCallback<nebstruct_program_status_data, NagiosProgramStatusData,
+        RegisterCallback<StandardCallbackSerializer<nebstruct_program_status_data, NagiosProgramStatusDataSerializer,
                 NEBCALLBACK_PROGRAM_STATUS_DATA, Queue::ProgramStatusData>>({Queue::ProgramStatusData});
 
-        RegisterCallback<StandardCallback<nebstruct_contact_status_data, NagiosContactStatusData,
+        RegisterCallback<StandardCallbackSerializer<nebstruct_contact_status_data, NagiosContactStatusDataSerializer,
                 NEBCALLBACK_CONTACT_STATUS_DATA, Queue::ContactStatusData>>({Queue::ContactStatusData});
 
-        RegisterCallback<StandardCallback<nebstruct_contact_notification_data, NagiosContactNotificationData,
+        RegisterCallback<StandardCallbackSerializer<nebstruct_contact_notification_data, NagiosContactNotificationDataSerializer,
                 NEBCALLBACK_CONTACT_NOTIFICATION_DATA, Queue::ContactNotificationData>>({Queue::ContactNotificationData});
 
-        RegisterCallback<StandardCallback<nebstruct_contact_notification_method_data, NagiosContactNotificationMethodData,
+        RegisterCallback<StandardCallbackSerializer<nebstruct_contact_notification_method_data, NagiosContactNotificationMethodDataSerializer,
                 NEBCALLBACK_CONTACT_NOTIFICATION_METHOD_DATA,
                 Queue::ContactNotificationMethodData>>({Queue::ContactNotificationMethodData});
 
-        RegisterCallback<StandardCallback<nebstruct_event_handler_data, NagiosEventHandlerData,
+        RegisterCallback<StandardCallbackSerializer<nebstruct_event_handler_data, NagiosEventHandlerDataSerializer,
                 NEBCALLBACK_EVENT_HANDLER_DATA, Queue::EventHandlerData>>({Queue::EventHandlerData});
 
         RegisterCallback<ServiceCheckCallback>({Queue::ServiceCheck, Queue::OCSP, Queue::ServicePerfData});
