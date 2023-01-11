@@ -1,14 +1,14 @@
-#include <gtest/gtest.h>
-#include <naemon/naemon.h>
 #include <cstring>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
+#include <naemon/naemon.h>
 
-#include "Nebmodule.h"
-#include "MessageHandler/MessageHandler.h"
-#include "Statusengine.h"
 #include "MessageHandler/IBulkMessageCounter.h"
-#include "ObjectSerializerImpl.h"
+#include "MessageHandler/MessageHandler.h"
 #include "NagiosTestSuite.h"
+#include "Nebmodule.h"
+#include "ObjectSerializerImpl.h"
+#include "Statusengine.h"
 
 namespace statusengine {
 
@@ -20,4 +20,4 @@ TEST_F(NagiosTestSuite, NagiosServiceSerializerBenchmark) {
     }
 }
 
-}
+} // namespace statusengine

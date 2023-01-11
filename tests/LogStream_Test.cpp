@@ -3,11 +3,9 @@
 
 #include "LogStream.h"
 
-
 namespace statusengine {
 
-class LogStreamTest : public ::testing::TestWithParam<LogLevel>
-{};
+class LogStreamTest : public ::testing::TestWithParam<LogLevel> {};
 
 TEST_P(LogStreamTest, LogLevel) {
     LogStream subject;
@@ -17,6 +15,7 @@ TEST_P(LogStreamTest, LogLevel) {
 }
 
 INSTANTIATE_TEST_SUITE_P(LogStream, LogStreamTest,
-                         testing::Values(LogLevel::Error, LogLevel::Info, LogLevel::Warning));
+                         testing::Values(LogLevel::Error, LogLevel::Info,
+                                         LogLevel::Warning));
 
-}
+} // namespace statusengine

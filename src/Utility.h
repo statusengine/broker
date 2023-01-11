@@ -2,8 +2,7 @@
 
 #include <map>
 
-template <typename T>
-void clearContainer(T *container) {
+template <typename T> void clearContainer(T *container) {
     for (auto it = container->begin(); it != container->end();) {
         delete *it;
         it = container->erase(it);
@@ -18,5 +17,5 @@ void clearContainer(std::map<T, A> *container) {
     }
 }
 
-#define FRIEND_TEST(test_case_name, test_name) \
-  friend class test_case_name##_##test_name##_Test
+#define FRIEND_TEST(test_case_name, test_name)                                 \
+    friend class test_case_name##_##test_name##_Test

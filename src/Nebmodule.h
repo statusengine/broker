@@ -8,44 +8,46 @@
 
 namespace statusengine {
 
-    class Nebmodule : public INebmodule {
-      public:
-        explicit Nebmodule(Neb_NebmodulePtr handle, std::string args);
-        virtual ~Nebmodule();
-        
-        void Init() override;
+class Nebmodule : public INebmodule {
+  public:
+    explicit Nebmodule(Neb_NebmodulePtr handle, std::string args);
+    virtual ~Nebmodule();
 
-        int Callback(int event_type, void *data) override;
+    void Init() override;
 
-        bool RegisterCallback(NEBCallbackType cbType) override;
+    int Callback(int event_type, void *data) override;
 
-        void RegisterEventCallback(EventCallback *ecb) override;
+    bool RegisterCallback(NEBCallbackType cbType) override;
 
-        void ScheduleHostCheckDelay(host *temp_host, time_t delay) override;
+    void RegisterEventCallback(EventCallback *ecb) override;
 
-        void ScheduleHostCheckFixed(host *temp_host, time_t fixed) override;
+    void ScheduleHostCheckDelay(host *temp_host, time_t delay) override;
 
-        void ScheduleServiceCheckDelay(service *temp_service, time_t delay) override;
+    void ScheduleHostCheckFixed(host *temp_host, time_t fixed) override;
 
-        void ScheduleServiceCheckFixed(service *temp_service, time_t fixed) override;
+    void ScheduleServiceCheckDelay(service *temp_service,
+                                   time_t delay) override;
 
-        void DeleteDowntime(const char *hostname, const char *service_description, time_t start_time, time_t end_time, const char *comment) override;
+    void ScheduleServiceCheckFixed(service *temp_service,
+                                   time_t fixed) override;
 
-        std::string EncodeString(char *data) override;
+    void DeleteDowntime(const char *hostname, const char *service_description,
+                        time_t start_time, time_t end_time,
+                        const char *comment) override;
 
-        Neb_NebmodulePtr GetNebNebmodulePtr() override;
+    std::string EncodeString(char *data) override;
 
-        IStatusengine& GetStatusengine() {
-          return *se;
-        };
+    Neb_NebmodulePtr GetNebNebmodulePtr() override;
 
-      private:
-        explicit Nebmodule() : se(nullptr), uc(nullptr) {}
+    IStatusengine &GetStatusengine() { return *se; };
 
-        IStatusengine *se;
-        uchardet_t uc;
-        Neb_NebmodulePtr handle;
-    };
+  private:
+    explicit Nebmodule() : se(nullptr), uc(nullptr) {}
+
+    IStatusengine *se;
+    uchardet_t uc;
+    Neb_NebmodulePtr handle;
+};
 } // namespace statusengine
 
 int nebmodule_callback(int event_type, void *data);

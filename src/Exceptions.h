@@ -4,8 +4,6 @@
 
 namespace statusengine {
 
-    class StatusengineException : public std::exception {
+class StatusengineException : public std::exception {};
 
-    };
-
-}
+} // namespace statusengine

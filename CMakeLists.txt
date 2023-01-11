@@ -191,3 +191,53 @@ if(ENABLE_CLANG_TIDY)
       COMMENT "Running clang-tidy..."
     )
 endif()
+
+find_program(CLANG_FORMAT_EXE "clang-format")
+mark_as_advanced(FORCE CLANG_FORMAT_EXE)
+if(CLANG_FORMAT_EXE)
+  message(STATUS "clang-format found: ${CLANG_FORMAT_EXE}")
+else()
+  message(STATUS "clang-format not found!")
+endif()
+
+function(clang_format TARGET_NAME)
+  if(CLANG_FORMAT_EXE)
+    set(FORMAT_FILES)
+    # Check through the ARGN's, determine existent files
+    foreach(item IN LISTS ARGN)
+      if(TARGET ${item})
+        # If the item is a target, then we'll attempt to grab the associated
+        # source files from it.
+        get_target_property(_TARGET_TYPE ${item} TYPE)
+        if(NOT _TARGET_TYPE STREQUAL "INTERFACE_LIBRARY")
+          get_property(
+            _TEMP
+            TARGET ${item}
+            PROPERTY SOURCES)
+          foreach(iter IN LISTS _TEMP)
+            if(EXISTS ${iter})
+              set(FORMAT_FILES ${FORMAT_FILES} ${iter})
+            endif()
+          endforeach()
+        endif()
+      elseif(EXISTS ${item})
+        # Check if it's a full file path
+        set(FORMAT_FILES ${FORMAT_FILES} ${item})
+      elseif(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${item})
+        # Check if it's based on the current source dir
+        set(FORMAT_FILES ${FORMAT_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/${item})
+      endif()
+    endforeach()
+
+    # Make the target
+    if(FORMAT_FILES)
+      if(NOT TARGET ${TARGET_NAME})
+        add_custom_target(${TARGET_NAME} COMMAND ${CLANG_FORMAT_EXE} -i
+                                                 -style=file ${FORMAT_FILES})
+      endif()
+    endif()
+
+  endif()
+endfunction()
+
+clang_format(format statusengine tests benchmarks)
