@@ -17,7 +17,7 @@ namespace statusengine {
     class MessageHandlerConfiguration {
     public:
 
-        bool InitLoad(const toml::Table &tbl) {
+        bool InitLoad(const toml::table &tbl) {
             for (auto &tableEntry : tbl) {
                 auto QueueName = QueueNameHandler::Instance().QueueNames();
                 auto qName = QueueName.find(tableEntry.first);
@@ -73,7 +73,7 @@ namespace statusengine {
             return queueIds;
         }
 
-        virtual bool Load(const toml::Table &tbl) = 0;
+        virtual bool Load(const toml::table &tbl) = 0;
 
         virtual ~MessageHandlerConfiguration() = default;
 
@@ -89,12 +89,17 @@ namespace statusengine {
         std::shared_ptr<std::map<Queue, std::string>> queues;
         std::shared_ptr<std::map<WorkerQueue, std::string>> workerQueues;
 
-        template <typename T> T GetTomlDefault(const toml::Table &tab, const char *ky, T &&opt) const {
+        template <typename T> T GetTomlDefault(const toml::value &tab, const char *ky, T &&opt) const {
             try {
-                return toml::get_or(tab, ky, opt);
+                return toml::find<T>(tab, ky);
+                //return toml::find_or(tab, ky, opt);
             }
             catch (const toml::type_error &tte) {
                 se.Log() << "Invalid configuration: Invalid value for key " << ky << LogLevel::Error;
+                return std::move(opt);
+            }
+            catch (const std::out_of_range &oor) {
+                return std::move(opt);
             }
             return std::move(opt);
         }
@@ -109,7 +114,7 @@ namespace statusengine {
 
         virtual ~RabbitmqConfiguration() = default;
 
-        bool Load(const toml::Table &tbl) override {
+        bool Load(const toml::table &tbl) override {
             Hostname = GetTomlDefault<>(tbl, "Hostname", std::string(""));
 
             if (Hostname.empty()) {
@@ -166,7 +171,7 @@ namespace statusengine {
     public:
         explicit GearmanConfiguration(IStatusengine &se) : MessageHandlerConfiguration(se) {}
 
-        bool Load(const toml::Table &tbl) override {
+        bool Load(const toml::table &tbl) override {
             try {
                 URL = toml::get<std::string>(tbl.at("URL"));
             }
@@ -190,7 +195,7 @@ namespace statusengine {
 
         bool Load(const std::string &configurationPath) {
             try {
-                cfg = toml::parse(configurationPath);
+                cfg = toml::parse(configurationPath).as_table();
             }
             catch (std::runtime_error &rte) {
                 se.Log() << "Could not read file: " << rte.what() << LogLevel::Error;
@@ -202,7 +207,7 @@ namespace statusengine {
             }
 
             try {
-                bulkTable = cfg.at("Bulk").cast<toml::value_t::Table>();
+                bulkTable = cfg.at("Bulk").cast<toml::value_t::table>();
             }
             catch (std::out_of_range &oor) {
             }
@@ -212,8 +217,8 @@ namespace statusengine {
             }
 
             try {
-                auto logTable = cfg.at("Log").cast<toml::value_t::Table>();
-                auto logLevelStr = toml::get_or<std::string>(logTable, "Level", "Warning");
+                auto logTable = cfg.at("Log");
+                auto logLevelStr = toml::find_or<std::string>(logTable, "Level", "Warning");
                 if (logLevelStr == "Info") {
                     logLevel = LogLevel::Info;
                 }
@@ -256,7 +261,7 @@ namespace statusengine {
             }
 
             try {
-                schedulerTable = cfg.at("Scheduler").cast<toml::value_t::Table>();
+                schedulerTable = cfg.at("Scheduler").cast<toml::value_t::table>();
             }
             catch (std::out_of_range &oor) {
             }
@@ -266,7 +271,7 @@ namespace statusengine {
             }
 
             try {
-                std::vector<toml::Table> gearmans = toml::get<std::vector<toml::Table>>(cfg.at("Gearman"));
+                std::vector<toml::table> gearmans = toml::get<std::vector<toml::table>>(cfg.at("Gearman"));
                 for (auto &gearmanConfig : gearmans) {
                     auto gfg = std::make_shared<GearmanConfiguration>(se);
                     if (!gfg->InitLoad(gearmanConfig)) {
@@ -283,7 +288,7 @@ namespace statusengine {
             }
 
             try {
-                std::vector<toml::Table> rabbits = toml::get<std::vector<toml::Table>>(cfg.at("Rabbitmq"));
+                std::vector<toml::table> rabbits = toml::get<std::vector<toml::table>>(cfg.at("Rabbitmq"));
                 for (auto &rabbitConfig : rabbits) {
                     auto rfg = std::make_shared<RabbitmqConfiguration>(se);
                     if (!rfg->InitLoad(rabbitConfig)) {
@@ -300,7 +305,7 @@ namespace statusengine {
             }
 
             try {
-                maxWorkerMessagesPerInterval = toml::get_or<unsigned long>(toml::get<toml::Table>(cfg.at("Worker")),
+                maxWorkerMessagesPerInterval = toml::find_or<unsigned long>(cfg.at("Worker"),
                                                                            "MaxWorkerMessagesPerInterval", 1000000ul);
             }
             catch (const std::out_of_range &oor) {
@@ -337,11 +342,11 @@ namespace statusengine {
         }
 
         time_t GetBulkFlushInterval() const {
-            return GetTomlDefault<>(bulkTable, "FlushInterval", static_cast<time_t>(10));
+            return GetTomlDefault<time_t>(bulkTable, "FlushInterval", static_cast<time_t>(10));
         }
 
         unsigned long GetBulkMaximum() const {
-            return GetTomlDefault<>(bulkTable, "Maximum", 200ul);
+            return GetTomlDefault<unsigned long>(bulkTable, "Maximum", 200ul);
         }
 
         bool IsBulkQueue(Queue queue) const {
@@ -349,7 +354,7 @@ namespace statusengine {
         }
 
         time_t GetStartupScheduleMax() const {
-            return GetTomlDefault<>(schedulerTable, "StartupScheduleMax", 0);
+            return GetTomlDefault<time_t>(schedulerTable, "StartupScheduleMax", 0);
         }
 
         std::vector<std::shared_ptr<GearmanConfiguration>> *GetGearmanConfiguration() {
@@ -370,9 +375,9 @@ namespace statusengine {
 
       private:
         IStatusengine &se;
-        toml::Table cfg;
-        toml::Table bulkTable;
-        toml::Table schedulerTable;
+        toml::table cfg;
+        toml::table bulkTable;
+        toml::table schedulerTable;
 
         std::vector<std::shared_ptr<RabbitmqConfiguration>> rabbitmq;
         std::vector<std::shared_ptr<GearmanConfiguration>> gearman;
@@ -382,12 +387,16 @@ namespace statusengine {
 
         LogLevel logLevel;
 
-        template <typename T> T GetTomlDefault(const toml::Table &tab, const char *ky, T &&opt) const {
+        template <typename T> T GetTomlDefault(const toml::value &tab, const char *ky, T &&opt) const {
             try {
-                return toml::get_or(tab, ky, opt);
+                return toml::find<T>(tab, ky);
+                //return toml::find_or(tab, ky, opt);
             }
             catch (const toml::type_error &tte) {
                 se.Log() << "Invalid configuration: Invalid value for key " << ky << LogLevel::Error;
+            }
+            catch (const std::out_of_range &oor) {
+                return opt;
             }
             return opt;
         }
