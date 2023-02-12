@@ -35,9 +35,8 @@ project(
 )
 
 pkg_check_modules(UCHARDET REQUIRED uchardet)
-pkg_check_modules(JSONC REQUIRED json-c)
-set(STATUSENGINE_LIBS ${UCHARDET_LIBRARIES} ${JSONC_LIBRARIES})
-set(STATUSENGINE_INCLUDES ${UCHARDET_INCLUDE_DIRS} ${JSONC_INCLUDE_DIRS})
+set(STATUSENGINE_LIBS ${UCHARDET_LIBRARIES})
+set(STATUSENGINE_INCLUDES ${UCHARDET_INCLUDE_DIRS})
 
 if(WITH_GEARMAN)
     pkg_check_modules(GEARMAN REQUIRED gearmand)
@@ -129,6 +128,7 @@ ExternalProject_Add(
 )
 ExternalProject_Get_Property(rapidjson SOURCE_DIR)
 set(STATUSENGINE_INCLUDES ${SOURCE_DIR}/include ${STATUSENGINE_INCLUDES})
+add_compile_definitions(RAPIDJSON_HAS_STDSTRING=1)
 
 FetchContent_Declare(backward
         GIT_REPOSITORY https://github.com/bombela/backward-cpp

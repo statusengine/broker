@@ -2,6 +2,8 @@
 
 #include <cstring>
 #include <memory>
+#include <rapidjson/document.h>
+#include <rapidjson/reader.h>
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
 #include <set>
@@ -19,9 +21,13 @@ class MessageHandler : public IMessageHandler {
   public:
     explicit MessageHandler(IStatusengine &se) : se(se) {}
 
-    inline static char *get_json_string(json_object *obj) {
-        auto jsonChars = json_object_get_string(obj);
-        auto jsonCharsLen = json_object_get_string_len(obj);
+    /**
+     * Naemon takes memory ownership of the json strings over and free()'s them
+     * later. Therefore we have to copy them.
+     */
+    inline static char *copy_json_value(rapidjson::Value &value) {
+        auto jsonChars = value.GetString();
+        auto jsonCharsLen = value.GetStringLength();
         char *chars = static_cast<char *>(malloc(jsonCharsLen + 1));
         std::strncpy(chars, jsonChars, jsonCharsLen);
         chars[jsonCharsLen] = 0; // set last byte to zero
@@ -30,159 +36,143 @@ class MessageHandler : public IMessageHandler {
 
     void ProcessMessage(WorkerQueue workerQueue,
                         const std::string &message) override {
-        json_object *obj = json_tokener_parse(message.c_str());
-        if (obj == nullptr) {
+        rapidjson::Document doc;
+        doc.Parse(message);
+        if (!doc.IsObject()) {
             se.Log() << "Received non-json string '" << message
                      << "'. Ignoring..." << LogLevel::Warning;
         } else {
-            ProcessMessage(workerQueue, obj);
-            json_object_put(obj);
+            ProcessMessage(workerQueue, doc.GetObject());
         }
     }
 
-    void ProcessMessage(WorkerQueue workerQueue, json_object *obj) override {
-        if (workerQueue == WorkerQueue::WorkerOCHP) {
-            json_object *messages;
-            if (json_object_object_get_ex(obj, "messages", &messages)) {
-                if (!json_object_is_type(messages, json_type_array)) {
-                    se.Log() << "OCHP::messages is not an array. Ignoring..."
+    void ProcessMessage(WorkerQueue workerQueue,
+                        rapidjson::Value::Object obj) override {
+        auto findItr = obj.FindMember("messages");
+        if (findItr != obj.MemberEnd()) {
+            if (!findItr->value.IsArray()) {
+                se.Log() << "messages is not an array. Ignoring..."
+                         << LogLevel::Warning;
+                return;
+            }
+            auto messages = findItr->value.GetArray();
+            for (auto &message : messages) {
+                if (!message.IsObject()) {
+                    se.Log() << "messages contains non object "
+                                "item in array. Ignoring..."
                              << LogLevel::Warning;
                 } else {
-                    long unsigned int arrLen =
-                        json_object_array_length(messages);
-                    for (long unsigned int i = 0; i < arrLen; i++) {
-                        json_object *arrObj =
-                            json_object_array_get_idx(messages, i);
-                        ProcessMessage(WorkerQueue::WorkerOCHP, arrObj);
-                    }
-                }
-            } else {
-                json_object *hostcheck;
-                if (json_object_object_get_ex(obj, "hostcheck", &hostcheck)) {
-                    ParseCheckResult(hostcheck);
-                } else {
-                    se.Log() << "OCHP Object doesn't contain a hostcheck "
-                                "value. Ignoring..."
-                             << LogLevel::Warning;
+                    ProcessMessage(workerQueue, message.GetObject());
                 }
             }
-        } else if (workerQueue == WorkerQueue::WorkerOCSP) {
-            json_object *messages;
-            if (json_object_object_get_ex(obj, "messages", &messages)) {
-                if (!json_object_is_type(messages, json_type_array)) {
-                    se.Log() << "OCSP::messages is not an array. Ignoring..."
-                             << LogLevel::Warning;
-                } else {
-                    long unsigned int arrLen =
-                        json_object_array_length(messages);
-                    for (long unsigned int i = 0; i < arrLen; i++) {
-                        json_object *arrObj =
-                            json_object_array_get_idx(messages, i);
-                        ProcessMessage(WorkerQueue::WorkerOCSP, arrObj);
-                    }
-                }
-            } else {
-                json_object *servicecheck;
-                if (json_object_object_get_ex(obj, "servicecheck",
-                                              &servicecheck)) {
-                    ParseCheckResult(servicecheck);
-                } else {
-                    se.Log() << "OCSP Object doesn't contain a servicecheck "
-                                "value. Ignoring..."
-                             << LogLevel::Warning;
-                }
-            }
-        } else if (workerQueue == WorkerQueue::WorkerCommand) {
-            std::string command;
-            json_object *data = nullptr;
-            bool haveCommand = false, haveData = false, haveList = false;
-            json_object_object_foreach(obj, cKey, jsonValue) {
-                std::string jsonKey(cKey);
+            return;
+        }
 
-                if (jsonKey.compare("Command") == 0) {
-                    command =
-                        std::string(json_object_get_string(jsonValue),
-                                    json_object_get_string_len(jsonValue));
-                    haveCommand = true;
-                } else if (jsonKey.compare("Data") == 0) {
-                    data = jsonValue;
-                    haveData = true;
-                } else if (jsonKey.compare("messages") == 0) {
-                    if (!json_object_is_type(jsonValue, json_type_array)) {
-                        se.Log()
-                            << "messages doesn't contain an array. Ignoring..."
-                            << LogLevel::Warning;
-                    } else {
-                        long unsigned int arrLen =
-                            json_object_array_length(jsonValue);
-                        for (long unsigned int i = 0; i < arrLen; i++) {
-                            json_object *arrObj =
-                                json_object_array_get_idx(jsonValue, i);
-                            ProcessMessage(WorkerQueue::WorkerCommand, arrObj);
-                        }
-                    }
-                    haveList = true;
-                }
+        const char *findData;
+        switch (workerQueue) {
+        case WorkerQueue::WorkerOCHP:
+            findData = "hostcheck";
+            break;
+        case WorkerQueue::WorkerOCSP:
+            findData = "servicecheck";
+            break;
+        case WorkerQueue::WorkerCommand:
+            findData = "Data";
+            break;
+        }
+
+        findItr = obj.FindMember(findData);
+        if (findItr == obj.MemberEnd()) {
+            se.Log() << "OCHP Object doesn't contain a " << findData
+                     << " value. Ignoring..." << LogLevel::Warning;
+        }
+        switch (workerQueue) {
+        case WorkerQueue::WorkerOCHP:
+        case WorkerQueue::WorkerOCSP:
+            if (!findItr->value.IsObject()) {
+                se.Log() << findData << " is not an object value. Ignoring..."
+                         << LogLevel::Warning;
+                return;
             }
-            if (!haveList) {
-                if (haveData && haveCommand) {
-                    if (command.compare("check_result") == 0) {
-                        ParseCheckResult(data);
-                    } else if (command.compare("schedule_check") == 0) {
-                        ParseScheduleCheck(data);
-                    } else if (command.compare("delete_downtime") == 0) {
-                        ParseDeleteDowntime(data);
-                    } else if (command.compare("raw") == 0) {
-                        ParseRaw(data);
-                    }
-                } else {
-                    se.Log() << "Command Object is missing Command or Data. "
-                                "Ignoring..."
-                             << LogLevel::Warning;
-                }
+            ParseCheckResult(findItr->value.GetObject());
+            return;
+        default:
+            break;
+        }
+
+        auto findCommandItr = obj.FindMember("Command");
+        if (findCommandItr == obj.MemberEnd() ||
+            !findCommandItr->value.IsString()) {
+            se.Log() << "Command Object is missing Command. "
+                        "Ignoring..."
+                     << LogLevel::Warning;
+            return;
+        }
+
+        std::string command = findCommandItr->value.GetString();
+        if (command.compare("raw")) {
+            if (!findItr->value.IsString()) {
+                se.Log() << "Command raw is not a string. "
+                            "Ignoring..."
+                         << LogLevel::Warning;
+                return;
             }
         } else {
-            se.Log() << "Received message for unknown worker queue"
-                     << LogLevel::Warning;
+            if (!findItr->value.IsObject()) {
+                se.Log() << "Command is not an object. "
+                            "Ignoring..."
+                         << LogLevel::Warning;
+                return;
+            }
+        }
+
+        if (command.compare("check_result") == 0) {
+            ParseCheckResult(findItr->value.GetObject());
+        } else if (command.compare("schedule_check") == 0) {
+            ParseScheduleCheck(findItr->value.GetObject());
+        } else if (command.compare("delete_downtime") == 0) {
+            ParseDeleteDowntime(findItr->value.GetObject());
+        } else if (command.compare("raw") == 0) {
+            ParseRaw(findItr->value.GetString());
         }
     }
 
   protected:
     IStatusengine &se;
 
-    void ParseCheckResult(json_object *obj) {
+    void ParseCheckResult(rapidjson::Value::Object obj) {
         check_result cr;
         init_check_result(&cr);
         char *output = nullptr;
         char *longOutput = nullptr;
         char *perfData = nullptr;
 
-        json_object_object_foreach(obj, cKey, jsonValue) {
-            std::string jsonKey(cKey);
+        for (auto &member : obj) {
+            std::string jsonKey(member.name.GetString());
             if (jsonKey.compare("host_name") == 0) {
-                cr.host_name = get_json_string(jsonValue);
+                cr.host_name = copy_json_value(member.value);
             } else if (jsonKey.compare("service_description") == 0) {
-                cr.service_description = get_json_string(jsonValue);
+                cr.service_description = copy_json_value(member.value);
             } else if (jsonKey.compare("output") == 0) {
-                output = get_json_string(jsonValue);
+                output = copy_json_value(member.value);
             } else if (jsonKey.compare("long_output") == 0) {
-                longOutput = get_json_string(jsonValue);
+                longOutput = copy_json_value(member.value);
             } else if (jsonKey.compare("perf_data") == 0) {
-                perfData = get_json_string(jsonValue);
+                perfData = copy_json_value(member.value);
             } else if (jsonKey.compare("check_type") == 0) {
-                cr.check_type = json_object_get_int64(jsonValue);
+                cr.check_type = member.value.GetInt();
             } else if (jsonKey.compare("return_code") == 0) {
-                cr.return_code = json_object_get_int64(jsonValue);
+                cr.return_code = member.value.GetInt();
             } else if (jsonKey.compare("start_time") == 0) {
-                cr.start_time.tv_sec = json_object_get_int64(jsonValue);
+                cr.start_time.tv_sec = member.value.GetInt();
             } else if (jsonKey.compare("end_time") == 0) {
-                cr.finish_time.tv_sec = json_object_get_int64(jsonValue);
+                cr.finish_time.tv_sec = member.value.GetInt();
             } else if (jsonKey.compare("early_timeout") == 0) {
-                cr.early_timeout = json_object_get_int64(jsonValue);
+                cr.early_timeout = member.value.GetInt();
             } else if (jsonKey.compare("latency") == 0) {
-                cr.latency = json_object_get_double(jsonValue);
+                cr.latency = member.value.GetDouble();
             } else if (jsonKey.compare("exited_ok") == 0) {
-                cr.exited_ok = json_object_get_int64(jsonValue);
+                cr.exited_ok = member.value.GetInt();
             }
         }
 
@@ -225,21 +215,19 @@ class MessageHandler : public IMessageHandler {
         free(perfData);
     }
 
-    void ParseScheduleCheck(json_object *obj) {
-        std::unique_ptr<const char *> hostname;
-        std::unique_ptr<const char *> service_description;
+    void ParseScheduleCheck(rapidjson::Value::Object obj) {
+        const char *hostname = nullptr;
+        const char *service_description = nullptr;
         time_t schedule_time = 0;
 
-        json_object_object_foreach(obj, cKey, jsonValue) {
-            std::string jsonKey(cKey);
+        for (auto &member : obj) {
+            std::string jsonKey(member.name.GetString());
             if (jsonKey.compare("host_name") == 0) {
-                hostname =
-                    std::make_unique<const char *>(get_json_string(jsonValue));
+                hostname = member.value.GetString();
             } else if (jsonKey.compare("service_description") == 0) {
-                service_description =
-                    std::make_unique<const char *>(get_json_string(jsonValue));
+                service_description = member.value.GetString();
             } else if (jsonKey.compare("schedule_time") == 0) {
-                schedule_time = json_object_get_int64(jsonValue);
+                schedule_time = member.value.GetInt64();
             }
         }
 
@@ -251,7 +239,7 @@ class MessageHandler : public IMessageHandler {
         }
 
         if (service_description == nullptr) {
-            host *temp_host = find_host(*hostname);
+            host *temp_host = find_host(hostname);
             if (temp_host == nullptr) {
                 se.Log() << "Received schedule_check command for unknown host "
                          << *hostname << LogLevel::Warning;
@@ -259,8 +247,7 @@ class MessageHandler : public IMessageHandler {
             }
             se.GetNebmodule().ScheduleHostCheckFixed(temp_host, schedule_time);
         } else {
-            service *temp_service =
-                find_service(*hostname, *service_description);
+            service *temp_service = find_service(hostname, service_description);
             if (temp_service == nullptr) {
                 se.Log()
                     << "Received schedule_check command for unknown service "
@@ -272,46 +259,43 @@ class MessageHandler : public IMessageHandler {
         }
     }
 
-    void ParseDeleteDowntime(json_object *obj) {
-        std::unique_ptr<const char *> hostname;
-        std::unique_ptr<const char *> service_description;
-        std::unique_ptr<const char *> comment;
+    void ParseDeleteDowntime(rapidjson::Value::Object obj) {
+        const char *hostname = nullptr;
+        const char *service_description = nullptr;
+        const char *comment = nullptr;
         time_t start_time = 0;
         time_t end_time = 0;
 
-        json_object_object_foreach(obj, cKey, jsonValue) {
-            std::string jsonKey(cKey);
+        for (auto &member : obj) {
+            std::string jsonKey(member.name.GetString());
             if (jsonKey.compare("host_name") == 0) {
-                hostname =
-                    std::make_unique<const char *>(get_json_string(jsonValue));
+                hostname = member.value.GetString();
             } else if (jsonKey.compare("service_description") == 0) {
-                service_description =
-                    std::make_unique<const char *>(get_json_string(jsonValue));
+                service_description = member.value.GetString();
             } else if (jsonKey.compare("start_time") == 0) {
-                start_time = json_object_get_int64(jsonValue);
+                start_time = member.value.GetInt64();
             } else if (jsonKey.compare("end_time") == 0) {
-                end_time = json_object_get_int64(jsonValue);
+                end_time = member.value.GetInt64();
             } else if (jsonKey.compare("comment") == 0) {
-                comment =
-                    std::make_unique<const char *>(get_json_string(jsonValue));
+                comment = member.value.GetString();
             }
         }
 
         if (hostname == nullptr) {
-            if (hostname == nullptr) {
-                se.Log() << "Received delete_downtime command without hostname "
-                         << LogLevel::Warning;
-                return;
-            }
+            se.Log() << "Received delete_downtime command without hostname "
+                     << LogLevel::Warning;
+            return;
         }
 
-        se.GetNebmodule().DeleteDowntime(*hostname, *service_description,
-                                         start_time, end_time, *comment);
+        se.GetNebmodule().DeleteDowntime(hostname, service_description,
+                                         start_time, end_time, comment);
     }
 
-    inline static void ParseRaw(json_object *obj) {
-        auto cmd = get_json_string(obj);
-        process_external_command1(cmd);
+    void ParseRaw(std::string str) {
+        char *cmd = static_cast<char *>(malloc(str.size() + 1));
+        std::strncpy(cmd, str.c_str(), str.size());
+        cmd[str.size()] = 0;
+        se.GetNebmodule().ProcessExternalCommand(cmd);
         free(cmd);
     }
 };

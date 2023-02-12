@@ -48,6 +48,7 @@ class INebmodule {
                                 const char *service_description,
                                 time_t start_time, time_t end_time,
                                 const char *comment) = 0;
+    virtual void ProcessExternalCommand(char *cmd) = 0;
     virtual Neb_NebmodulePtr GetNebNebmodulePtr() = 0;
     virtual std::string EncodeString(char *data) = 0;
 };

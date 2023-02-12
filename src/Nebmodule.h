@@ -35,6 +35,8 @@ class Nebmodule : public INebmodule {
                         time_t start_time, time_t end_time,
                         const char *comment) override;
 
+    void ProcessExternalCommand(char *) override;
+
     std::string EncodeString(char *data) override;
 
     Neb_NebmodulePtr GetNebNebmodulePtr() override;

@@ -1,15 +1,9 @@
 #pragma once
 
-#include <gtest/gtest.h>
-#include <naemon/naemon.h>
 #include <cstring>
 #include <gmock/gmock.h>
-
-#include "Nebmodule.h"
-#include "MessageHandler/MessageHandler.h"
-#include "Statusengine.h"
-#include "MessageHandler/IBulkMessageCounter.h"
-#include "ObjectSerializerImpl.h"
+#include <gtest/gtest.h>
+#include <naemon/naemon.h>
 
 namespace statusengine {
 
@@ -17,8 +11,7 @@ namespace statusengine {
 #define TARGET_HOST_NAME "my_host"
 
 class NagiosTestSuite : public ::testing::Test {
-    public:
-   
+  public:
     void SetUp() override {
         init_event_queue();
         init_objects_host(1);
@@ -54,4 +47,4 @@ class NagiosTestSuite : public ::testing::Test {
     command *cmd;
 };
 
-}
+} // namespace statusengine

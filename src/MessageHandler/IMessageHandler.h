@@ -1,7 +1,7 @@
 #pragma once
 
-#include <json.h>
 #include <memory>
+#include <rapidjson/document.h>
 #include <string_view>
 
 #include "../Queue.h"
@@ -13,8 +13,8 @@ class IMessageHandler {
 
     virtual void ProcessMessage(WorkerQueue workerQueue,
                                 const std::string &message) = 0;
-    virtual void ProcessMessage(WorkerQueue workerQueue, json_object *obj) = 0;
-
+    virtual void ProcessMessage(WorkerQueue workerQueue,
+                                rapidjson::Value::Object obj) = 0;
     virtual bool Connect() = 0;
     virtual bool Worker(unsigned long &counter) = 0;
     virtual void SendMessage(Queue queue, const std::string_view msg) = 0;

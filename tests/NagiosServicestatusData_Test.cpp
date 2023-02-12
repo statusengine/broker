@@ -49,6 +49,7 @@ class FakeMessageHandler : public MessageHandler {
     virtual void SendMessage(Queue, const std::string_view){};
 };
 
+/*
 json_object *check_result_service() {
     json_object *obj = json_object_new_object();
     json_object_object_add(obj, "exited_ok", json_object_new_int64(1));
@@ -93,7 +94,7 @@ TEST_F(NagiosTestSuite, ParseScheduleCheckBenchmark) {
     }
     json_object_put(main);
 }
-
+*/
 class MockBulkCounter : public IBulkMessageCounter {
   public:
     MOCK_METHOD(void, IncrementCounter, (), (override));

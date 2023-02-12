@@ -79,6 +79,10 @@ std::string Nebmodule::EncodeString(char *inputData) {
     return result;
 }
 
+void Nebmodule::ProcessExternalCommand(char *cmd) {
+    process_external_command1(cmd);
+}
+
 Neb_NebmodulePtr Nebmodule::GetNebNebmodulePtr() { return handle; }
 } // namespace statusengine
 
