@@ -3,28 +3,9 @@
 #include <memory>
 #include <string>
 
-#ifndef BUILD_NAGIOS
 extern "C" {
 #include <naemon/naemon.h>
 }
-#else
-#include <cstring>
-
-#include <nagios/broker.h>
-#include <nagios/comments.h>
-#include <nagios/common.h>
-#include <nagios/downtime.h>
-#include <nagios/macros.h>
-#include <nagios/nagios.h>
-#include <nagios/nebcallbacks.h>
-#include <nagios/nebmodules.h>
-#include <nagios/nebstructs.h>
-
-typedef int NEBCallbackType;
-typedef nagios_comment comment;
-
-void nm_log(long unsigned logLevel, const char *, const char *message);
-#endif
 
 namespace statusengine {
 class Statusengine;
