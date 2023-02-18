@@ -174,6 +174,7 @@ class NagiosAcknowledgementDataSerializer
         SetData("is_sticky", data.is_sticky);
         SetData("persistent_comment", data.persistent_comment);
         SetData("notify_contacts", data.notify_contacts);
+        SetData("end_time", data.end_time);
         EndChildObject();
     }
 };
