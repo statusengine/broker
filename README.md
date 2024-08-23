@@ -111,6 +111,35 @@ I have also placed a small script inside the container that shows you the queue 
 docker exec -t -i broker_naemon_1 /usr/bin/queuestatus
 ```
 
+### Development with Visual Studio Code
+
+1. Setup Naemon Core
+The easiest method is to clone the original Naemon repository and run the `initial Task` as described here:
+https://github.com/naemon/naemon-core/tree/master/.vscode
+
+
+2. Install Statusengine Broker dependencies
+```
+apt-get install git python3-pip gcc g++ cmake build-essential libglib2.0-dev libgearman-dev uuid-dev libuchardet-dev libjson-c-dev pkg-config libssl-dev librabbitmq-dev gearman-job-server
+pip3 install meson ninja
+```
+
+3. Open the Project in Visual Studio Code.
+Create a new folder named `build`.
+Adjust the path of `/home/dziegler/git/naemon-core-original` in the `tasks.json` and `settings.json`.
+
+Than run the Task `Terminal > Run Task... > configure` to setup `meson`
+
+4. Make sure the Statusengine Broker is loaded in Naemon
+```
+broker_module=/home/dziegler/git/broker/build/src/libstatusengine.so /home/dziegler/git/broker/statusengine.toml
+```
+
+5. Start Debugging using the `Debug Shared Library` configuration
+
+![vscode debugger via WSL2](/vscode.png)
+
+
 ## License
 
     statusengine - the missing event broker

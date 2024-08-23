@@ -1,0 +1,30 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug Shared Library",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/home/dziegler/git/naemon-core-original/build/bin/naemon",
+            "args": [
+                "/home/dziegler/git/naemon-core-original/build/etc/naemon/naemon.cfg"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [
+                {
+                    "name": "LD_LIBRARY_PATH",
+                    "value": "/home/dziegler/git/naemon-core-original/build/lib/pkgconfig"
+                },
+                {
+                    "name": "PKG_CONFIG_PATH",
+                    "value": "/home/dziegler/git/naemon-core-original/build/lib/pkgconfig"
+                }
+            ],
+
+            "launchCompleteCommand": "exec-run",
+            "MIMode": "gdb",
+            "miDebuggerPath": "/usr/bin/gdb",
+        }
+    ]
+}

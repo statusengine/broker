@@ -1,0 +1,39 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "configure",
+            "type": "shell",
+            "command": "meson",
+            "args": [
+                "setup",
+                "build"
+            ],
+            "options": {
+                "env": {
+                    "LD_LIBRARY_PATH": "/home/dziegler/git/naemon-core-original/build/lib/pkgconfig",
+                    "PKG_CONFIG_PATH": "/home/dziegler/git/naemon-core-original/build/lib/pkgconfig"
+                }
+            },
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "build",
+            "type": "shell",
+            "command": "ninja",
+            "args": [
+                "-C",
+                "build"
+            ],
+            "problemMatcher": ["$gcc"],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ]
+}
