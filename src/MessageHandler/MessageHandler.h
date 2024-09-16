@@ -359,15 +359,19 @@ namespace statusengine {
         */
         void SendMessage(NagiosObject &obj) override {
             if (bulk) {
-                bulkMessages.push_back(new NagiosObject(&obj));
-                if (++(*globalBulkCounter) >= maxBulkSize) {
-                    mhlist.FlushBulkQueue();
+                if(!obj.isEmpty()){
+                    bulkMessages.push_back(new NagiosObject(&obj));
+                    if (++(*globalBulkCounter) >= maxBulkSize) {
+                        mhlist.FlushBulkQueue();
+                    }
                 }
             }
             else {
-                std::string msg = obj.ToString();
-                for (auto &handler : *handlers) {
-                    handler->SendMessage(queue, msg);
+                if(!obj.isEmpty()){
+                    std::string msg = obj.ToString();
+                    for (auto &handler : *handlers) {
+                        handler->SendMessage(queue, msg);
+                    }
                 }
             }
         }

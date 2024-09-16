@@ -34,6 +34,15 @@ namespace statusengine {
         }
 
         /**
+         * Check if the JSON object is empty
+         * Objects can be empty, if the broker filters certain events
+         * @return true if the JSON object is empty, false otherwise
+         */
+        bool isEmpty() const {
+            return json_object_object_length(data) == 0;
+        }
+
+        /**
          * Counter will be incremented
          * @return json_object*
          */
@@ -504,6 +513,13 @@ namespace statusengine {
     class NagiosNotificationData : public NagiosObject {
     public:
         explicit NagiosNotificationData(const nebstruct_notification_data *notificationData) {
+            if(notificationData->type == 600 || notificationData->contacts_notified == 0){
+                // 600 = NEBTYPE_NOTIFICATION_START
+                // Naemon calls the broker_notification_data nearly for every service check. This produces a lot of traffic to the broker.
+                // Due to we dont need the NEBTYPE_NOTIFICATION_START data, and if no contacts where notified, we drop all this data hardcoded for now.
+                return;
+            }
+
             SetData("type", notificationData->type);
             SetData("flags", notificationData->flags);
             SetData("attr", notificationData->attr);
