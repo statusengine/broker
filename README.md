@@ -11,18 +11,14 @@ Visit the [documentation](https://statusengine.org/broker/) for more information
 Please compile and install the newest version of naemon or nagios. We need the header files for building the broker.
 
 ### Dependencies
-#### Meson
-https://mesonbuild.com/Getting-meson.html
 
 #### Ubuntu/Debian
 ```bash
-apt install git python3-pip gcc g++ cmake build-essential libglib2.0-dev libgearman-dev uuid-dev libuchardet-dev libjson-c-dev pkg-config libssl-dev librabbitmq-dev
-pip3 install meson ninja
+apt install git gcc g++ cmake build-essential libglib2.0-dev libgearman-dev uuid-dev libuchardet-dev libjson-c-dev pkg-config libssl-dev librabbitmq-dev
 ```
 #### CentOS
 ```bash
-yum install git python-pip gcc gcc-c++ cmake3 pkgconfig librabbitmq-devel libgearman-devel libuchardet-devel json-c-devel openssl-devel glib2-devel
-pip install meson ninja
+yum install git gcc gcc-c++ cmake3 pkgconfig librabbitmq-devel libgearman-devel libuchardet-devel json-c-devel openssl-devel glib2-devel
 ```
 
 ### Sources
@@ -40,46 +36,40 @@ Please make sure you have set up Naemon like described in the [docs](https://sta
 Then create the make files
 ```bash
 export PKG_CONFIG_PATH=/opt/naemon/lib/pkgconfig/
-meson setup --buildtype=release build
-ninja -C build
+mkdir build && cd build && cmake .. -DWITH_GEARMAN=ON -DWITH_RABBITMQ=ON
 ```
 
 ### Nagios
 Please make sure you have set up Nagios like described in the [docs](https://statusengine.org/tutorials/install-nagios4-focal/).
 
-#### Ubuntu/Debian
 ```bash
-meson setup -Dnagios=true -Dnagios_include_dir=/opt/nagios/include build
+mkdir build && cd build && cmake .. -DWITH_GEARMAN=ON -DWITH_RABBITMQ=ON -DNAGIOS_INCLUDE_DIR=/opt/nagios/include
 ```
 
-#### RHEL/CentOS
-```bash
-meson setup -Dnagios=true -Dnagios_include_dir=/opt/nagios/include build
-```
 
 ### Build
 
 ```bash
-ninja -C build
+make -j
 ```
 
 ### Installation
 
 ```bash
-ninja -C build install
+make install
 ```
 
-## Additional meson build flags
+## Additional cmake build flags
 
 ### Installation path
 
 The default installation path for the library is /usr/local, which means that the so file will be placed under /usr/local/lib/libstatusengine.so.
 
-You can specify --prefix=/opt/naemon as meson argument to change the path.
+You can specify -DCMAKE_INSTALL_PREFIX=/opt/naemon as cmake argument to change the path.
 
 ### Disable RabbitMQ or Gearman
 
-You can specify -Dgearman=false or -Drabbitmq=false as meson argument to disable gearman or rabbitmq.
+You can specify -DWITH_GEARMAN=OFF or -DWITH_RABBITMQ=OFF as cmake argument to disable gearman or rabbitmq.
 
 
 ## Configuration
