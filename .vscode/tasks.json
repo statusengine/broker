@@ -11,8 +11,8 @@
             ],
             "options": {
                 "env": {
-                    "LD_LIBRARY_PATH": "/home/dziegler/git/naemon-core-original/build/lib/pkgconfig",
-                    "PKG_CONFIG_PATH": "/home/dziegler/git/naemon-core-original/build/lib/pkgconfig"
+                    "LD_LIBRARY_PATH": "${env:HOME}/git/naemon-core-original/build/lib/pkgconfig",
+                    "PKG_CONFIG_PATH": "${env:HOME}/git/naemon-core-original/build/lib/pkgconfig"
                 }
             },
             "problemMatcher": [],

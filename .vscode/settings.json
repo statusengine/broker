@@ -54,5 +54,5 @@
         "typeinfo": "cpp"
     },
     "C_Cpp.default.configurationProvider": "mesonbuild.mesonbuild",
-    "C_Cpp.default.compileCommands": "/home/dziegler/git/broker/builddir/compile_commands.json"
+    "C_Cpp.default.compileCommands": "${workspaceFolder}/build/compile_commands.json"
 }

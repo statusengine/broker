@@ -126,19 +126,21 @@ pip3 install meson ninja
 
 3. Open the Project in Visual Studio Code.
 Create a new folder named `build`.
-Adjust the path of `/home/dziegler/git/naemon-core-original` in the `tasks.json` and `settings.json`.
+Adjust the path of `${env:HOME}/git/naemon-core-original` in the `tasks.json` and `settings.json`.
 
 Than run the Task `Terminal > Run Task... > configure` to setup `meson`
 
-4. Make sure the Statusengine Broker is loaded in Naemon
+4. In case VS Code has issues with the include path, make sure the file `"${workspaceFolder}/build/compile_commands.json"` in `settings.json` exists
+or adjust the path if necessary.
+
+5. Make sure the Statusengine Broker is loaded in Naemon
 ```
 broker_module=/home/dziegler/git/broker/build/src/libstatusengine.so /home/dziegler/git/broker/statusengine.toml
 ```
 
-5. Start Debugging using the `Debug Shared Library` configuration
+6. Start Debugging using the `Debug Shared Library` configuration
 
 ![vscode debugger via WSL2](/vscode.png)
-
 
 ## License
 
