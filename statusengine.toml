@@ -45,8 +45,12 @@ WorkerCommand = "statusngin_cmd"
 ##Vhost = "/"
 ##Timeout = 30
 ##Exchange = "statusengine"
-##DurableExchange = false
-##DurableQueues = false
+## Durable queues and exchange. Required by RabbitMQ 4, which refuses to declare a queue
+## that is neither durable nor exclusive. This stores queue and exchange *definitions* on
+## disk, not the events: messages are published transient, so the queues still buffer in
+## RAM and are still emptied by a broker restart.
+##DurableExchange = true
+##DurableQueues = true
 ##SSL = false
 ##SSL_verify = true
 ##SSL_cacert = ""

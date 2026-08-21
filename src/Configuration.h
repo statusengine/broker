@@ -132,8 +132,23 @@ namespace statusengine {
 
             Exchange = GetTomlDefault<>(tbl, "Exchange", std::string("statusengine"));
 
-            DurableExchange = GetTomlDefault<>(tbl, "DurableExchange", false);
-            DurableQueues = GetTomlDefault<>(tbl, "DurableQueues", false);
+            // Durable by default. A queue that is neither durable nor exclusive is
+            // RabbitMQ's deprecated transient_nonexcl_queues feature: 3.13 warns once per
+            // broker start, 4.x refuses the declare outright, and the broker then fails to
+            // connect at all (see Connect()). Durable has worked since AMQP 0-9-1, so it is
+            // the only value that works on every supported broker version.
+            //
+            // This does not put events on disk. Queue durability and message persistence
+            // are separate: durable stores the queue *definition*, while messages are only
+            // written durably when the publisher marks them persistent - and SendMessage
+            // passes properties=nullptr, i.e. transient. So the queues still buffer in RAM
+            // and a broker restart still empties them, which is the intended behaviour.
+            //
+            // The exchange follows the queues: a transient exchange loses its bindings on a
+            // broker restart while the durable queues survive, and keeping the pair
+            // consistent costs nothing, both being metadata only.
+            DurableExchange = GetTomlDefault<>(tbl, "DurableExchange", true);
+            DurableQueues = GetTomlDefault<>(tbl, "DurableQueues", true);
 
             SSL = GetTomlDefault<>(tbl, "SSL", false);
 
