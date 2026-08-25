@@ -40,10 +40,14 @@ namespace statusengine {
         gearman_return_t lastWorkerError;
         time_t lastSendErrorReport;
         time_t lastWorkerErrorReport;
+        time_t lastClientReconnect;
 
         /// Reports a worker error once per distinct cause, counting the rest.
         void ReportWorkerError(gearman_return_t ret);
         /// Reports that the worker is healthy again, if it previously was not.
         void ReportWorkerRecovered();
+        /// Rebuilds the client's server connection after a failed send, at most now and
+        /// then. libgearman does not do this on its own for the client.
+        void ReconnectClient();
     };
 } // namespace statusengine

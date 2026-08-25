@@ -15,6 +15,10 @@ namespace statusengine {
         /// once per message was around 4 lines a second even on a tiny installation.
         const time_t outageReportIntervalSeconds = 300;
 
+        /// How often a broken client connection is rebuilt. Short enough to recover from a
+        /// job server restart quickly, long enough not to do it for every single message.
+        const time_t clientReconnectIntervalSeconds = 5;
+
         /// True if this condition should be written to the log now.
         bool ShouldReport(time_t &lastReport, unsigned long occurrences) {
             const time_t now = std::time(nullptr);
@@ -42,7 +46,7 @@ namespace statusengine {
     GearmanClient::GearmanClient(IStatusengine *se, std::shared_ptr<GearmanConfiguration> cfg)
         : MessageHandler(se), cfg(cfg), client(nullptr), worker(nullptr), failedSends(0),
           failedWorkerCalls(0), lastWorkerError(GEARMAN_SUCCESS), lastSendErrorReport(0),
-          lastWorkerErrorReport(0) {
+          lastWorkerErrorReport(0), lastClientReconnect(0) {
 
         queueNames = cfg->GetQueueNames();
         if (!queueNames->empty()) {
@@ -132,6 +136,7 @@ namespace statusengine {
             // An unreachable job server fails every single message. Logging each one buries
             // the rest of the log and can outpace the events themselves, so report the
             // outage once and count what it costs.
+            ReconnectClient();
             if (ShouldReport(lastSendErrorReport, ++failedSends)) {
                 auto error = gearman_client_error(client);
                 se->Log() << "Could not write message to gearman queue (" << failedSends
@@ -147,6 +152,26 @@ namespace statusengine {
                       << LogLevel::Error;
             failedSends = 0;
             lastSendErrorReport = 0;
+        }
+    }
+
+    void GearmanClient::ReconnectClient() {
+        const time_t now = std::time(nullptr);
+        if (now - lastClientReconnect < clientReconnectIntervalSeconds) {
+            return;
+        }
+        lastClientReconnect = now;
+
+        // libgearman leaves a failed client connection failed. The worker recovers because
+        // libgearman resets its universal internally on a connect error (worker.cc), but
+        // nothing does that for the client, so without this the broker stops delivering to
+        // gearman until naemon is restarted. Dropping and re-adding the server list forces
+        // a fresh connection on the next send.
+        gearman_client_remove_servers(client);
+        auto ret = gearman_client_add_servers(client, cfg->URL.c_str());
+        if (!gearman_success(ret)) {
+            se->Log() << "Could not re-add gearman server " << cfg->URL << ": " << gearman_client_error(client)
+                      << LogLevel::Error;
         }
     }
 

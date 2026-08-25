@@ -37,6 +37,12 @@ set of memory errors that could take the monitoring core down with them.
 - **Log levels were wrong in both directions.** At `Level = Error` warnings were still
   written, and at `Level = Info` - the most verbose setting - warnings were dropped.
 - The module title was overwritten by the copyright string in the naemon module info.
+- **The gearman client now reconnects after a job server restart.** It never did:
+  `gearman_client_add_servers()` ran once at startup and a failed send had no recovery
+  path, so once the job server had been restarted the broker stopped delivering to gearman
+  until naemon itself was restarted. The worker side was unaffected, which made this easy
+  to miss - libgearman resets the worker's connection internally but does nothing for the
+  client.
 - **An unreachable gearman job server no longer floods the log.** Every failed message
   produced its own line - measured at over 350 in five minutes on a small test
   installation, and it scales with the number of checks. An outage is now reported when it
