@@ -224,44 +224,45 @@ namespace statusengine {
                 free(perfData);
             });
 
-            json_object_object_foreach(obj, cKey, jsonValue) {
-                std::string jsonKey(cKey);
-                if (jsonKey.compare("host_name") == 0) {
-                    cr.host_name = get_json_string_c(jsonValue);
-                }
-                else if (jsonKey.compare("service_description") == 0) {
-                    cr.service_description = get_json_string_c(jsonValue);
-                }
-                else if (jsonKey.compare("output") == 0) {
-                    output = get_json_string_c(jsonValue);
-                }
-                else if (jsonKey.compare("long_output") == 0) {
-                    longOutput = get_json_string_c(jsonValue);
-                }
-                else if (jsonKey.compare("perf_data") == 0) {
-                    perfData = get_json_string_c(jsonValue);
-                }
-                else if (jsonKey.compare("check_type") == 0) {
-                    cr.check_type = json_object_get_int64(jsonValue);
-                }
-                else if (jsonKey.compare("return_code") == 0) {
-                    cr.return_code = json_object_get_int64(jsonValue);
-                }
-                else if (jsonKey.compare("start_time") == 0) {
-                    cr.start_time.tv_sec = json_object_get_int64(jsonValue);
-                }
-                else if (jsonKey.compare("end_time") == 0) {
-                    cr.finish_time.tv_sec = json_object_get_int64(jsonValue);
-                }
-                else if (jsonKey.compare("early_timeout") == 0) {
-                    cr.early_timeout = json_object_get_int64(jsonValue);
-                }
-                else if (jsonKey.compare("latency") == 0) {
-                    cr.latency = json_object_get_double(jsonValue);
-                }
-                else if (jsonKey.compare("exited_ok") == 0) {
-                    cr.exited_ok = json_object_get_int64(jsonValue);
-                }
+            // Direct lookups rather than iterating every key and running it down a chain
+            // of string comparisons: json-c keeps the members in a hash table, so this is
+            // one lookup per field instead of comparisons proportional to keys times fields.
+            json_object *value = nullptr;
+            if (json_object_object_get_ex(obj, "host_name", &value)) {
+                cr.host_name = get_json_string_c(value);
+            }
+            if (json_object_object_get_ex(obj, "service_description", &value)) {
+                cr.service_description = get_json_string_c(value);
+            }
+            if (json_object_object_get_ex(obj, "output", &value)) {
+                output = get_json_string_c(value);
+            }
+            if (json_object_object_get_ex(obj, "long_output", &value)) {
+                longOutput = get_json_string_c(value);
+            }
+            if (json_object_object_get_ex(obj, "perf_data", &value)) {
+                perfData = get_json_string_c(value);
+            }
+            if (json_object_object_get_ex(obj, "check_type", &value)) {
+                cr.check_type = json_object_get_int64(value);
+            }
+            if (json_object_object_get_ex(obj, "return_code", &value)) {
+                cr.return_code = json_object_get_int64(value);
+            }
+            if (json_object_object_get_ex(obj, "start_time", &value)) {
+                cr.start_time.tv_sec = json_object_get_int64(value);
+            }
+            if (json_object_object_get_ex(obj, "end_time", &value)) {
+                cr.finish_time.tv_sec = json_object_get_int64(value);
+            }
+            if (json_object_object_get_ex(obj, "early_timeout", &value)) {
+                cr.early_timeout = json_object_get_int64(value);
+            }
+            if (json_object_object_get_ex(obj, "latency", &value)) {
+                cr.latency = json_object_get_double(value);
+            }
+            if (json_object_object_get_ex(obj, "exited_ok", &value)) {
+                cr.exited_ok = json_object_get_int64(value);
             }
 
             cr.output = BuildCheckOutput(output, longOutput, perfData);
