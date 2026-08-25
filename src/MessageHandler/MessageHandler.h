@@ -20,13 +20,32 @@ namespace statusengine {
 
         explicit MessageHandler(IStatusengine *se) : se(se) {}
 
+        /**
+         * Copy a json string into a buffer owned by the C++ side. Release it with delete[].
+         */
         inline static char *get_json_string(json_object *obj) {
             auto jsonChars = json_object_get_string(obj);
+            if (jsonChars == nullptr) {
+                return nullptr;
+            }
             auto jsonCharsLen = json_object_get_string_len(obj);
             char *chars = new char[jsonCharsLen + 1];
-            std::strncpy(chars, jsonChars, jsonCharsLen);
+            std::memcpy(chars, jsonChars, jsonCharsLen);
             chars[jsonCharsLen] = 0; // set last byte to zero
             return chars;
+        }
+
+        /**
+         * Copy a json string into a buffer allocated by the malloc family. Everything that
+         * is stored in a check_result has to be allocated this way: free_check_result()
+         * releases those strings with free(), which must not be paired with new[].
+         */
+        inline static char *get_json_string_c(json_object *obj) {
+            auto jsonChars = json_object_get_string(obj);
+            if (jsonChars == nullptr) {
+                return nullptr;
+            }
+            return strndup(jsonChars, json_object_get_string_len(obj));
         }
 
         void ProcessMessage(WorkerQueue workerQueue, const std::string &message) override {
@@ -149,30 +168,79 @@ namespace statusengine {
         IStatusengine *se;
 
 
+        /**
+         * Join output, long output and perf data the way naemon expects them in a single
+         * plugin output string. The result is allocated with malloc, so that
+         * free_check_result() can release it. Returns nullptr if there is nothing to join,
+         * i.e. if at most one of the parts is present.
+         */
+        inline static char *BuildCheckOutput(const char *output, const char *longOutput, const char *perfData) {
+            if (output == nullptr || (longOutput == nullptr && perfData == nullptr)) {
+                return nullptr;
+            }
+
+            size_t strLen;
+            if (longOutput == nullptr) {
+                // output + pipe + perfData + newline + zero byte
+                strLen = std::strlen(output) + std::strlen(perfData) + 3;
+            }
+            else if (perfData == nullptr) {
+                // output + newline + longOutput + zero byte
+                strLen = std::strlen(output) + std::strlen(longOutput) + 2;
+            }
+            else {
+                // output + pipe + perfData + newline + longOutput + zero byte
+                strLen = std::strlen(output) + std::strlen(perfData) + std::strlen(longOutput) + 3;
+            }
+
+            char *fullOutput = static_cast<char *>(malloc(strLen));
+            if (fullOutput == nullptr) {
+                return nullptr;
+            }
+
+            if (longOutput == nullptr) {
+                std::snprintf(fullOutput, strLen, "%s|%s\n", output, perfData);
+            }
+            else if (perfData == nullptr) {
+                std::snprintf(fullOutput, strLen, "%s\n%s", output, longOutput);
+            }
+            else {
+                std::snprintf(fullOutput, strLen, "%s|%s\n%s", output, perfData, longOutput);
+            }
+            return fullOutput;
+        }
+
         void ParseCheckResult(json_object *obj) {
             check_result cr;
             init_check_result(&cr);
             char *output = nullptr;
             char *longOutput = nullptr;
             char *perfData = nullptr;
-            char *fullOutput = nullptr;
+            // These three stay ours unless ownership is explicitly handed to cr.output below,
+            // in which case the local pointer is cleared. Everything still held here at the
+            // end of the function is ours to release; free_check_result() takes care of cr.
+            auto freeParts = gsl::finally([&] {
+                free(output);
+                free(longOutput);
+                free(perfData);
+            });
 
             json_object_object_foreach(obj, cKey, jsonValue) {
                 std::string jsonKey(cKey);
                 if (jsonKey.compare("host_name") == 0) {
-                    cr.host_name = get_json_string(jsonValue);
+                    cr.host_name = get_json_string_c(jsonValue);
                 }
                 else if (jsonKey.compare("service_description") == 0) {
-                    cr.service_description = get_json_string(jsonValue);
+                    cr.service_description = get_json_string_c(jsonValue);
                 }
                 else if (jsonKey.compare("output") == 0) {
-                    output = get_json_string(jsonValue);
+                    output = get_json_string_c(jsonValue);
                 }
                 else if (jsonKey.compare("long_output") == 0) {
-                    longOutput = get_json_string(jsonValue);
+                    longOutput = get_json_string_c(jsonValue);
                 }
                 else if (jsonKey.compare("perf_data") == 0) {
-                    perfData = get_json_string(jsonValue);
+                    perfData = get_json_string_c(jsonValue);
                 }
                 else if (jsonKey.compare("check_type") == 0) {
                     cr.check_type = json_object_get_int64(jsonValue);
@@ -197,34 +265,17 @@ namespace statusengine {
                 }
             }
 
-            if (output != nullptr && longOutput == nullptr) {
-                if (perfData == nullptr) {
+            cr.output = BuildCheckOutput(output, longOutput, perfData);
+            if (cr.output == nullptr) {
+                // Only a single part was given, hand it over instead of copying it.
+                if (output != nullptr) {
                     cr.output = output;
-                } else {
-                    // we need a new string with size of strings + pipe + newline + zero byte
-                    auto strLen = std::strlen(output) + std::strlen(perfData) + 3;
-                    fullOutput = new char[strLen];
-                    std::snprintf(fullOutput, strLen, "%s|%s\n", output, perfData);
-                    cr.output = fullOutput;
+                    output = nullptr;
                 }
-            }
-            else if (output != nullptr && longOutput != nullptr) {
-                if (perfData == nullptr) {
-                    // we need a new string with size of strings + newline + zero byte
-                    auto strLen = std::strlen(output) + std::strlen(longOutput) + 2;
-                    fullOutput = new char[strLen];
-                    std::snprintf(fullOutput, strLen, "%s\n%s", output, longOutput);
-                    cr.output = fullOutput;
-                } else {
-                    // we need a new string with size of strings + pipe + newline + zero byte
-                    auto strLen = std::strlen(output) + std::strlen(longOutput) + std::strlen(perfData) + 3;
-                    fullOutput = new char[strLen];
-                    std::snprintf(fullOutput, strLen, "%s|%s\n%s", output, perfData, longOutput);
-                    cr.output = fullOutput;
+                else if (longOutput != nullptr) {
+                    cr.output = longOutput;
+                    longOutput = nullptr;
                 }
-            }
-            else if (longOutput != nullptr && output == nullptr) {
-                cr.output = longOutput;
             }
 
             if (cr.host_name == nullptr) {
@@ -242,14 +293,8 @@ namespace statusengine {
                 process_check_result(&cr);
             }
 
-            // deletes hostname, service_description and output
+            // frees host_name, service_description and output
             free_check_result(&cr);
-            if (fullOutput != nullptr) {
-                // free_check_result only frees fulloutput in this case
-                delete output;
-                delete longOutput;
-                delete perfData;
-            }
         }
 
         void ParseScheduleCheck(json_object *obj) {

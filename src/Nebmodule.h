@@ -1,7 +1,8 @@
 #pragma once
 
 #include <string>
-#include <uchardet.h>
+
+#include "Encoding.h"
 
 #ifndef BUILD_NAGIOS
 extern "C" {
@@ -62,13 +63,13 @@ namespace statusengine {
 
         void DeleteDowntime(const char *hostname, const char *service_description, time_t start_time, time_t end_time, const char *comment);
 
-        std::string EncodeString(char *data);
+        std::string EncodeString(const char *data);
 
       private:
-        explicit Nebmodule() : se(nullptr), uc(nullptr) {}
+        explicit Nebmodule() : se(nullptr), encoder() {}
 
         Statusengine *se;
-        uchardet_t uc;
+        Encoder encoder;
     };
 } // namespace statusengine
 

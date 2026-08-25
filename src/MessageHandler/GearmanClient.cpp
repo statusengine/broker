@@ -88,9 +88,15 @@ namespace statusengine {
     }
 
     void GearmanClient::SendMessage(Queue queue, const std::string &message) {
-        auto queueName = queueNames->find(queue)->second;
-        auto ret = gearman_client_do_background(client, queueName.c_str(), nullptr, message.c_str(), message.length(),
-                                                nullptr);
+        auto queueNameIt = queueNames->find(queue);
+        if (queueNameIt == queueNames->end()) {
+            auto QueueId = QueueNameHandler::Instance().QueueIds();
+            se->Log() << "No gearman queue configured for " << QueueId.at(queue) << ", dropping message"
+                      << LogLevel::Error;
+            return;
+        }
+        auto ret = gearman_client_do_background(client, queueNameIt->second.c_str(), nullptr, message.c_str(),
+                                                message.length(), nullptr);
         if (!gearman_success(ret)) {
             se->Log() << "Could not write message to gearman queue: " << gearman_client_error(client)
                       << LogLevel::Error;

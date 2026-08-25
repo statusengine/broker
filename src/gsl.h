@@ -17,6 +17,8 @@
 
 #pragma once
 
+#include <utility> // std::move, std::forward
+
 namespace gsl {
 
 template< class F >

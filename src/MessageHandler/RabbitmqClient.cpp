@@ -18,6 +18,13 @@ namespace statusengine {
     }
 
     bool RabbitmqClient::CloseConnection(bool quiet) {
+        // Reachable with conn == nullptr: if an earlier handler fails in
+        // MessageHandlerList::Connect(), the remaining clients are destroyed without ever
+        // having connected, and the amqp calls below do not accept a null connection.
+        if (conn == nullptr) {
+            return true;
+        }
+
         bool result = true;
         if (!CheckAMQPReply(amqp_channel_close(conn, 1, AMQP_REPLY_SUCCESS), "Closing amqp channel", quiet)) {
             result = false;
@@ -32,6 +39,9 @@ namespace statusengine {
             }
             result = false;
         }
+        conn = nullptr;
+        socket = nullptr;
+        connected = false;
         return result;
     }
 
@@ -97,6 +107,20 @@ namespace statusengine {
 
     bool RabbitmqClient::Connect(bool quiet) {
         conn = amqp_new_connection();
+
+        // Every failure path below used to return without releasing the connection state,
+        // and with it the socket's file descriptor once the socket was open. SendMessage()
+        // retries Connect() for every single message while the broker is unreachable, so
+        // that leak grows without bound.
+        bool connectOk = false;
+        auto cleanup = gsl::finally([&] {
+            if (!connectOk) {
+                amqp_destroy_connection(conn);
+                conn = nullptr;
+                socket = nullptr;
+            }
+        });
+
         if (cfg->SSL) {
             socket = amqp_ssl_socket_new(conn);
 #ifndef WITH_RABBITMQ_CX080
@@ -198,12 +222,20 @@ namespace statusengine {
         }
 
         connected = true;
+        connectOk = true;
         se->Log() << "Rabbitmq (re)connected" << LogLevel::Info;
         return true;
     }
 
     void RabbitmqClient::SendMessage(Queue queue, const std::string &message) {
-        auto queueName = queueNames->find(queue)->second;
+        auto queueNameIt = queueNames->find(queue);
+        if (queueNameIt == queueNames->end()) {
+            auto QueueId = QueueNameHandler::Instance().QueueIds();
+            se->Log() << "No rabbitmq queue configured for " << QueueId.at(queue) << ", dropping message"
+                      << LogLevel::Error;
+            return;
+        }
+        auto queueName = queueNameIt->second;
         if (connected || Connect(true)) {
             amqp_bytes_t message_bytes;
             message_bytes.len = message.length();
@@ -223,6 +255,12 @@ namespace statusengine {
     }
 
     bool RabbitmqClient::Worker(unsigned long &counter) {
+        // CloseConnection() clears conn, and the amqp calls below do not accept a null
+        // connection. Reconnecting is SendMessage()'s job, not the worker's.
+        if (conn == nullptr || !connected) {
+            return false;
+        }
+
         amqp_rpc_reply_t res;
         amqp_envelope_t envelope;
 

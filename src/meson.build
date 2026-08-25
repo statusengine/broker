@@ -1,4 +1,4 @@
-statusengine_sources = ['Nebmodule.cpp', 'Statusengine.cpp', 'MessageHandler/MessageHandlerList.cpp']
+statusengine_sources = ['Encoding.cpp', 'Nebmodule.cpp', 'Statusengine.cpp', 'MessageHandler/MessageHandlerList.cpp']
 
 statusengine_deps = [uchardet_dep, jsonc_dep, toml_dep]
 statusengine_cpp_args = []
