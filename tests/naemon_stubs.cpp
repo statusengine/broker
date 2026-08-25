@@ -14,6 +14,15 @@
 
 std::vector<std::string> capturedLogs;
 
+#ifdef BUILD_NAGIOS
+// Under nagios, Nebmodule.h provides nm_log() as an inline that forwards here, so this is
+// where the log has to be captured for the assertions to see anything.
+extern "C" int write_to_all_logs(char *message, unsigned long) {
+    capturedLogs.emplace_back(message != nullptr ? message : "");
+    return 0;
+}
+#endif
+
 // Signature has to match naemon/logging.h exactly.
 extern "C" void nm_log(int, const char *fmt, ...) {
     char buffer[4096];
@@ -44,6 +53,9 @@ extern "C" int clear_volatile_macros_r(nagios_macros *) {
     return 0;
 }
 
+// The two cores differ here: naemon has "struct comment" and a const char* version
+// string, nagios has "struct nagios_comment" and a non const one.
+#ifndef BUILD_NAGIOS
 extern "C" struct comment *find_service_comment(unsigned long) {
     return nullptr;
 }
@@ -55,6 +67,20 @@ extern "C" struct comment *find_host_comment(unsigned long) {
 extern "C" const char *get_program_version(void) {
     return "test";
 }
+#else
+extern "C" struct nagios_comment *find_service_comment(unsigned long) {
+    return nullptr;
+}
+
+extern "C" struct nagios_comment *find_host_comment(unsigned long) {
+    return nullptr;
+}
+
+extern "C" char *get_program_version(void) {
+    static char version[] = "test";
+    return version;
+}
+#endif
 
 namespace statusengine {
     // Defined here instead of linking Nebmodule.cpp, which would pull in the whole naemon
@@ -76,14 +102,14 @@ extern "C" int init_check_result(check_result *cr) {
 }
 
 extern "C" int free_check_result(check_result *cr) {
+    // output_file is left alone: the broker never sets it, and nagios declares it const
+    // while naemon does not.
     free(cr->host_name);
     free(cr->service_description);
     free(cr->output);
-    free(cr->output_file);
     cr->host_name = nullptr;
     cr->service_description = nullptr;
     cr->output = nullptr;
-    cr->output_file = nullptr;
     return 0;
 }
 

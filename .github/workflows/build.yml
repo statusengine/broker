@@ -85,11 +85,12 @@ jobs:
           mkdir -p /opt/nagios/include
           ln -s "$(readlink -f devtools/ci/nagios)" /opt/nagios/include/nagios
 
-      - name: Build
+      - name: Build and test
         run: |
-          meson setup --buildtype=release -Dnagios=true \
+          meson setup --buildtype=release -Dtests=true -Dnagios=true \
             -Dnagios_include_dir=/opt/nagios/include build
           ninja -C build
+          meson test -C build --print-errorlogs
 
   tests:
     name: unit tests (${{ matrix.sanitize && 'sanitized' || 'plain' }})
