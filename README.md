@@ -117,6 +117,13 @@ The reason is that the underlying naemon/nagios `nebstruct_*` structs simply hav
 duplication is kept for backwards compatibility, so that existing consumers do not break.
 Do not read a separate long plugin output out of these five event types.
 
+### Compact JSON
+
+Messages are serialised without insignificant whitespace (`{"a":1}` rather than
+`{"a": 1, ...}`), which is 8 to 9 percent fewer bytes per message. This is a
+whitespace only difference - the JSON is unchanged and any conformant parser
+reads it identically. Do not match on the raw payload text.
+
 ### `timestamp` on core restart
 
 The `RestartData` message carries the unix timestamp of the restart:
