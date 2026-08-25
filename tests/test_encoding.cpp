@@ -76,3 +76,43 @@ TEST_CASE("Encoder keeps embedded newlines and pipes") {
     Encoder encoder;
     CHECK(encoder.ToUtf8("first line\nsecond line|perf=1") == "first line\nsecond line|perf=1");
 }
+
+TEST_CASE("valid multi byte utf8 passes through untouched") {
+    Encoder encoder;
+    // two, three and four byte sequences
+    const std::string samples[] = {"ü ö ä ß", "€ ✓ →", "\xf0\x9f\x91\x8d ok", "日本語のテキスト"};
+    for (const auto &sample : samples) {
+        CHECK(encoder.ToUtf8(sample.c_str()) == sample);
+    }
+}
+
+TEST_CASE("malformed utf8 is not mistaken for valid") {
+    // These must fall through to charset detection rather than being passed through as
+    // "already utf8", otherwise broken bytes would reach the queue.
+    Encoder encoder;
+
+    SUBCASE("lone continuation byte") {
+        const char input[] = "ok \x80 tail";
+        CHECK(encoder.ToUtf8(input) != std::string(input));
+    }
+    SUBCASE("truncated two byte sequence at end") {
+        const char input[] = "ok \xc3";
+        CHECK(encoder.ToUtf8(input) != std::string(input));
+    }
+    SUBCASE("overlong encoding of '/'") {
+        const char input[] = "ok \xc0\xaf tail";
+        CHECK(encoder.ToUtf8(input) != std::string(input));
+    }
+    SUBCASE("surrogate half") {
+        const char input[] = "ok \xed\xa0\x80 tail";
+        CHECK(encoder.ToUtf8(input) != std::string(input));
+    }
+}
+
+TEST_CASE("ascii output is returned byte for byte") {
+    // ASCII is a subset of UTF-8, so the fast path returns it unchanged where the old code
+    // ran it through an iconv ASCII->UTF-8 conversion. The bytes have to be identical.
+    Encoder encoder;
+    const std::string sample = "OK - up 3 days, load 0.14 | uptime=3;;;0 load=0.14;;;0";
+    CHECK(encoder.ToUtf8(sample.c_str()) == sample);
+}

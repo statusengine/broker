@@ -7,6 +7,68 @@
 
 namespace statusengine {
 
+    namespace {
+        /**
+         * True if the bytes already are valid UTF-8. Pure ASCII is a subset of UTF-8, so
+         * this one check covers both cases that need no conversion at all.
+         *
+         * Worth having because uchardet's statistical detection costs around 4us on a
+         * typical plugin output, while this scan is a few nanoseconds per byte - and
+         * virtually all real plugin output is ASCII or valid UTF-8 already.
+         */
+        bool IsValidUtf8(const char *data, size_t length) {
+            const unsigned char *p = reinterpret_cast<const unsigned char *>(data);
+            for (size_t i = 0; i < length;) {
+                const unsigned char c = p[i];
+                if (c < 0x80) {
+                    i += 1;
+                    continue;
+                }
+
+                size_t continuation;
+                unsigned int codepoint;
+                if ((c & 0xe0) == 0xc0) {
+                    continuation = 1;
+                    codepoint = c & 0x1fu;
+                }
+                else if ((c & 0xf0) == 0xe0) {
+                    continuation = 2;
+                    codepoint = c & 0x0fu;
+                }
+                else if ((c & 0xf8) == 0xf0) {
+                    continuation = 3;
+                    codepoint = c & 0x07u;
+                }
+                else {
+                    return false; // continuation byte in leading position, or 5/6 byte form
+                }
+
+                if (i + continuation >= length) {
+                    return false; // truncated sequence
+                }
+                for (size_t k = 1; k <= continuation; ++k) {
+                    if ((p[i + k] & 0xc0) != 0x80) {
+                        return false;
+                    }
+                    codepoint = (codepoint << 6) | (p[i + k] & 0x3fu);
+                }
+
+                // Reject the encodings a strict decoder rejects, so that anything this
+                // function passes through really is well formed UTF-8.
+                if ((continuation == 1 && codepoint < 0x80) || (continuation == 2 && codepoint < 0x800) ||
+                    (continuation == 3 && codepoint < 0x10000)) {
+                    return false; // overlong
+                }
+                if (codepoint > 0x10FFFF || (codepoint >= 0xD800 && codepoint <= 0xDFFF)) {
+                    return false; // out of range or surrogate half
+                }
+
+                i += continuation + 1;
+            }
+            return true;
+        }
+    } // namespace
+
     Encoder::Encoder() : uc(uchardet_new()), warn() {}
 
     Encoder::~Encoder() {
@@ -26,6 +88,12 @@ namespace statusengine {
         const auto inputLength = std::strlen(inputData);
         if (inputLength == 0) {
             return std::string();
+        }
+
+        // Fast path: nothing to detect and nothing to convert if it already is UTF-8.
+        // Skipping uchardet here is what makes the common case cheap.
+        if (IsValidUtf8(inputData, inputLength)) {
+            return std::string(inputData, inputLength);
         }
 
         uchardet_handle_data(uc, inputData, inputLength); //TODO error handling
