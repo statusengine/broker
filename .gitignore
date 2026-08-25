@@ -12,3 +12,6 @@
 /vendor/iconv
 /vendor/yaml_cpp
 /build
+# meson subprojects: keep the .wrap files, ignore what meson downloads
+/subprojects/*
+!/subprojects/*.wrap

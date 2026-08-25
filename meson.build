@@ -22,3 +22,7 @@ endif
 toml_dep = declare_dependency(include_directories: include_directories('vendor')).as_system('system')
 
 subdir('src')
+
+if get_option('tests')
+    subdir('tests')
+endif
