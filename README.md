@@ -16,12 +16,12 @@ https://mesonbuild.com/Getting-meson.html
 
 #### Ubuntu/Debian
 ```bash
-apt install git python3-pip gcc g++ cmake build-essential libglib2.0-dev libgearman-dev uuid-dev libuchardet-dev libjson-c-dev pkg-config libssl-dev librabbitmq-dev
+apt install git python3-pip gcc g++ build-essential libglib2.0-dev libgearman-dev uuid-dev libuchardet-dev libjson-c-dev pkg-config libssl-dev librabbitmq-dev
 pip3 install meson ninja
 ```
 #### CentOS
 ```bash
-yum install git python-pip gcc gcc-c++ cmake3 pkgconfig librabbitmq-devel libgearman-devel libuchardet-devel json-c-devel openssl-devel glib2-devel
+yum install git python-pip gcc gcc-c++ pkgconfig librabbitmq-devel libgearman-devel libuchardet-devel json-c-devel openssl-devel glib2-devel
 pip install meson ninja
 ```
 
@@ -45,6 +45,13 @@ ninja -C build
 ```
 
 ### Nagios
+
+> **Note:** Nagios support is a deprecation candidate. It is kept for now, but it doubles
+> the maintenance cost of some parts of the module (`Nebmodule::DeleteDowntime()` for
+> example exists twice in nearly identical form). If you build the broker against Nagios,
+> please open an issue and say so, otherwise the Nagios code paths may be removed in a
+> future release.
+
 Please make sure you have set up Nagios like described in the [docs](https://statusengine.org/tutorials/install-nagios4-focal/).
 
 #### Ubuntu/Debian
@@ -120,7 +127,7 @@ https://github.com/naemon/naemon-core/tree/master/.vscode
 
 2. Install Statusengine Broker dependencies
 ```
-apt-get install git python3-pip gcc g++ cmake build-essential libglib2.0-dev libgearman-dev uuid-dev libuchardet-dev libjson-c-dev pkg-config libssl-dev librabbitmq-dev gearman-job-server
+apt-get install git python3-pip gcc g++ build-essential libglib2.0-dev libgearman-dev uuid-dev libuchardet-dev libjson-c-dev pkg-config libssl-dev librabbitmq-dev gearman-job-server
 pip3 install meson ninja
 ```
 

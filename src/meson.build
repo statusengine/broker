@@ -1,3 +1,7 @@
+version_conf = configuration_data()
+version_conf.set_quoted('STATUSENGINE_VERSION', meson.project_version())
+version_h = configure_file(output: 'version.h', configuration: version_conf)
+
 statusengine_sources = ['Encoding.cpp', 'Nebmodule.cpp', 'Statusengine.cpp', 'MessageHandler/MessageHandlerList.cpp']
 
 statusengine_deps = [uchardet_dep, jsonc_dep, toml_dep]
@@ -29,7 +33,7 @@ if get_option('rabbitmq') and librabbitmq_dep.found()
 endif
 
 statusengine_lib = shared_module('statusengine',
-    statusengine_sources,
+    statusengine_sources, version_h,
     dependencies: statusengine_deps,
     cpp_args: statusengine_cpp_args,
     install: true)

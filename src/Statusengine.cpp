@@ -9,6 +9,7 @@
 #include "NagiosObject.h"
 #include "Nebmodule.h"
 #include "Utility.h"
+#include "version.h"
 
 namespace statusengine {
 
@@ -22,7 +23,7 @@ namespace statusengine {
         SetModuleInfo(NEBMODULE_MODINFO_TITLE, "Statusengine - the missing event broker");
         SetModuleInfo(NEBMODULE_MODINFO_AUTHOR, "Johannes Drummer");
         SetModuleInfo(NEBMODULE_MODINFO_TITLE, "Copyright (c) 2018 - present Johannes Drummer");
-        SetModuleInfo(NEBMODULE_MODINFO_VERSION, "4.0.0");
+        SetModuleInfo(NEBMODULE_MODINFO_VERSION, STATUSENGINE_VERSION);
         SetModuleInfo(NEBMODULE_MODINFO_LICENSE, "GPL v2");
         SetModuleInfo(NEBMODULE_MODINFO_DESC, "A powerful and flexible event broker");
 

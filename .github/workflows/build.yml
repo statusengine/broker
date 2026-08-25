@@ -1,0 +1,93 @@
+name: build
+
+on:
+  push:
+    branches: [ master, rabbitmq-4 ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  naemon:
+    name: naemon (${{ matrix.image }}, ${{ matrix.options }})
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ matrix.image }}
+    strategy:
+      fail-fast: false
+      matrix:
+        image:
+          - ubuntu:22.04
+          - ubuntu:24.04
+          - debian:12
+        options:
+          - ''
+        include:
+          # The build options are only exercised on a single image, they are
+          # independent of the distribution.
+          - image: ubuntu:24.04
+            options: '-Dgearman=false'
+          - image: ubuntu:24.04
+            options: '-Drabbitmq=false'
+    steps:
+      - name: Install dependencies
+        run: |
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+            g++ pkg-config meson ninja-build git ca-certificates \
+            libglib2.0-dev libgearman-dev libjson-c-dev libuchardet-dev \
+            librabbitmq-dev libssl-dev uuid-dev
+
+      - uses: actions/checkout@v4
+
+      - name: Provide naemon headers
+        # We only need the headers to build the module, not libnaemon itself, so the
+        # checked in stubs stand in for an installed naemon-dev package.
+        run: |
+          set -e
+          mkdir -p /opt/naemon/include /usr/local/lib/pkgconfig
+          ln -s "$(readlink -f devtools/ci/naemon)" /opt/naemon/include/naemon
+          ln -s "$(readlink -f devtools/ci/naemon.pc)" /usr/local/lib/pkgconfig/naemon.pc
+
+      - name: Build
+        env:
+          PKG_CONFIG_PATH: /usr/local/lib/pkgconfig
+        run: |
+          meson setup --buildtype=release ${{ matrix.options }} build
+          ninja -C build
+
+  nagios:
+    name: nagios (${{ matrix.image }})
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ matrix.image }}
+    strategy:
+      fail-fast: false
+      matrix:
+        image:
+          - ubuntu:24.04
+          - debian:12
+    steps:
+      - name: Install dependencies
+        run: |
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+            g++ pkg-config meson ninja-build git ca-certificates \
+            libglib2.0-dev libgearman-dev libjson-c-dev libuchardet-dev \
+            librabbitmq-dev libssl-dev uuid-dev
+
+      - uses: actions/checkout@v4
+
+      - name: Provide nagios headers
+        # The include dir has to live outside the source tree, meson rejects
+        # include_directories() pointing back into it.
+        run: |
+          set -e
+          mkdir -p /opt/nagios/include
+          ln -s "$(readlink -f devtools/ci/nagios)" /opt/nagios/include/nagios
+
+      - name: Build
+        run: |
+          meson setup --buildtype=release -Dnagios=true \
+            -Dnagios_include_dir=/opt/nagios/include build
+          ninja -C build
+

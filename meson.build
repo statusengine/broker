@@ -1,6 +1,9 @@
 project('statusengine-broker', 'cpp',
-    version: '4.2.0',
-    default_options: ['warning_level=3', 'cpp_std=c++11'],
+    version: '4.0.4',
+    default_options: ['warning_level=3', 'cpp_std=c++17',
+                      # The module is loaded by an absolute path from naemon.cfg, so it goes
+                      # straight into <prefix>/lib rather than a multiarch subdirectory.
+                      'libdir=lib'],
     license: 'GPLv2+')
 
 uchardet_dep = dependency('uchardet')
@@ -14,7 +17,7 @@ else
     glib_dep = dependency('glib-2.0')
     naemon_full_dep = dependency('naemon')
     # We don't want to link against libnaemon
-    naemon_dep = declare_dependency(include_directories: include_directories(naemon_full_dep.get_pkgconfig_variable('includedir'))).as_system('system')
+    naemon_dep = declare_dependency(include_directories: include_directories(naemon_full_dep.get_variable(pkgconfig: 'includedir'))).as_system('system')
 endif
 toml_dep = declare_dependency(include_directories: include_directories('vendor')).as_system('system')
 
