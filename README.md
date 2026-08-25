@@ -136,6 +136,65 @@ The value comes from naemon's own event time. Consumers should keep treating a
 missing field or a `0` as "not set" and fall back to their own clock - older
 brokers did not populate it.
 
+## Performance
+
+The numbers below are the broker's own share of the work - the part that runs inside
+naemon's single threaded event loop, where every microsecond is one the core does not
+spend scheduling checks. naemon's own processing is not included.
+
+Measured on the same machine directly before and after the changes, `--buildtype=release`,
+GCC 11.4 on x86-64:
+
+| | before | after | |
+|---|---|---|---|
+| Encoder, ASCII output | 286 ns | 48 ns | 6.0x |
+| Encoder, UTF-8 output | 3997 ns | 48 ns | 83x |
+| Encoder, Latin-1 output | 4298 ns | 4248 ns | unchanged |
+| Building a service check message | 3449 ns | 2662 ns | -23% |
+| Receiving one check result | 2550 ns | 2112 ns | -17% |
+| Receiving a bulk of 100 | 435 us | 352 us | -19% |
+
+Messages also got smaller, which is network traffic, queue memory and parsing work on the
+consumer side:
+
+| | before | after | |
+|---|---|---|---|
+| One service check message | 571 B | 519 B | -9.1% |
+| Bulk of 100 check results | 63318 B | 58014 B | -8.4% |
+
+Where this comes from:
+
+* Charset detection is skipped when the output already is valid UTF-8, which ASCII is a
+  subset of. That covers virtually all real plugin output; previously every string went
+  through uchardet's statistical detection.
+* The fields of an incoming check result are looked up directly instead of iterating every
+  key and running it down a chain of string comparisons.
+* JSON is serialised without insignificant whitespace.
+
+### What these numbers do not say
+
+* They are micro benchmarks from one machine and one compiler. The ratios are the useful
+  part, the absolute values will differ on your hardware.
+* Each timing is a single run. Repeated runs vary by a few percent, so read the timings as
+  the order of magnitude they are, not as exact figures. The message sizes are
+  deterministic and do reproduce exactly.
+* The encoder gain depends on the input. Output that genuinely is not UTF-8 still goes
+  through detection and conversion and is no faster - as the Latin-1 row shows.
+* On the receive path most of what remains is json-c parsing, roughly 320 us of the 352 us
+  in the bulk case. That is not broker code and none of this changed it.
+
+### Reproducing
+
+The benchmark ships with the sources:
+
+```bash
+meson setup --buildtype=release -Dtests=true build
+ninja -C build
+./build/tests/statusengine-bench
+```
+
+`--buildtype=release` is required; at `-O0` the numbers are meaningless.
+
 ## Developer build + test
 
 If you want to build and test the broker, you can use the docker-compose configuration:
