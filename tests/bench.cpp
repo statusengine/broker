@@ -187,6 +187,80 @@ int main() {
         sink += static_cast<long long>(copy.size());
     });
 
+    std::cout << "\n--- point 6: incidental costs ---" << std::endl;
+
+    // The map copy that FlushBulkQueue does on every flush, only to log a queue name.
+    Bench("QueueIds() copied (auto)", 200000, [&] {
+        auto QueueId = QueueNameHandler::Instance().QueueIds();
+        sink += static_cast<long long>(QueueId.size());
+    });
+    Bench("QueueIds() by reference", 200000, [&] {
+        const auto &QueueId = QueueNameHandler::Instance().QueueIds();
+        sink += static_cast<long long>(QueueId.size());
+    });
+
+    // LogStream formats into its stringstream before it knows whether the level keeps the
+    // message, so a suppressed Info line still costs the full formatting.
+    {
+        LogStream discarding;
+        discarding.SetLogLevel(LogLevel::Warning); // Info is dropped
+        LogStream emitting;
+        emitting.SetLogLevel(LogLevel::Info);
+        Bench("Log line, level discards it", 200000, [&] {
+            discarding << "Sent bulk message (" << 200ul << ") for queue "
+                       << std::string("statusngin_servicechecks") << LogLevel::Info;
+        });
+        Bench("Log line, level emits it", 200000, [&] {
+            capturedLogs.clear();
+            emitting << "Sent bulk message (" << 200ul << ") for queue "
+                     << std::string("statusngin_servicechecks") << LogLevel::Info;
+        });
+    }
+
+    // Serialisation: what json-c's default SPACED costs against PLAIN.
+    {
+        NagiosServiceCheckData msg(&scd);
+        json_object *raw = msg.GetDataCopy();
+        const char *spaced = json_object_to_json_string_ext(raw, JSON_C_TO_STRING_SPACED);
+        size_t spacedLen = std::strlen(spaced);
+        const char *plain = json_object_to_json_string_ext(raw, JSON_C_TO_STRING_PLAIN);
+        size_t plainLen = std::strlen(plain);
+
+        Bench("ToString SPACED (current)", 200000, [&] {
+            sink += static_cast<long long>(std::strlen(json_object_to_json_string_ext(raw, JSON_C_TO_STRING_SPACED)));
+        });
+        Bench("ToString PLAIN", 200000, [&] {
+            sink += static_cast<long long>(std::strlen(json_object_to_json_string_ext(raw, JSON_C_TO_STRING_PLAIN)));
+        });
+        std::cout << "  serialised size: SPACED " << spacedLen << " B, PLAIN " << plainLen << " B ("
+                  << std::setprecision(1) << (100.0 - 100.0 * static_cast<double>(plainLen) /
+                                                          static_cast<double>(spacedLen))
+                  << "% smaller)" << std::endl;
+        json_object_put(raw);
+    }
+
+    // The same comparison on a realistic bulk payload, which is what actually travels.
+    {
+        json_object *fixture = json_tokener_parse(ReadFixture("statusngin_servicechecks.json").c_str());
+        json_object *messages = nullptr;
+        json_object_object_get_ex(fixture, "messages", &messages);
+        json_object *one = json_object_array_get_idx(messages, 0);
+        json_object *arr = json_object_new_array();
+        for (int i = 0; i < 100; ++i) {
+            json_object_array_add(arr, json_object_get(one));
+        }
+        json_object *root = json_object_new_object();
+        json_object_object_add(root, "messages", arr);
+        size_t sp = std::strlen(json_object_to_json_string_ext(root, JSON_C_TO_STRING_SPACED));
+        size_t pl = std::strlen(json_object_to_json_string_ext(root, JSON_C_TO_STRING_PLAIN));
+        std::cout << "  bulk of 100:     SPACED " << sp << " B, PLAIN " << pl << " B ("
+                  << std::setprecision(1) << (100.0 - 100.0 * static_cast<double>(pl) /
+                                                          static_cast<double>(sp))
+                  << "% smaller, " << (sp - pl) << " B saved)" << std::endl;
+        json_object_put(root);
+        json_object_put(fixture);
+    }
+
     std::cout << "\nbulk payload of 100: " << bulk100.size() << " bytes, "
               << "processed check results: " << processedCheckResults << std::endl;
     return sink == 0x7fffffff ? 1 : 0; // keep the sink alive
