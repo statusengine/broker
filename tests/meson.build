@@ -21,7 +21,7 @@ endif
 test_incdirs = include_directories('.', '../src')
 
 statusengine_tests = executable('statusengine-tests',
-    ['main.cpp', 'naemon_stubs.cpp', 'test_encoding.cpp', 'test_configuration.cpp', 'test_logstream.cpp', 'test_queue.cpp', 'test_messageformat.cpp',
+    ['main.cpp', 'naemon_stubs.cpp', 'test_encoding.cpp', 'test_configuration.cpp', 'test_logstream.cpp', 'test_queue.cpp', 'test_messageformat.cpp', 'test_workerloop.cpp',
      '../src/Encoding.cpp'],
     include_directories: test_incdirs,
     dependencies: test_deps,

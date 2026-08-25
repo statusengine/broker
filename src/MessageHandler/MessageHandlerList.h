@@ -54,16 +54,37 @@ namespace statusengine {
         }
 
         void Worker() override {
+            RunWorkers(allHandlers, maxWorkerMessagesPerInterval);
+        }
+
+        /**
+         * Lets every handler drain its queue, until nobody has anything left or
+         * maxMessages have been processed.
+         *
+         * A handler may ask for another round without having processed anything - the
+         * gearman worker does exactly that when its socket would block. Such a handler
+         * cannot advance the message counter, so counting messages alone does not bound
+         * this loop, and it runs inside naemon's event loop. A round that made no progress
+         * therefore ends it, and the next worker tick picks the work up again.
+         *
+         * Static and defined here so it can be exercised with fake handlers.
+         */
+        static void RunWorkers(std::vector<std::shared_ptr<IMessageHandler>> &handlers,
+                               unsigned long maxMessages) {
             unsigned long counter = 0ul;
             bool moreMessages;
             do {
                 moreMessages = false;
-                for (auto &handler : allHandlers) {
+                const unsigned long before = counter;
+                for (auto &handler : handlers) {
                     if (handler->Worker(counter)) {
                         moreMessages = true;
                     }
                 }
-            } while (moreMessages && (counter < maxWorkerMessagesPerInterval));
+                if (counter == before) {
+                    break;
+                }
+            } while (moreMessages && (counter < maxMessages));
         }
 
 
