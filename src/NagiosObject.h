@@ -143,6 +143,17 @@ namespace statusengine {
         }
     };
 
+    class NagiosRestartData : public NagiosObject {
+    public:
+        explicit NagiosRestartData(const nebstruct_process_data *processData) {
+            SetData("object_type", static_cast<int>(NEBTYPE_PROCESS_RESTART));
+            // Unix timestamp of the restart itself. The worker treats a missing value or a
+            // 0 as "not set" and falls back to its own wall clock as the stale row cutoff,
+            // so sending naemon's own event time gives it an accurate one instead.
+            SetData("timestamp", processData->timestamp.tv_sec);
+        }
+    };
+
     class NagiosAcknowledgementData : public NagiosObject {
     public:
         explicit NagiosAcknowledgementData(const nebstruct_acknowledgement_data *acknowledgementData) {

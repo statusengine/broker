@@ -117,6 +117,18 @@ The reason is that the underlying naemon/nagios `nebstruct_*` structs simply hav
 duplication is kept for backwards compatibility, so that existing consumers do not break.
 Do not read a separate long plugin output out of these five event types.
 
+### `timestamp` on core restart
+
+The `RestartData` message carries the unix timestamp of the restart:
+
+```json
+{"object_type": 102, "timestamp": 1787678804}
+```
+
+The value comes from naemon's own event time. Consumers should keep treating a
+missing field or a `0` as "not set" and fall back to their own clock - older
+brokers did not populate it.
+
 ## Developer build + test
 
 If you want to build and test the broker, you can use the docker-compose configuration:

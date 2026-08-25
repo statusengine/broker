@@ -304,3 +304,33 @@ TEST_CASE("non utf8 plugin output is converted in the message") {
 
     json_object_put(parsed);
 }
+
+TEST_CASE("core restart message keeps its shape") {
+    // Until this was added the broker only sent object_type, so the recorded shape and the
+    // produced one disagreed and this was the one message type without a golden test.
+    nebstruct_process_data data;
+    FillHeader(data, NEBTYPE_PROCESS_START);
+
+    NagiosRestartData msg(&data);
+    CheckShape(msg, "statusngin_core_restart.json", nullptr);
+}
+
+TEST_CASE("core restart carries naemon's event time") {
+    nebstruct_process_data data;
+    FillHeader(data, NEBTYPE_PROCESS_START);
+    data.timestamp.tv_sec = 1785470668;
+
+    NagiosRestartData msg(&data);
+    json_object *parsed = json_tokener_parse(Rendered(msg).c_str());
+    REQUIRE(parsed != nullptr);
+
+    json_object *value = nullptr;
+    REQUIRE(json_object_object_get_ex(parsed, "object_type", &value));
+    CHECK(json_object_get_int(value) == NEBTYPE_PROCESS_RESTART);
+
+    REQUIRE(json_object_object_get_ex(parsed, "timestamp", &value));
+    // The worker reads 0 as "not set", so a real restart must never report 0.
+    CHECK(json_object_get_int64(value) == 1785470668);
+
+    json_object_put(parsed);
+}
