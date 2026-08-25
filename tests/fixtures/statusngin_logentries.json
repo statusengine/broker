@@ -1,0 +1,41 @@
+{
+    "messages": [
+        {
+            "type": 300,
+            "flags": 0,
+            "attr": 0,
+            "timestamp": 1785470659,
+            "timestamp_usec": 589318,
+            "logentry": {
+                "entry_time": 1785470659,
+                "data_type": 262144,
+                "data": "Event broker module '\/opt\/statusengine\/lib\/libstatusengine.so' initialized successfully."
+            }
+        },
+        {
+            "type": 300,
+            "flags": 0,
+            "attr": 0,
+            "timestamp": 1785470659,
+            "timestamp_usec": 600279,
+            "logentry": {
+                "entry_time": 1785470659,
+                "data_type": 262144,
+                "data": "Successfully launched command file worker with pid 1490327"
+            }
+        },
+        {
+            "type": 300,
+            "flags": 0,
+            "attr": 0,
+            "timestamp": 1785470666,
+            "timestamp_usec": 600929,
+            "logentry": {
+                "entry_time": 1785470666,
+                "data_type": 1048576,
+                "data": "SERVICE NOTIFICATION SUPPRESSED: localhost;Swap Usage;Notifications are temporarily disabled for this object by an external command."
+            }
+        }
+    ],
+    "format": "none"
+}

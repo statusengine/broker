@@ -1,0 +1,32 @@
+{
+    "messages": [
+        {
+            "type": 801,
+            "flags": 0,
+            "attr": 0,
+            "timestamp": 1785470668,
+            "timestamp_usec": 701779,
+            "hostcheck": {
+                "host_name": "localhost",
+                "command_line": "$USER1$\/check_ping -H $HOSTADDRESS$ -w 3000.0,80% -c 5000.0,100% -p 5",
+                "command_name": "check-host-alive",
+                "output": "PING OK - Packet loss = 0%, RTA = 0.08 ms",
+                "long_output": "",
+                "perf_data": "rta=0.078000ms;3000.000000;5000.000000;0.000000 pl=0%;80;100;0",
+                "check_type": 0,
+                "current_attempt": 1,
+                "max_attempts": 10,
+                "state_type": 1,
+                "state": 0,
+                "timeout": 30,
+                "start_time": 1785470664,
+                "end_time": 1785470668,
+                "early_timeout": 0,
+                "execution_time": 4.0977930000000002,
+                "latency": 0.60372000932693481,
+                "return_code": 0
+            }
+        }
+    ],
+    "format": "none"
+}

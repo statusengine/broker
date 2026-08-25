@@ -1,0 +1,18 @@
+{
+    "type": 1700,
+    "flags": 0,
+    "attr": 0,
+    "timestamp": 1785516972,
+    "timestamp_usec": 732213,
+    "acknowledgement": {
+        "host_name": "localhost",
+        "service_description": "Swap Usage",
+        "author_name": "Daniel Z",
+        "comment_data": "I will take a look at this",
+        "acknowledgement_type": 1,
+        "state": 2,
+        "is_sticky": 0,
+        "persistent_comment": 1,
+        "notify_contacts": 1
+    }
+}

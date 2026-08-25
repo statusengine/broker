@@ -4,6 +4,7 @@ test_deps = [doctest_dep, uchardet_dep, jsonc_dep, toml_dep]
 test_cpp_args = statusengine_cpp_args + [
     '-DSTATUSENGINE_EXAMPLE_CONFIG="' + meson.project_source_root() / 'statusengine.toml' + '"',
     '-DSTATUSENGINE_DEVENV_CONFIG="' + meson.project_source_root() / 'devtools/buildenv/statusengine.toml' + '"',
+    '-DSTATUSENGINE_FIXTURE_DIR="' + meson.current_source_dir() / 'fixtures' + '"',
 ]
 
 if get_option('nagios')
@@ -20,7 +21,7 @@ endif
 test_incdirs = include_directories('.', '../src')
 
 statusengine_tests = executable('statusengine-tests',
-    ['main.cpp', 'naemon_stubs.cpp', 'test_encoding.cpp', 'test_configuration.cpp', 'test_logstream.cpp', 'test_queue.cpp',
+    ['main.cpp', 'naemon_stubs.cpp', 'test_encoding.cpp', 'test_configuration.cpp', 'test_logstream.cpp', 'test_queue.cpp', 'test_messageformat.cpp',
      '../src/Encoding.cpp'],
     include_directories: test_incdirs,
     dependencies: test_deps,

@@ -1,0 +1,61 @@
+{
+    "messages": [
+        {
+            "type": 701,
+            "flags": 0,
+            "attr": 0,
+            "timestamp": 1785470660,
+            "timestamp_usec": 603182,
+            "servicecheck": {
+                "host_name": "localhost",
+                "service_description": "Current Users",
+                "command_line": "$USER1$\/check_users -w $ARG1$ -c $ARG2$",
+                "command_name": "check_local_users!20!50",
+                "output": "USERS OK - 0 users currently logged in",
+                "long_output": "",
+                "perf_data": "users=0;20;50;0",
+                "check_type": 0,
+                "current_attempt": 1,
+                "max_attempts": 4,
+                "state_type": 1,
+                "state": 0,
+                "timeout": 60,
+                "start_time": 1785470660,
+                "end_time": 1785470660,
+                "early_timeout": 0,
+                "execution_time": 0.002062,
+                "latency": 0.60077601671218872,
+                "return_code": 0
+            }
+        },
+        {
+            "type": 701,
+            "flags": 0,
+            "attr": 0,
+            "timestamp": 1785470668,
+            "timestamp_usec": 700601,
+            "servicecheck": {
+                "host_name": "demo.statusengine.org",
+                "service_description": "PING",
+                "command_line": "$USER1$\/check_ping -H $HOSTADDRESS$ -w $ARG1$ -c $ARG2$ -p 5",
+                "command_name": "check_ping!100.0,20%!500.0,60%",
+                "output": "PING OK - Packet loss = 0%, RTA = 0.08 ms",
+                "long_output": "",
+                "perf_data": "rta=0.084000ms;100.000000;500.000000;0.000000 pl=0%;20;60;0",
+                "check_type": 0,
+                "current_attempt": 1,
+                "max_attempts": 4,
+                "state_type": 1,
+                "state": 0,
+                "timeout": 60,
+                "start_time": 1785470664,
+                "end_time": 1785470668,
+                "early_timeout": 0,
+                "execution_time": 4.0999400000000001,
+                "latency": 0.60019499063491821,
+                "return_code": 0
+            }
+        }
+    ],
+    "format": "none"
+}
