@@ -37,6 +37,12 @@ set of memory errors that could take the monitoring core down with them.
 - **Log levels were wrong in both directions.** At `Level = Error` warnings were still
   written, and at `Level = Info` - the most verbose setting - warnings were dropped.
 - The module title was overwritten by the copyright string in the naemon module info.
+- **An unreachable gearman job server no longer floods the log.** Every failed message
+  produced its own line - measured at over 350 in five minutes on a small test
+  installation, and it scales with the number of checks. An outage is now reported when it
+  starts and then at most every five minutes while it lasts, with a count of failed
+  attempts, and once more when it recovers. Worker side errors are named via
+  `gearman_strerror()` instead of being reported as "Unknown gearman worker error: 12".
 
 ### Changed
 

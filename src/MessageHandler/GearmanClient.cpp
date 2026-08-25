@@ -9,6 +9,21 @@ namespace statusengine {
     namespace {
         /// Upper bound in milliseconds for a single gearman_worker_wait() poll.
         const int gearmanPollTimeoutMs = 10;
+
+        /// How often an ongoing outage is repeated in the log. Often enough that a broken
+        /// job server cannot go unnoticed, rarely enough that it does not drown the log:
+        /// once per message was around 4 lines a second even on a tiny installation.
+        const time_t outageReportIntervalSeconds = 300;
+
+        /// True if this condition should be written to the log now.
+        bool ShouldReport(time_t &lastReport, unsigned long occurrences) {
+            const time_t now = std::time(nullptr);
+            if (occurrences == 1 || now - lastReport >= outageReportIntervalSeconds) {
+                lastReport = now;
+                return true;
+            }
+            return false;
+        }
     } // namespace
 
     class GearmanWorkerContext {
@@ -25,7 +40,9 @@ namespace statusengine {
     }
 
     GearmanClient::GearmanClient(IStatusengine *se, std::shared_ptr<GearmanConfiguration> cfg)
-        : MessageHandler(se), cfg(cfg), client(nullptr), worker(nullptr) {
+        : MessageHandler(se), cfg(cfg), client(nullptr), worker(nullptr), failedSends(0),
+          failedWorkerCalls(0), lastWorkerError(GEARMAN_SUCCESS), lastSendErrorReport(0),
+          lastWorkerErrorReport(0) {
 
         queueNames = cfg->GetQueueNames();
         if (!queueNames->empty()) {
@@ -112,8 +129,49 @@ namespace statusengine {
         auto ret = gearman_client_do_background(client, queueNameIt->second.c_str(), nullptr, message.c_str(),
                                                 message.length(), nullptr);
         if (!gearman_success(ret)) {
-            se->Log() << "Could not write message to gearman queue: " << gearman_client_error(client)
+            // An unreachable job server fails every single message. Logging each one buries
+            // the rest of the log and can outpace the events themselves, so report the
+            // outage once and count what it costs.
+            if (ShouldReport(lastSendErrorReport, ++failedSends)) {
+                auto error = gearman_client_error(client);
+                se->Log() << "Could not write message to gearman queue (" << failedSends
+                          << " failed send(s) so far): " << (error != nullptr ? error : "unknown error")
+                          << LogLevel::Error;
+            }
+        }
+        else if (failedSends > 0) {
+            // Deliberately "failed send(s)" and not "messages lost": this counts the
+            // attempts libgearman reported an error for, which is not necessarily
+            // everything that failed to reach the job server.
+            se->Log() << "Gearman queue is writable again after " << failedSends << " failed send(s)"
                       << LogLevel::Error;
+            failedSends = 0;
+            lastSendErrorReport = 0;
+        }
+    }
+
+    void GearmanClient::ReportWorkerError(gearman_return_t ret) {
+        ++failedWorkerCalls;
+        // A job server that stays down would otherwise produce a line per worker tick,
+        // around the clock. Report a new cause immediately, and an ongoing one on an
+        // interval so it cannot be silently forgotten.
+        if (ret != lastWorkerError) {
+            failedWorkerCalls = 1;
+            lastWorkerError = ret;
+        }
+        if (ShouldReport(lastWorkerErrorReport, failedWorkerCalls)) {
+            se->Log() << "Gearman worker error (" << failedWorkerCalls << " failed attempt(s) so far): "
+                      << gearman_strerror(ret) << LogLevel::Error;
+        }
+    }
+
+    void GearmanClient::ReportWorkerRecovered() {
+        if (failedWorkerCalls > 0) {
+            se->Log() << "Gearman worker is working again after " << failedWorkerCalls << " failed attempt(s)"
+                      << LogLevel::Error;
+            failedWorkerCalls = 0;
+            lastWorkerError = GEARMAN_SUCCESS;
+            lastWorkerErrorReport = 0;
         }
     }
 
@@ -131,8 +189,10 @@ namespace statusengine {
                 case GEARMAN_SUCCESS:
                     ++counter;
                     moreJobs = true;
+                    ReportWorkerRecovered();
                     break;
                 case GEARMAN_NO_JOBS:
+                    ReportWorkerRecovered();
                     break;
                 case GEARMAN_IO_WAIT:
                     // Not just a sleep: gearman_wait() runs the poll() that refreshes the
@@ -143,11 +203,11 @@ namespace statusengine {
                     gearman_worker_wait(worker);
                     moreJobs = true;
                     break;
-                case GEARMAN_NO_ACTIVE_FDS:
-                    se->Log() << "Gearman worker is not connected to server" << LogLevel::Error;
-                    break;
                 default:
-                    se->Log() << "Unknown gearman worker error: " << ret << LogLevel::Error;
+                    // Every remaining code means the worker could not do its job -
+                    // no servers, name resolution, a lost connection. gearman_strerror()
+                    // names them, which the previous "Unknown ... : 12" did not.
+                    ReportWorkerError(ret);
             }
         }
         return moreJobs;
