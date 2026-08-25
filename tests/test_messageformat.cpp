@@ -223,6 +223,36 @@ TEST_CASE("acknowledgement message keeps its shape") {
     CheckShape(msg, "statusngin_acknowledgements.json", "acknowledgement");
 }
 
+TEST_CASE("acknowledgement carries the end time") {
+    nebstruct_acknowledgement_data data;
+    FillHeader(data, NEBTYPE_ACKNOWLEDGEMENT_ADD);
+    data.host_name = Str("localhost");
+    data.author_name = Str("admin");
+    data.comment_data = Str("until tomorrow");
+#ifndef BUILD_NAGIOS
+    data.end_time = 1785470668;
+#endif
+
+    NagiosAcknowledgementData msg(&data);
+    json_object *parsed = json_tokener_parse(Rendered(msg).c_str());
+    REQUIRE(parsed != nullptr);
+
+    json_object *ack = nullptr;
+    REQUIRE(json_object_object_get_ex(parsed, "acknowledgement", &ack));
+    json_object *endTime = nullptr;
+    // The key is always present, so consumers can rely on it regardless of the core.
+    REQUIRE(json_object_object_get_ex(ack, "end_time", &endTime));
+
+#ifndef BUILD_NAGIOS
+    CHECK(json_object_get_int64(endTime) == 1785470668);
+#else
+    // Nagios cannot supply it. Null, not 0, because 0 means "never expires" under naemon.
+    CHECK(endTime == nullptr);
+#endif
+
+    json_object_put(parsed);
+}
+
 TEST_CASE("downtime message keeps its shape") {
     nebstruct_downtime_data data;
     FillHeader(data, NEBTYPE_DOWNTIME_ADD);

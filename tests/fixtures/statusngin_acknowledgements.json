@@ -13,6 +13,7 @@
         "state": 2,
         "is_sticky": 0,
         "persistent_comment": 1,
-        "notify_contacts": 1
+        "notify_contacts": 1,
+        "end_time": 0
     }
 }

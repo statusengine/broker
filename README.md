@@ -126,6 +126,17 @@ Messages are serialised without insignificant whitespace (`{"a":1}` rather than
 whitespace only difference - the JSON is unchanged and any conformant parser
 reads it identically. Do not match on the raw payload text.
 
+### `end_time` on acknowledgements
+
+The `AcknowledgementData` message carries `end_time`, the point at which the
+acknowledgement expires. The field is always present:
+
+* Under naemon it holds the value from the core, where `0` means the
+  acknowledgement does not expire.
+* Under nagios it is `null`, because `nebstruct_acknowledgement_data` has no such
+  member there. It is deliberately not `0`, which would be indistinguishable from
+  naemon's "does not expire".
+
 ### `timestamp` on core restart
 
 The `RestartData` message carries the unix timestamp of the restart:

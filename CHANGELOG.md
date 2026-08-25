@@ -65,12 +65,20 @@ set of memory errors that could take the monitoring core down with them.
 - Nagios support is a deprecation candidate. It still builds and is still tested in CI; if
   you rely on it, please say so in an issue.
 
+- **`AcknowledgementData` now carries `end_time`**, the point at which an acknowledgement
+  expires. Under naemon this is the value from the core, where `0` means it does not
+  expire. Under nagios the field is `null`, because the struct has no such member there -
+  deliberately not `0`, which would be indistinguishable from naemon's "does not expire".
+
 ### Added
 
 - A unit test suite, run in CI both plain and under the address and undefined behaviour
   sanitizers. The recorded message formats are pinned against fixtures, so an accidental
   change to the wire format fails the build.
 - Micro benchmarks for the message paths, see the Performance section in the README.
+- The vendored naemon and nagios headers used for building without an installed core were
+  six years old (naemon 1.0.6, nagios 4.4.5) and are now naemon 1.5.2 and nagios 4.5.14.
+  The test suite also builds and runs against the nagios headers now, which it never did.
 - A GitHub Actions workflow covering current Ubuntu and Debian releases and all build
   options. The configuration it replaces still invoked cmake, which the project dropped in
   2020, was GitLab CI in a repository hosted on GitHub, and targeted distributions that
