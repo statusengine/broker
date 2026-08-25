@@ -68,11 +68,13 @@ namespace statusengine {
 
         nebmodule *nebhandle;
         std::string configurationPath;
-        Configuration *configuration;
-        IMessageHandlerList *messageHandler;
+        // ls is declared before everything that logs while being torn down, so that it
+        // outlives them: members are destroyed in reverse declaration order.
         LogStream ls;
+        std::unique_ptr<Configuration> configuration;
+        std::unique_ptr<IMessageHandlerList> messageHandler;
         std::multimap<NEBCallbackType, std::unique_ptr<NebmoduleCallback>> callbacks;
-        BulkMessageCallback *bulkCallback;
-        MessageWorkerCallback *messageWorkerCallback;
+        std::unique_ptr<BulkMessageCallback> bulkCallback;
+        std::unique_ptr<MessageWorkerCallback> messageWorkerCallback;
     };
 } // namespace statusengine

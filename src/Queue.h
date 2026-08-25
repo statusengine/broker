@@ -1,7 +1,7 @@
 #pragma once
 
 #include <map>
-
+#include <string>
 
 namespace statusengine {
     enum class Queue {
@@ -32,9 +32,16 @@ namespace statusengine {
 
     enum class WorkerQueue { OCSP, OCHP, Command };
 
+    /**
+     * Maps between the queue enums and the identifiers used in statusengine.toml.
+     *
+     * The identifier of a queue is written down exactly once, in the tables below. Both
+     * lookup directions are derived from them, so adding a queue means adding an enum value
+     * and one table row.
+     */
     class QueueNameHandler {
-    public:
-        static QueueNameHandler& Instance() {
+      public:
+        static QueueNameHandler &Instance() {
             static QueueNameHandler instance;
             return instance;
         }
@@ -47,41 +54,23 @@ namespace statusengine {
             return queueIds;
         }
 
-        const std::map<std::string, WorkerQueue> &WorkerQueueNames() {
+        const std::map<std::string, WorkerQueue> &WorkerQueueNames() const {
             return workerQueueNames;
         }
 
-        const std::map<WorkerQueue, std::string> &WorkerQueueIds() {
+        const std::map<WorkerQueue, std::string> &WorkerQueueIds() const {
             return workerQueueIds;
         }
-    private:
-        explicit QueueNameHandler() : queueNames(), queueIds() {
-            queueNames = {
-                {"HostStatus", Queue::HostStatus},
-                {"HostCheck", Queue::HostCheck},
-                {"ServiceStatus", Queue::ServiceStatus},
-                {"ServiceCheck", Queue::ServiceCheck},
-                {"ServicePerfData", Queue::ServicePerfData},
-                {"StateChange", Queue::StateChange},
-                {"LogData", Queue::LogData},
-                {"AcknowledgementData", Queue::AcknowledgementData},
-                {"FlappingData", Queue::FlappingData},
-                {"DowntimeData", Queue::DowntimeData},
-                {"ContactNotificationMethodData", Queue::ContactNotificationMethodData},
-                {"RestartData", Queue::RestartData},
-                {"SystemCommandData", Queue::SystemCommandData},
-                {"CommentData", Queue::CommentData},
-                {"ExternalCommandData", Queue::ExternalCommandData},
-                {"NotificationData", Queue::NotificationData},
-                {"ProgramStatusData", Queue::ProgramStatusData},
-                {"ContactStatusData", Queue::ContactStatusData},
-                {"ContactNotificationData", Queue::ContactNotificationData},
-                {"EventHandlerData", Queue::EventHandlerData},
-                {"ProcessData", Queue::ProcessData},
-                {"OCSP", Queue::OCSP},
-                {"OCHP", Queue::OCHP}};
 
-            queueIds = {
+      private:
+        template <typename T>
+        struct Entry {
+            T id;
+            const char *name;
+        };
+
+        static const Entry<Queue> *QueueTable(size_t &count) {
+            static const Entry<Queue> table[] = {
                 {Queue::HostStatus, "HostStatus"},
                 {Queue::HostCheck, "HostCheck"},
                 {Queue::ServiceStatus, "ServiceStatus"},
@@ -105,16 +94,39 @@ namespace statusengine {
                 {Queue::ProcessData, "ProcessData"},
                 {Queue::OCSP, "OCSP"},
                 {Queue::OCHP, "OCHP"}};
+            count = sizeof(table) / sizeof(table[0]);
+            return table;
+        }
 
-            workerQueueNames = {
-                {"WorkerOCSP", WorkerQueue::OCSP},
-                {"WorkerOCHP", WorkerQueue::OCHP},
-                {"WorkerCommand", WorkerQueue::Command}};
-
-            workerQueueIds = {
+        static const Entry<WorkerQueue> *WorkerQueueTable(size_t &count) {
+            static const Entry<WorkerQueue> table[] = {
                 {WorkerQueue::OCSP, "WorkerOCSP"},
                 {WorkerQueue::OCHP, "WorkerOCHP"},
                 {WorkerQueue::Command, "WorkerCommand"}};
+            count = sizeof(table) / sizeof(table[0]);
+            return table;
+        }
+
+        template <typename T>
+        static void Fill(const Entry<T> *table, size_t count, std::map<std::string, T> &byName,
+                         std::map<T, std::string> &byId) {
+            for (size_t i = 0; i < count; ++i) {
+                byName[table[i].name] = table[i].id;
+                byId[table[i].id] = table[i].name;
+            }
+        }
+
+        QueueNameHandler() : queueNames(), queueIds(), workerQueueNames(), workerQueueIds() {
+            // The table has to be fetched in its own statement: the order in which function
+            // arguments are evaluated is unspecified, so passing QueueTable(count) and count
+            // to the same call may read count before QueueTable() has set it.
+            size_t queueCount = 0;
+            const Entry<Queue> *queues = QueueTable(queueCount);
+            Fill(queues, queueCount, queueNames, queueIds);
+
+            size_t workerCount = 0;
+            const Entry<WorkerQueue> *workers = WorkerQueueTable(workerCount);
+            Fill(workers, workerCount, workerQueueNames, workerQueueIds);
         }
 
         std::map<std::string, Queue> queueNames;

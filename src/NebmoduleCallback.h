@@ -83,7 +83,6 @@ namespace statusengine {
             if (data->type == NEBTYPE_SERVICECHECK_PROCESSED) {
                 if (servicechecks || ocsp) {
                     NagiosServiceCheckData checkData(data);
-                    ;
                     if (servicechecks) {
                         serviceCheckHandler->SendMessage(checkData);
                     }

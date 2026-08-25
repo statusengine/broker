@@ -28,6 +28,6 @@ namespace statusengine {
 
         std::shared_ptr<std::map<Queue, std::string>> queueNames;
         std::shared_ptr<std::map<WorkerQueue, std::string>> workerQueueNames;
-        std::map<WorkerQueue, GearmanWorkerContext *> workerContexts;
+        std::map<WorkerQueue, std::unique_ptr<GearmanWorkerContext>> workerContexts;
     };
 } // namespace statusengine

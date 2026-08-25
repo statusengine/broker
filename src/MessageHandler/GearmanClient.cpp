@@ -1,7 +1,6 @@
 #include "GearmanClient.h"
 
 #include "Configuration.h"
-#include "Utility.h"
 
 #include <iostream>
 
@@ -44,7 +43,7 @@ namespace statusengine {
         if (worker != nullptr) {
             se->Log() << "Destroy gearman worker" << LogLevel::Info;
             gearman_worker_free(worker);
-            clearContainer<>(&workerContexts);
+            workerContexts.clear();
         }
     }
 
@@ -70,8 +69,11 @@ namespace statusengine {
                 return false;
             }
             for (auto &queue : *workerQueueNames) {
-                auto ctx = new GearmanWorkerContext(queue.first, this);
-                workerContexts[queue.first] = ctx;
+                // The raw pointer is handed to libgearman as the callback context; the
+                // context object itself stays owned by workerContexts.
+                std::unique_ptr<GearmanWorkerContext> ownedCtx(new GearmanWorkerContext(queue.first, this));
+                auto ctx = ownedCtx.get();
+                workerContexts[queue.first] = std::move(ownedCtx);
                 auto cbfn = gearman_function_create_v2(se_gearman_worker_callback);
                 ret = gearman_worker_define_function(worker, queue.second.c_str(), queue.second.size(), cbfn, 0, ctx);
                 if (gearman_success(ret)) {

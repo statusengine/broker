@@ -10,7 +10,6 @@
 #include "Configuration.h"
 #include "IStatusengine.h"
 #include "IMessageHandler.h"
-#include "Utility.h"
 #include "gsl.h"
 
 
@@ -373,10 +372,8 @@ namespace statusengine {
             }
 
             if (hostname == nullptr) {
-                if (hostname == nullptr) {
-                    se->Log() << "Received delete_downtime command without hostname " << LogLevel::Warning;
-                    return;
-                }
+                se->Log() << "Received delete_downtime command without hostname " << LogLevel::Warning;
+                return;
             }
 
             Nebmodule::Instance().DeleteDowntime(hostname, service_description, start_time, end_time, comment);
@@ -405,7 +402,7 @@ namespace statusengine {
         void SendMessage(NagiosObject &obj) override {
             if (bulk) {
                 if(!obj.isEmpty()){
-                    bulkMessages.push_back(new NagiosObject(&obj));
+                    bulkMessages.push_back(std::unique_ptr<NagiosObject>(new NagiosObject(&obj)));
                     if (++(*globalBulkCounter) >= maxBulkSize) {
                         mhlist.FlushBulkQueue();
                     }
@@ -442,7 +439,7 @@ namespace statusengine {
                 se.Log() << "Sent bulk message (" << bulkMessages.size() << ") for queue "
                          << QueueId.at(queue) << LogLevel::Info;
 
-                clearContainer<>(&bulkMessages);
+                bulkMessages.clear();
             }
         }
 
@@ -452,7 +449,7 @@ namespace statusengine {
 
         Queue queue;
         std::shared_ptr<std::vector<std::shared_ptr<IMessageHandler>>> handlers;
-        std::vector<NagiosObject *> bulkMessages;
+        std::vector<std::unique_ptr<NagiosObject>> bulkMessages;
 
         unsigned long maxBulkSize;
         unsigned long *globalBulkCounter;

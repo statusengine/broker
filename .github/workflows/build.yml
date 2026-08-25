@@ -91,3 +91,20 @@ jobs:
             -Dnagios_include_dir=/opt/nagios/include build
           ninja -C build
 
+  format:
+    name: clang-format (advisory)
+    runs-on: ubuntu-latest
+    # Not blocking: the existing sources predate .clang-format and would need a one off
+    # reformat first. This job shows what would change so new code can converge on it.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install clang-format
+        run: sudo apt-get update && sudo apt-get install -y clang-format
+
+      - name: Show formatting differences
+        run: |
+          find src tests -name '*.cpp' -o -name '*.h' \
+            | grep -v '^src/gsl.h$' \
+            | while read -r f; do clang-format "$f" | diff -u "$f" - || true; done

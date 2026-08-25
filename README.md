@@ -99,6 +99,24 @@ broker module like this:
 broker_module=/opt/naemon/lib/libstatusengine.so /path/to/statusengine.toml
 ```
 
+## Message format
+
+### `long_output` on events that have no long output
+
+For the following event types the `long_output` field is a verbatim copy of `output` and
+carries no additional information:
+
+* `ContactNotificationData`
+* `EventHandlerData`
+* `NotificationData`
+* `StateChange`
+* `SystemCommandData`
+
+The reason is that the underlying naemon/nagios `nebstruct_*` structs simply have no
+`long_output` member for these events; only host and service checks have one. The
+duplication is kept for backwards compatibility, so that existing consumers do not break.
+Do not read a separate long plugin output out of these five event types.
+
 ## Developer build + test
 
 If you want to build and test the broker, you can use the docker-compose configuration:

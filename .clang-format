@@ -1,0 +1,15 @@
+---
+Language:        Cpp
+BasedOnStyle:    LLVM
+IndentWidth:     4
+ColumnLimit:     120
+AccessModifierOffset: -2
+NamespaceIndentation: All
+BreakBeforeBraces: Stroustrup
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+AlwaysBreakTemplateDeclarations: Yes
+PointerAlignment: Right
+SortIncludes:    false
+SpaceAfterTemplateKeyword: false

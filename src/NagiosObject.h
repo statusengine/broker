@@ -206,6 +206,9 @@ namespace statusengine {
             contactnotificationdata.SetData("host_name", contactNotificationData->host_name);
             contactnotificationdata.SetData("service_description", contactNotificationData->service_description);
             contactnotificationdata.SetData("output", nebmodule.EncodeString(contactNotificationData->output));
+            // Intentional: this nebstruct has no long_output member, only host and service
+            // checks do. long_output repeats output so the message format stays backwards
+            // compatible - see the "Message format" section in README.md. Not a typo.
             contactnotificationdata.SetData("long_output", nebmodule.EncodeString(contactNotificationData->output));
             contactnotificationdata.SetData("ack_author", contactNotificationData->ack_author);
             contactnotificationdata.SetData("ack_data", contactNotificationData->ack_data);
@@ -314,6 +317,9 @@ namespace statusengine {
             eventhandler.SetData("host_name", eventHandlerData->host_name);
             eventhandler.SetData("service_description", eventHandlerData->service_description);
             eventhandler.SetData("output", nebmodule.EncodeString(eventHandlerData->output));
+            // Intentional: this nebstruct has no long_output member, only host and service
+            // checks do. long_output repeats output so the message format stays backwards
+            // compatible - see the "Message format" section in README.md. Not a typo.
             eventhandler.SetData("long_output", nebmodule.EncodeString(eventHandlerData->output));
             eventhandler.SetData("command_name", eventHandlerData->command_name);
             eventhandler.SetData("command_args", eventHandlerData->command_args);
@@ -531,6 +537,9 @@ namespace statusengine {
             notification_data.SetData("host_name", notificationData->host_name);
             notification_data.SetData("service_description", notificationData->service_description);
             notification_data.SetData("output", nebmodule.EncodeString(notificationData->output));
+            // Intentional: this nebstruct has no long_output member, only host and service
+            // checks do. long_output repeats output so the message format stays backwards
+            // compatible - see the "Message format" section in README.md. Not a typo.
             notification_data.SetData("long_output", nebmodule.EncodeString(notificationData->output));
             notification_data.SetData("ack_author", notificationData->ack_author);
             notification_data.SetData("ack_data", notificationData->ack_data);
@@ -742,6 +751,9 @@ namespace statusengine {
             statechange.SetData("host_name", stateChangeData->host_name);
             statechange.SetData("service_description", stateChangeData->service_description);
             statechange.SetData("output", nebmodule.EncodeString(stateChangeData->output));
+            // Intentional: this nebstruct has no long_output member, only host and service
+            // checks do. long_output repeats output so the message format stays backwards
+            // compatible - see the "Message format" section in README.md. Not a typo.
             statechange.SetData("long_output", nebmodule.EncodeString(stateChangeData->output));
             statechange.SetData("statechange_type", stateChangeData->statechange_type);
             statechange.SetData("state", stateChangeData->state);
@@ -768,6 +780,9 @@ namespace statusengine {
 
             systemcommand.SetData("command_line", systemCommandData->command_line);
             systemcommand.SetData("output", nebmodule.EncodeString(systemCommandData->output));
+            // Intentional: this nebstruct has no long_output member, only host and service
+            // checks do. long_output repeats output so the message format stays backwards
+            // compatible - see the "Message format" section in README.md. Not a typo.
             systemcommand.SetData("long_output", nebmodule.EncodeString(systemCommandData->output));
             systemcommand.SetData("start_time", systemCommandData->start_time.tv_sec);
             systemcommand.SetData("end_time", systemCommandData->end_time.tv_sec);

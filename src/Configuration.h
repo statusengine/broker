@@ -14,11 +14,26 @@
 
 namespace statusengine {
 
+    /**
+     * Reads an optional key from a table, falling back to opt. A value of the wrong type is
+     * reported and also falls back, so a single bad key does not take the whole config down.
+     */
+    template <typename T>
+    T GetTomlDefault(IStatusengine &se, const toml::value &tab, const char *ky, T opt) {
+        try {
+            return toml::find_or<T>(tab, ky, opt);
+        }
+        catch (const toml::type_error &tte) {
+            se.Log() << "Invalid configuration: Invalid value for key " << ky << LogLevel::Error;
+        }
+        return opt;
+    }
+
     class MessageHandlerConfiguration {
     public:
 
-        bool InitLoad(const toml::Table &tbl) {
-            for (auto &tableEntry : tbl) {
+        bool InitLoad(const toml::value &tbl) {
+            for (auto &tableEntry : tbl.as_table()) {
                 auto QueueName = QueueNameHandler::Instance().QueueNames();
                 auto qName = QueueName.find(tableEntry.first);
                 if (qName != QueueName.end()) {
@@ -73,7 +88,7 @@ namespace statusengine {
             return queueIds;
         }
 
-        virtual bool Load(const toml::Table &tbl) = 0;
+        virtual bool Load(const toml::value &tbl) = 0;
 
         virtual ~MessageHandlerConfiguration() = default;
 
@@ -89,15 +104,6 @@ namespace statusengine {
         std::shared_ptr<std::map<Queue, std::string>> queues;
         std::shared_ptr<std::map<WorkerQueue, std::string>> workerQueues;
 
-        template <typename T> T GetTomlDefault(const toml::Table &tab, const char *ky, T &&opt) const {
-            try {
-                return toml::get_or(tab, ky, opt);
-            }
-            catch (const toml::type_error &tte) {
-                se.Log() << "Invalid configuration: Invalid value for key " << ky << LogLevel::Error;
-            }
-            return std::move(opt);
-        }
     };
 
 
@@ -109,28 +115,28 @@ namespace statusengine {
 
         virtual ~RabbitmqConfiguration() = default;
 
-        bool Load(const toml::Table &tbl) override {
-            Hostname = GetTomlDefault<>(tbl, "Hostname", std::string(""));
+        bool Load(const toml::value &tbl) override {
+            Hostname = GetTomlDefault(se, tbl, "Hostname", std::string(""));
 
             if (Hostname.empty()) {
                 se.Log() << "Please specify a hostname in rabbitmq configuration" << LogLevel::Error;
                 return false;
             }
 
-            Port = GetTomlDefault<>(tbl, "Port", 5672);
+            Port = GetTomlDefault(se, tbl, "Port", 5672);
 
-            Vhost = GetTomlDefault<>(tbl, "Vhost", std::string("/"));
-            Username = GetTomlDefault<>(tbl, "Username", std::string("statusengine"));
-            Password = GetTomlDefault<>(tbl, "Password", std::string(""));
+            Vhost = GetTomlDefault(se, tbl, "Vhost", std::string("/"));
+            Username = GetTomlDefault(se, tbl, "Username", std::string("statusengine"));
+            Password = GetTomlDefault(se, tbl, "Password", std::string(""));
             if (Password.empty()) {
                 se.Log() << "Warning, no password specified" << LogLevel::Warning;
             }
 
-            int tov = GetTomlDefault<>(tbl, "Timeout", 30);
+            int tov = GetTomlDefault(se, tbl, "Timeout", 30);
             Timeout.tv_sec = tov;
             Timeout.tv_usec = 0;
 
-            Exchange = GetTomlDefault<>(tbl, "Exchange", std::string("statusengine"));
+            Exchange = GetTomlDefault(se, tbl, "Exchange", std::string("statusengine"));
 
             // Durable by default. A queue that is neither durable nor exclusive is
             // RabbitMQ's deprecated transient_nonexcl_queues feature: 3.13 warns once per
@@ -147,15 +153,15 @@ namespace statusengine {
             // The exchange follows the queues: a transient exchange loses its bindings on a
             // broker restart while the durable queues survive, and keeping the pair
             // consistent costs nothing, both being metadata only.
-            DurableExchange = GetTomlDefault<>(tbl, "DurableExchange", true);
-            DurableQueues = GetTomlDefault<>(tbl, "DurableQueues", true);
+            DurableExchange = GetTomlDefault(se, tbl, "DurableExchange", true);
+            DurableQueues = GetTomlDefault(se, tbl, "DurableQueues", true);
 
-            SSL = GetTomlDefault<>(tbl, "SSL", false);
+            SSL = GetTomlDefault(se, tbl, "SSL", false);
 
-            SSLVerify = GetTomlDefault<>(tbl, "SSL_verify", true);
-            SSLCacert = GetTomlDefault<>(tbl, "SSL_cacert", std::string(""));
-            SSLCert = GetTomlDefault<>(tbl, "SSL_cert", std::string(""));
-            SSLKey = GetTomlDefault<>(tbl, "SSL_key", std::string(""));
+            SSLVerify = GetTomlDefault(se, tbl, "SSL_verify", true);
+            SSLCacert = GetTomlDefault(se, tbl, "SSL_cacert", std::string(""));
+            SSLCert = GetTomlDefault(se, tbl, "SSL_cert", std::string(""));
+            SSLKey = GetTomlDefault(se, tbl, "SSL_key", std::string(""));
 
             return true;
         }
@@ -181,12 +187,12 @@ namespace statusengine {
     public:
         explicit GearmanConfiguration(IStatusengine &se) : MessageHandlerConfiguration(se) {}
 
-        bool Load(const toml::Table &tbl) override {
+        bool Load(const toml::value &tbl) override {
             try {
-                URL = toml::get<std::string>(tbl.at("URL"));
+                URL = toml::find<std::string>(tbl, "URL");
             }
-            catch (const toml::type_error &tte) {
-                se.Log() << "Invalid configuration: Invalid value for key URL" << LogLevel::Error;
+            catch (const std::exception &e) {
+                se.Log() << "Invalid configuration: Invalid or missing value for key URL" << LogLevel::Error;
                 return false;
             }
 
@@ -198,7 +204,9 @@ namespace statusengine {
 
     class Configuration {
       public:
-        explicit Configuration(IStatusengine &se) : se(se), maxWorkerMessagesPerInterval(0), logLevel(LogLevel::Warning) {}
+        explicit Configuration(IStatusengine &se)
+            : se(se), cfg(toml::table{}), bulkTable(toml::table{}), schedulerTable(toml::table{}),
+              maxWorkerMessagesPerInterval(0), logLevel(LogLevel::Warning) {}
         ~Configuration() {
             rabbitmq.clear(); // shared_ptr
         }
@@ -207,124 +215,79 @@ namespace statusengine {
             try {
                 cfg = toml::parse(configurationPath);
             }
-            catch (std::runtime_error &rte) {
-                se.Log() << "Could not read file: " << rte.what() << LogLevel::Error;
-                return false;
-            }
-            catch (toml::syntax_error &ste) {
+            catch (const toml::syntax_error &ste) {
                 se.Log() << "configuration syntax error: " << ste.what() << LogLevel::Error;
                 return false;
             }
-
-            try {
-                bulkTable = cfg.at("Bulk").cast<toml::value_t::Table>();
-            }
-            catch (std::out_of_range &oor) {
-            }
-            catch (const toml::type_error &tte) {
-                se.Log() << "Invalid configuration: Bulk isn't a table!" << LogLevel::Error;
+            catch (const std::exception &e) {
+                se.Log() << "Could not read file: " << e.what() << LogLevel::Error;
                 return false;
             }
 
-            try {
-                auto logTable = cfg.at("Log").cast<toml::value_t::Table>();
-                auto logLevelStr = toml::get_or<std::string>(logTable, "Level", "Warning");
-                if (logLevelStr == "Info") {
-                    logLevel = LogLevel::Info;
+            if (!ReadSection("Bulk", bulkTable) || !ReadSection("Scheduler", schedulerTable)) {
+                return false;
+            }
+
+            toml::value logTable;
+            if (!ReadSection("Log", logTable)) {
+                return false;
+            }
+            auto logLevelStr = GetTomlDefault(se, logTable, "Level", std::string("Warning"));
+            if (logLevelStr == "Info") {
+                logLevel = LogLevel::Info;
+            }
+            else if (logLevelStr == "Warning") {
+                logLevel = LogLevel::Warning;
+            }
+            else if (logLevelStr == "Error") {
+                logLevel = LogLevel::Error;
+            }
+            else {
+                se.Log() << "Invalid configuration: Unknown log level: " << logLevelStr << LogLevel::Error;
+                return false;
+            }
+
+            if (bulkTable.contains("Queues")) {
+                std::vector<std::string> bulkQueueList;
+                try {
+                    bulkQueueList = toml::find<std::vector<std::string>>(bulkTable, "Queues");
                 }
-                else if(logLevelStr == "Warning") {
-                    logLevel = LogLevel::Warning;
-                }
-                else if(logLevelStr == "Error") {
-                    logLevel = LogLevel::Error;
-                }
-                else {
-                    se.Log() << "Invalid configuration: Unknown log level: " << logLevelStr << LogLevel::Error;
+                catch (const toml::type_error &tte) {
+                    se.Log() << "Invalid configuration: Bulk::Queues isn't an array!" << LogLevel::Error;
                     return false;
                 }
-            }
-            catch (std::out_of_range &oor) {
-            }
-            catch (const toml::type_error &tte) {
-                se.Log() << "Invalid configuration: Log isn't a table!" << LogLevel::Error;
-                return false;
-            }
-
-            try {
-                auto QueueName = QueueNameHandler::Instance().QueueNames();
-                std::vector<std::string> bulkQueueList = toml::get<std::vector<std::string>>(bulkTable.at("Queues"));
+                const auto &QueueName = QueueNameHandler::Instance().QueueNames();
                 for (auto &bulkQueueItem : bulkQueueList) {
-                    try {
-                        bulkQueues.insert(QueueName.at(bulkQueueItem));
-                    }
-                    catch (std::out_of_range &oor) {
-                        se.Log() << "Invalid configuration: Bulk::Queues contains an unknown queue identifier: " << bulkQueueItem << LogLevel::Error;
+                    auto queue = QueueName.find(bulkQueueItem);
+                    if (queue == QueueName.end()) {
+                        se.Log() << "Invalid configuration: Bulk::Queues contains an unknown queue identifier: "
+                                 << bulkQueueItem << LogLevel::Error;
                         return false;
                     }
+                    bulkQueues.insert(queue->second);
                 }
             }
-            catch (std::out_of_range &oor) {
-            }
-            catch (const toml::type_error &tte) {
-                se.Log() << "Invalid configuration: Bulk::Queues isn't an array!" << LogLevel::Error;
+
+            if (!ReadHandlerConfigs<GearmanConfiguration>("Gearman", gearman) ||
+                !ReadHandlerConfigs<RabbitmqConfiguration>("Rabbitmq", rabbitmq)) {
                 return false;
             }
 
-            try {
-                schedulerTable = cfg.at("Scheduler").cast<toml::value_t::Table>();
-            }
-            catch (std::out_of_range &oor) {
-            }
-            catch (const toml::type_error &tte) {
-                se.Log() << "Invalid configuration: Scheduler isn't a table!" << LogLevel::Error;
+            toml::value workerTable;
+            if (!ReadSection("Worker", workerTable)) {
                 return false;
             }
-
-            try {
-                std::vector<toml::Table> gearmans = toml::get<std::vector<toml::Table>>(cfg.at("Gearman"));
-                for (auto &gearmanConfig : gearmans) {
-                    auto gfg = std::make_shared<GearmanConfiguration>(se);
-                    if (!gfg->InitLoad(gearmanConfig)) {
-                        return false;
-                    }
-                    gearman.push_back(gfg);
+            maxWorkerMessagesPerInterval = 1000000ul;
+            if (workerTable.contains("MaxWorkerMessagesPerInterval")) {
+                try {
+                    maxWorkerMessagesPerInterval =
+                        toml::find<unsigned long>(workerTable, "MaxWorkerMessagesPerInterval");
                 }
-            }
-            catch (const std::out_of_range &oor) {
-            }
-            catch (const toml::type_error &tte) {
-                se.Log() << "Invalid configuration: Gearman isn't an Array of Tables!" << LogLevel::Error;
-                return false;
-            }
-
-            try {
-                std::vector<toml::Table> rabbits = toml::get<std::vector<toml::Table>>(cfg.at("Rabbitmq"));
-                for (auto &rabbitConfig : rabbits) {
-                    auto rfg = std::make_shared<RabbitmqConfiguration>(se);
-                    if (!rfg->InitLoad(rabbitConfig)) {
-                        return false;
-                    }
-                    rabbitmq.push_back(rfg);
+                catch (const toml::type_error &tte) {
+                    se.Log() << "Invalid configuration: Invalid value for key "
+                             << "MaxWorkerMessagesPerInterval" << LogLevel::Error;
+                    return false;
                 }
-            }
-            catch (const std::out_of_range &oor) {
-            }
-            catch (const toml::type_error &tte) {
-                se.Log() << "Invalid configuration: Rabbitmq isn't an Array of Tables!" << LogLevel::Error;
-                return false;
-            }
-
-            try {
-                maxWorkerMessagesPerInterval = toml::get_or<unsigned long>(toml::get<toml::Table>(cfg.at("Worker")),
-                                                                           "MaxWorkerMessagesPerInterval", 1000000ul);
-            }
-            catch (const std::out_of_range &oor) {
-                maxWorkerMessagesPerInterval = 1000000ul;
-            }
-            catch (const toml::type_error &tte) {
-                se.Log() << "Invalid configuration: Invalid value for key "
-                         << "MaxWorkerMessagesPerInterval" << LogLevel::Error;
-                return false;
             }
 
             se.Log() << "Finished loading config" << LogLevel::Info;
@@ -352,11 +315,11 @@ namespace statusengine {
         }
 
         time_t GetBulkFlushInterval() const {
-            return GetTomlDefault<>(bulkTable, "FlushInterval", static_cast<time_t>(10));
+            return GetTomlDefault(se, bulkTable, "FlushInterval", static_cast<time_t>(10));
         }
 
         unsigned long GetBulkMaximum() const {
-            return GetTomlDefault<>(bulkTable, "Maximum", 200ul);
+            return GetTomlDefault(se, bulkTable, "Maximum", 200ul);
         }
 
         bool IsBulkQueue(Queue queue) const {
@@ -364,7 +327,7 @@ namespace statusengine {
         }
 
         time_t GetStartupScheduleMax() const {
-            return GetTomlDefault<>(schedulerTable, "StartupScheduleMax", 0);
+            return GetTomlDefault(se, schedulerTable, "StartupScheduleMax", 0);
         }
 
         std::vector<std::shared_ptr<GearmanConfiguration>> *GetGearmanConfiguration() {
@@ -384,10 +347,53 @@ namespace statusengine {
         }
 
       private:
+        /// Copies an optional top level table into target. An absent section leaves target
+        /// as an empty table, so the lookups on it still work.
+        bool ReadSection(const char *name, toml::value &target) {
+            target = toml::value(toml::table{});
+            if (!cfg.contains(name)) {
+                return true;
+            }
+            const auto &section = cfg.at(name);
+            if (!section.is_table()) {
+                se.Log() << "Invalid configuration: " << name << " isn't a table!" << LogLevel::Error;
+                return false;
+            }
+            target = section;
+            return true;
+        }
+
+        /// Loads an optional array of tables, one connection configuration per entry.
+        template <typename T>
+        bool ReadHandlerConfigs(const char *name, std::vector<std::shared_ptr<T>> &out) {
+            if (!cfg.contains(name)) {
+                return true;
+            }
+            const auto &section = cfg.at(name);
+            if (!section.is_array()) {
+                se.Log() << "Invalid configuration: " << name << " isn't an Array of Tables!" << LogLevel::Error;
+                return false;
+            }
+            for (const auto &entry : section.as_array()) {
+                if (!entry.is_table()) {
+                    se.Log() << "Invalid configuration: " << name << " isn't an Array of Tables!" << LogLevel::Error;
+                    return false;
+                }
+                auto handlerConfig = std::make_shared<T>(se);
+                if (!handlerConfig->InitLoad(entry)) {
+                    return false;
+                }
+                out.push_back(handlerConfig);
+            }
+            return true;
+        }
+
         IStatusengine &se;
-        toml::Table cfg;
-        toml::Table bulkTable;
-        toml::Table schedulerTable;
+        toml::value cfg;
+        // Kept as (possibly empty) tables so the GetTomlDefault lookups below always have
+        // something well formed to search, even when the section is absent.
+        toml::value bulkTable;
+        toml::value schedulerTable;
 
         std::vector<std::shared_ptr<RabbitmqConfiguration>> rabbitmq;
         std::vector<std::shared_ptr<GearmanConfiguration>> gearman;
@@ -397,14 +403,5 @@ namespace statusengine {
 
         LogLevel logLevel;
 
-        template <typename T> T GetTomlDefault(const toml::Table &tab, const char *ky, T &&opt) const {
-            try {
-                return toml::get_or(tab, ky, opt);
-            }
-            catch (const toml::type_error &tte) {
-                se.Log() << "Invalid configuration: Invalid value for key " << ky << LogLevel::Error;
-            }
-            return opt;
-        }
     };
 } // namespace statusengine
