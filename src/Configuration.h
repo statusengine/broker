@@ -34,7 +34,7 @@ namespace statusengine {
 
         bool InitLoad(const toml::value &tbl) {
             for (auto &tableEntry : tbl.as_table()) {
-                auto QueueName = QueueNameHandler::Instance().QueueNames();
+                const auto &QueueName = QueueNameHandler::Instance().QueueNames();
                 auto qName = QueueName.find(tableEntry.first);
                 if (qName != QueueName.end()) {
                     try {

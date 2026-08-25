@@ -436,7 +436,7 @@ namespace statusengine {
                     handler->SendMessage(queue, msg);
                 }
 
-                auto QueueId = QueueNameHandler::Instance().QueueIds();
+                const auto &QueueId = QueueNameHandler::Instance().QueueIds();
                 se.Log() << "Sent bulk message (" << bulkMessages.size() << ") for queue "
                          << QueueId.at(queue) << LogLevel::Info;
 

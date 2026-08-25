@@ -104,7 +104,7 @@ namespace statusengine {
     void GearmanClient::SendMessage(Queue queue, const std::string &message) {
         auto queueNameIt = queueNames->find(queue);
         if (queueNameIt == queueNames->end()) {
-            auto QueueId = QueueNameHandler::Instance().QueueIds();
+            const auto &QueueId = QueueNameHandler::Instance().QueueIds();
             se->Log() << "No gearman queue configured for " << QueueId.at(queue) << ", dropping message"
                       << LogLevel::Error;
             return;
