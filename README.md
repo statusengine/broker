@@ -6,6 +6,8 @@ It will grab all status information, encode them as JSON, and put them into the 
 
 Visit the [documentation](https://statusengine.org/broker/) for more information about Statusengine C++ Broker Module
 
+See [CHANGELOG.md](CHANGELOG.md) for what changed between releases.
+
 ## Build and Installation
 
 Please compile and install the newest version of naemon or nagios. We need the header files for building the broker.
