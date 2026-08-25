@@ -9,6 +9,9 @@
 /// Everything nm_log() was called with, in order. Cleared by FakeStatusengine's constructor.
 extern std::vector<std::string> capturedLogs;
 
+/// How often the stubbed process_check_result() was called.
+extern unsigned long processedCheckResults;
+
 namespace statusengine {
 
     /**

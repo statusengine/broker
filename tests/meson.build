@@ -30,3 +30,11 @@ statusengine_tests = executable('statusengine-tests',
     install: false)
 
 test('unit', statusengine_tests, protocol: 'exitcode', timeout: 120)
+
+statusengine_bench = executable('statusengine-bench',
+    ['bench.cpp', 'naemon_stubs.cpp', '../src/Encoding.cpp'],
+    include_directories: test_incdirs,
+    dependencies: test_deps,
+    cpp_args: test_cpp_args,
+    build_by_default: true,
+    install: false)

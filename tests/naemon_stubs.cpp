@@ -6,6 +6,7 @@
 
 #include <cstdarg>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <vector>
 
@@ -62,4 +63,54 @@ namespace statusengine {
     std::string Nebmodule::EncodeString(const char *inputData) {
         return encoder.ToUtf8(inputData);
     }
+} // namespace statusengine
+
+// --- check_result handling, referenced by MessageHandler::ParseCheckResult -------------
+//
+// free_check_result() really frees, so that the benchmark and any future test see the same
+// allocation pattern as production and sanitizers can still catch a mismatch.
+
+extern "C" int init_check_result(check_result *cr) {
+    std::memset(cr, 0, sizeof(*cr));
+    return 0;
+}
+
+extern "C" int free_check_result(check_result *cr) {
+    free(cr->host_name);
+    free(cr->service_description);
+    free(cr->output);
+    free(cr->output_file);
+    cr->host_name = nullptr;
+    cr->service_description = nullptr;
+    cr->output = nullptr;
+    cr->output_file = nullptr;
+    return 0;
+}
+
+/// Counts calls so a caller can assert the result actually reached naemon.
+unsigned long processedCheckResults = 0;
+
+extern "C" int process_check_result(check_result *) {
+    ++processedCheckResults;
+    return 0;
+}
+
+// --- reached from ProcessMessage's other command branches --------------------------------
+
+extern "C" host *find_host(const char *) {
+    return nullptr;
+}
+
+extern "C" service *find_service(const char *, const char *) {
+    return nullptr;
+}
+
+extern "C" int process_external_command1(char *) {
+    return 0;
+}
+
+namespace statusengine {
+    void Nebmodule::ScheduleHostCheckFixed(host *, time_t) {}
+    void Nebmodule::ScheduleServiceCheckFixed(service *, time_t) {}
+    void Nebmodule::DeleteDowntime(const char *, const char *, time_t, time_t, const char *) {}
 } // namespace statusengine
