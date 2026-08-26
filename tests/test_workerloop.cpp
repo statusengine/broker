@@ -7,6 +7,7 @@
 
 #include "MessageHandler/MessageHandlerList.h"
 
+using statusengine::FakeIoWaitHandler;
 using statusengine::FakeMessageHandler;
 using statusengine::IMessageHandler;
 using statusengine::MessageHandlerList;
@@ -22,15 +23,42 @@ namespace {
 } // namespace
 
 TEST_CASE("a handler that asks for more without progressing does not spin the loop") {
-    // This is the GEARMAN_IO_WAIT shape: always "there is more", never a processed
-    // message, so the message counter can never end the loop. Before the loop was bounded
-    // by progress this ran forever, inside naemon's event loop.
+    // Always "there is more", never a processed message, so the message counter can never
+    // end the loop. Unbounded this ran forever, inside naemon's event loop.
     HandlerList handlers;
     auto stuck = Add(handlers, 0, true);
 
     MessageHandlerList::RunWorkers(handlers, 1000000ul);
 
-    CHECK(stuck->calls == 1);
+    CHECK(stuck->calls == MessageHandlerList::maxRoundsWithoutProgress);
+}
+
+TEST_CASE("a worker that waits for its socket before every message still drains") {
+    // The regression this file exists for. A gearman worker reports GEARMAN_IO_WAIT once
+    // per job, so the very first round of a tick usually processes nothing. Ending the
+    // loop on that round cut throughput to roughly one message per tick: measured against
+    // a real job server, 50000 queued jobs went from being drained in a single tick to 48
+    // messages in 50 ticks, and the queue grew without bound.
+    HandlerList handlers;
+    auto handler = std::make_shared<FakeIoWaitHandler>(500);
+    handlers.push_back(handler);
+
+    MessageHandlerList::RunWorkers(handlers, 1000000ul);
+
+    CHECK(handler->remaining == 0);
+}
+
+TEST_CASE("waiting for the socket does not consume the no progress budget") {
+    // Progress resets the budget, so a handler alternating wait and message can keep going
+    // indefinitely - which is exactly what draining a full queue looks like.
+    HandlerList handlers;
+    auto handler = std::make_shared<FakeIoWaitHandler>(4);
+    handlers.push_back(handler);
+
+    MessageHandlerList::RunWorkers(handlers, 1000000ul);
+
+    // four waits, four messages, and the round that finds the queue empty
+    CHECK(handler->calls == 9);
 }
 
 TEST_CASE("a handler drains its queue within one tick") {
@@ -63,8 +91,8 @@ TEST_CASE("a stuck handler does not stop the others") {
 
     // The loop keeps going while anyone makes progress, so the working handler drains...
     CHECK(busy->remaining == 0);
-    // ...and it ends on the first round where nobody did, rather than on the stuck one.
-    CHECK(stuck->calls == 4);
+    // ...and once nobody does, the no progress budget ends it rather than the stuck one.
+    CHECK(stuck->calls == 3 + MessageHandlerList::maxRoundsWithoutProgress);
 }
 
 TEST_CASE("a handler that goes quiet ends the loop") {

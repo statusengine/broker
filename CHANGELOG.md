@@ -33,7 +33,10 @@ set of memory errors that could take the monitoring core down with them.
 - **The worker loop could freeze naemon.** A handler reporting more work without having
   processed anything - which the gearman worker does when its socket would block - spun
   the loop forever inside naemon's event loop, so the core stopped scheduling entirely.
-  The gearman poll that goes with it was also unbounded and is now capped.
+  It now gives up after 16 rounds in a row without a processed message. Note that this
+  cannot be a single round: draining a queue produces one such round per message, so
+  ending on the first one throttles the worker to about one message per second. The
+  gearman poll that goes with it was also unbounded and is now capped at 10ms.
 - **Log levels were wrong in both directions.** At `Level = Error` warnings were still
   written, and at `Level = Info` - the most verbose setting - warnings were dropped.
 - The module title was overwritten by the copyright string in the naemon module info.

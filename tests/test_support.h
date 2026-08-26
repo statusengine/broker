@@ -87,4 +87,45 @@ namespace statusengine {
         /// How often Worker() was entered - the guard against a spinning loop.
         unsigned long calls;
     };
+
+    /**
+     * IMessageHandler shaped like the real gearman worker: every message costs one round
+     * that reports "there is more" without processing anything, because the grab-job
+     * response is still in flight, followed by a round that delivers it.
+     *
+     * Measured against a real job server this is not an edge case, it is what draining a
+     * queue looks like: one GEARMAN_IO_WAIT per GEARMAN_SUCCESS, all the way down.
+     */
+    class FakeIoWaitHandler : public IMessageHandler {
+      public:
+        explicit FakeIoWaitHandler(unsigned long messages) : remaining(messages), waiting(true), calls(0) {}
+
+        bool Worker(unsigned long &counter) override {
+            ++calls;
+            if (remaining == 0) {
+                return false;
+            }
+            if (waiting) {
+                // GEARMAN_IO_WAIT: more work is coming, but none of it is here yet.
+                waiting = false;
+                return true;
+            }
+            // GEARMAN_SUCCESS
+            waiting = true;
+            --remaining;
+            ++counter;
+            return true;
+        }
+
+        bool Connect() override {
+            return true;
+        }
+        void SendMessage(Queue, const std::string &) override {}
+        void ProcessMessage(WorkerQueue, const std::string &) override {}
+        void ProcessMessage(WorkerQueue, json_object *) override {}
+
+        unsigned long remaining;
+        bool waiting;
+        unsigned long calls;
+    };
 } // namespace statusengine

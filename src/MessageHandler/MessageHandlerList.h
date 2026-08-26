@@ -58,20 +58,34 @@ namespace statusengine {
         }
 
         /**
-         * Lets every handler drain its queue, until nobody has anything left or
-         * maxMessages have been processed.
+         * How many rounds in a row may end without a processed message before the loop
+         * gives up and lets the next tick try again.
          *
-         * A handler may ask for another round without having processed anything - the
-         * gearman worker does exactly that when its socket would block. Such a handler
-         * cannot advance the message counter, so counting messages alone does not bound
-         * this loop, and it runs inside naemon's event loop. A round that made no progress
-         * therefore ends it, and the next worker tick picks the work up again.
+         * This cannot be 1. A handler may legitimately ask for another round without
+         * having processed anything: the gearman worker does that on every single job,
+         * because its GRAB_JOB response is still in flight when the socket is first read
+         * and libgearman reports GEARMAN_IO_WAIT. Ending the loop on the first such round
+         * therefore ends it after roughly one message per tick.
+         *
+         * Draining 110000 jobs from a real job server - with concurrent submitters and a
+         * competing worker - never produced a run longer than two rounds, so this is
+         * almost entirely headroom. It exists only to bound a handler that has stopped
+         * making progress altogether, which would otherwise spin inside naemon's event
+         * loop and stop the monitoring core from scheduling anything at all.
+         */
+        static constexpr unsigned maxRoundsWithoutProgress = 16;
+
+        /**
+         * Lets every handler drain its queue, until nobody has anything left, maxMessages
+         * have been processed, or nobody has made progress for maxRoundsWithoutProgress
+         * rounds.
          *
          * Static and defined here so it can be exercised with fake handlers.
          */
         static void RunWorkers(std::vector<std::shared_ptr<IMessageHandler>> &handlers,
                                unsigned long maxMessages) {
             unsigned long counter = 0ul;
+            unsigned roundsWithoutProgress = 0u;
             bool moreMessages;
             do {
                 moreMessages = false;
@@ -81,7 +95,10 @@ namespace statusengine {
                         moreMessages = true;
                     }
                 }
-                if (counter == before) {
+                if (counter != before) {
+                    roundsWithoutProgress = 0u;
+                }
+                else if (++roundsWithoutProgress >= maxRoundsWithoutProgress) {
                     break;
                 }
             } while (moreMessages && (counter < maxMessages));
