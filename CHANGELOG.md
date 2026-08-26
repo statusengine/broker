@@ -30,6 +30,20 @@ set of memory errors that could take the monitoring core down with them.
   was unreachable.
 - **Crash on startup failure.** If one message handler failed to connect, destroying the
   remaining ones dereferenced a connection that had never been opened.
+- **A queue backlog stopped the monitoring core.** The worker runs inside naemon's event
+  loop and had no bound on how long one run could take: it ended only once the queues were
+  empty. Measured against naemon in docker, applying 100000 queued check results held the
+  event loop in a *single* callback for 128 seconds, during which the core scheduled
+  nothing. The only existing limit, `MaxWorkerMessagesPerInterval`, could not help - it
+  counts messages as they arrive, not the check results inside them, so at its default of
+  1000000 and 200 check results per bulk message the real ceiling was 200 million items in
+  one run. There is now a time budget, `[Worker] MaxRuntimeMilliseconds`, defaulting to
+  100ms. It costs no throughput: a run that stops early is rescheduled for naemon's very
+  next event loop pass rather than the next second - the same 100000 check results drain in
+  127s with the budget and 135s without it, while the longest single run drops from 132776ms
+  to 102ms. See the README for what it does and does not guarantee, in particular that a
+  bulk message cannot be interrupted. Not applied under nagios, which cannot reschedule
+  early.
 - **The worker loop could freeze naemon.** A handler reporting more work without having
   processed anything - which the gearman worker does when its socket would block - spun
   the loop forever inside naemon's event loop, so the core stopped scheduling entirely.
@@ -65,6 +79,8 @@ set of memory errors that could take the monitoring core down with them.
 - Built as C++17, and the vendored toml11 was updated from the 2018 version to 4.4.0.
 - The reported module version now comes from the build instead of a hardcoded string.
   Version numbers had drifted apart across four places.
+- `[Worker]` is documented for the first time, in `statusengine.toml` and the README.
+  Both keys existed but neither was written down anywhere.
 - Nagios support is a deprecation candidate. It still builds and is still tested in CI; if
   you rely on it, please say so in an issue.
 

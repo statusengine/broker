@@ -1,5 +1,6 @@
 #pragma once
 
+#include <chrono>
 #include <string>
 #include <vector>
 
@@ -86,6 +87,37 @@ namespace statusengine {
         bool keepAsking;
         /// How often Worker() was entered - the guard against a spinning loop.
         unsigned long calls;
+    };
+
+    /**
+     * Clock that only moves when it is read, by a fixed step per reading. Lets the worker
+     * loop's time budget be tested exactly and without sleeping: with a step of 10ms and a
+     * budget of 50ms the loop is expected to stop after a known number of rounds.
+     */
+    struct FakeClock {
+        using duration = std::chrono::steady_clock::duration;
+        using rep = duration::rep;
+        using period = duration::period;
+        using time_point = std::chrono::time_point<FakeClock, duration>;
+        static const bool is_steady = true;
+
+        inline static std::chrono::milliseconds step{0};
+        inline static unsigned long readings = 0ul;
+        inline static time_point current{};
+
+        /// Starts at zero again, advancing by perReading every time now() is called.
+        static void Reset(std::chrono::milliseconds perReading) {
+            step = perReading;
+            readings = 0ul;
+            current = time_point{};
+        }
+
+        static time_point now() {
+            ++readings;
+            const auto value = current;
+            current += step;
+            return value;
+        }
     };
 
     /**

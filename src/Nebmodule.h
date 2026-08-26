@@ -52,6 +52,11 @@ namespace statusengine {
         bool RegisterCallback(NEBCallbackType cbType);
 
         void RegisterEventCallback(EventCallback *ecb);
+#ifndef BUILD_NAGIOS
+        /// Schedules the callback for naemon's next event loop pass instead of after its
+        /// interval, for when it stopped with work left over.
+        void RegisterEventCallbackNow(EventCallback *ecb);
+#endif
 
         void ScheduleHostCheckDelay(host *temp_host, time_t delay);
 

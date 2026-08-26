@@ -1,5 +1,6 @@
 #pragma once
 
+#include <chrono>
 #include <ctime>
 #include <memory>
 #include <string>
@@ -206,7 +207,7 @@ namespace statusengine {
       public:
         explicit Configuration(IStatusengine &se)
             : se(se), cfg(toml::table{}), bulkTable(toml::table{}), schedulerTable(toml::table{}),
-              maxWorkerMessagesPerInterval(0), logLevel(LogLevel::Warning) {}
+              maxWorkerMessagesPerInterval(0), maxWorkerRuntime(0), logLevel(LogLevel::Warning) {}
         ~Configuration() {
             rabbitmq.clear(); // shared_ptr
         }
@@ -290,6 +291,32 @@ namespace statusengine {
                 }
             }
 
+            // How long one worker run may keep the monitoring core busy. Small on purpose:
+            // when it stops early the core reschedules it for its very next event loop
+            // pass, so the budget costs latency to the core and next to no throughput.
+            // Strict like MaxWorkerMessagesPerInterval above, and deliberately not
+            // GetTomlDefault(): toml11 falls back silently on a type mismatch there, and a
+            // typo in a bound that protects the monitoring core should not pass quietly.
+            unsigned long runtimeMs = 100ul;
+            if (workerTable.contains("MaxRuntimeMilliseconds")) {
+                try {
+                    runtimeMs = toml::find<unsigned long>(workerTable, "MaxRuntimeMilliseconds");
+                }
+                catch (const toml::type_error &tte) {
+                    se.Log() << "Invalid configuration: Invalid value for key "
+                             << "MaxRuntimeMilliseconds" << LogLevel::Error;
+                    return false;
+                }
+            }
+            maxWorkerRuntime = std::chrono::milliseconds(runtimeMs);
+#ifdef BUILD_NAGIOS
+            if (workerTable.contains("MaxRuntimeMilliseconds")) {
+                se.Log() << "MaxRuntimeMilliseconds has no effect when built for nagios and is "
+                         << "ignored: nagios cannot reschedule the worker before its next interval"
+                         << LogLevel::Warning;
+            }
+#endif
+
             se.Log() << "Finished loading config" << LogLevel::Info;
             se.Log() << "Gearman Clients: " << gearman.size() << LogLevel::Info;
             unsigned int counter = 0;
@@ -340,6 +367,11 @@ namespace statusengine {
 
         unsigned long GetMaxWorkerMessagesPerInterval() const {
             return maxWorkerMessagesPerInterval;
+        }
+
+        /// Time budget for one worker run. Zero means unbounded.
+        std::chrono::milliseconds GetMaxWorkerRuntime() const {
+            return maxWorkerRuntime;
         }
 
         LogLevel GetLogLevel() const {
@@ -400,6 +432,7 @@ namespace statusengine {
         std::set<Queue> bulkQueues;
 
         unsigned long maxWorkerMessagesPerInterval;
+        std::chrono::milliseconds maxWorkerRuntime;
 
         LogLevel logLevel;
 

@@ -1,5 +1,6 @@
 #include <doctest/doctest.h>
 
+#include <chrono>
 #include <cstdio>
 #include <cstdlib>
 #include <fstream>
@@ -134,6 +135,7 @@ TEST_CASE("Configuration applies bulk and worker defaults") {
     CHECK(cfg.GetBulkMaximum() == 200ul);
     CHECK(cfg.GetBulkFlushInterval() == 10);
     CHECK(cfg.GetMaxWorkerMessagesPerInterval() == 1000000ul);
+    CHECK(cfg.GetMaxWorkerRuntime() == std::chrono::milliseconds(100));
     CHECK(cfg.GetStartupScheduleMax() == 0);
 }
 
@@ -151,6 +153,7 @@ StartupScheduleMax = 30
 
 [Worker]
 MaxWorkerMessagesPerInterval = 42
+MaxRuntimeMilliseconds = 250
 )");
 
     REQUIRE(cfg.Load(file.path));
@@ -158,6 +161,7 @@ MaxWorkerMessagesPerInterval = 42
     CHECK(cfg.GetBulkFlushInterval() == 3);
     CHECK(cfg.GetStartupScheduleMax() == 30);
     CHECK(cfg.GetMaxWorkerMessagesPerInterval() == 42ul);
+    CHECK(cfg.GetMaxWorkerRuntime() == std::chrono::milliseconds(250));
     CHECK(cfg.IsBulkQueue(Queue::HostStatus));
     CHECK(cfg.IsBulkQueue(Queue::ServiceCheck));
     CHECK_FALSE(cfg.IsBulkQueue(Queue::LogData));
@@ -274,4 +278,23 @@ TEST_CASE("The developer environment configuration parses") {
     REQUIRE(cfg.Load(STATUSENGINE_DEVENV_CONFIG));
     CHECK(cfg.GetGearmanConfiguration()->size() == 1);
     CHECK(cfg.GetRabbitmqConfiguration()->size() == 1);
+}
+
+
+TEST_CASE("A worker runtime of zero is accepted and means unbounded") {
+    FakeStatusengine se;
+    Configuration cfg(se);
+    TempConfig file("[Worker]\nMaxRuntimeMilliseconds = 0\n");
+
+    REQUIRE(cfg.Load(file.path));
+    CHECK(cfg.GetMaxWorkerRuntime() == std::chrono::milliseconds::zero());
+}
+
+TEST_CASE("An invalid worker runtime is rejected rather than ignored") {
+    FakeStatusengine se;
+    Configuration cfg(se);
+    TempConfig file("[Worker]\nMaxRuntimeMilliseconds = \"soon\"\n");
+
+    CHECK_FALSE(cfg.Load(file.path));
+    CHECK(FakeStatusengine::Logged("MaxRuntimeMilliseconds"));
 }

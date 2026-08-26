@@ -51,13 +51,24 @@ namespace statusengine {
 
     void Nebmodule::RegisterEventCallback(EventCallback *ecb) {
 #ifndef BUILD_NAGIOS
-        schedule_event(ecb->Interval(), nebmodule_event_callback, ecb);
+        schedule_event(static_cast<time_t>(ecb->Interval()), nebmodule_event_callback, ecb);
 #else
         time_t interval = static_cast<time_t>(ecb->Interval());
         schedule_new_event(EVENT_USER_FUNCTION, 1, std::time(0) + interval, 1, interval, nullptr, 1,
                            reinterpret_cast<void *>(nebmodule_event_callback), reinterpret_cast<void *>(ecb), 0);
 #endif // BUILD_NAGIOS
     }
+
+#ifndef BUILD_NAGIOS
+    void Nebmodule::RegisterEventCallbackNow(EventCallback *ecb) {
+        // A zero delay does not starve the core. naemon's event_poll_full() computes the
+        // time to the next event, clamps it to zero for one that is already due, polls its
+        // own file descriptors with that timeout, and skips running the timed event
+        // altogether if any of them had input. So the next worker slice only happens once
+        // naemon has had a pass of its own, and naemon's own I/O gets priority over ours.
+        schedule_event(0, nebmodule_event_callback, ecb);
+    }
+#endif
 
     void Nebmodule::ScheduleHostCheckDelay(host *temp_host, time_t delay) {
 #ifndef BUILD_NAGIOS
@@ -241,13 +252,20 @@ int nebmodule_callback(int event_type, void *data) {
 #ifndef BUILD_NAGIOS
 void nebmodule_event_callback(struct nm_event_execution_properties *properties) {
     auto ecb = reinterpret_cast<statusengine::EventCallback *>(properties->user_data);
-    ecb->Callback();
+    const bool workRemaining = ecb->Callback();
     if (!(sigshutdown || sigrestart)) {
-        statusengine::Nebmodule::Instance().RegisterEventCallback(ecb);
+        if (workRemaining) {
+            statusengine::Nebmodule::Instance().RegisterEventCallbackNow(ecb);
+        }
+        else {
+            statusengine::Nebmodule::Instance().RegisterEventCallback(ecb);
+        }
     }
 }
 #else
 void nebmodule_event_callback(statusengine::EventCallback *ecb) {
-    ecb->Callback();
+    // Nagios reschedules this itself, the event is recurring. There is no way to ask for
+    // an earlier run, so a callback with work left over simply waits for the next one.
+    (void)ecb->Callback();
 }
 #endif

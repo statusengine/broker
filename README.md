@@ -101,6 +101,43 @@ broker module like this:
 broker_module=/opt/naemon/lib/libstatusengine.so /path/to/statusengine.toml
 ```
 
+### How long the worker may block the core
+
+If you consume queues (`WorkerCommand`, `WorkerOCHP`, `WorkerOCSP`), the broker applies
+those results from inside the monitoring core's event loop. While it does that, the core
+does nothing else - it schedules no checks, reaps no results and reads no external
+commands. A backlog therefore has to be bounded, or clearing it stops monitoring.
+
+Two settings in `[Worker]` bound it:
+
+| Key | Default | Bounds |
+|---|---|---|
+| `MaxRuntimeMilliseconds` | `100` | wall clock time of one worker run; `0` disables |
+| `MaxWorkerMessagesPerInterval` | `1000000` | messages taken off the queues in one run |
+
+`MaxRuntimeMilliseconds` is the one that matters. When a run stops on it with messages
+still queued, the broker asks naemon to run it again on its very next event loop pass, so
+the core keeps its responsiveness and the broker keeps its throughput - the gap between
+two runs is a single loop iteration, not a second.
+
+Two caveats worth knowing:
+
+* **One message is indivisible.** A bulk message is a single job that has already been
+  acknowledged, so it cannot be abandoned half way without throwing check results away.
+  A run can therefore overshoot by the cost of the message it is busy with. The guarantee
+  is "budget plus one message", and with large bulk messages the second term is the one
+  that dominates: measured against naemon in docker with the default 100ms budget, single
+  check results gave a longest run of 102ms, while bulk messages of 200 check results gave
+  302ms - one such message costs around 220ms all by itself. Both drained 100000 check
+  results in around two minutes. If you need a tighter bound, send smaller bulks.
+* **`MaxWorkerMessagesPerInterval` counts messages, not check results.** One bulk message
+  of 200 check results counts as `1`. That is why it is a poor bound on its own and why
+  the time budget exists.
+
+Under nagios `MaxRuntimeMilliseconds` has no effect and is ignored with a warning: nagios
+schedules the worker as a recurring one second event and offers no way to ask for an
+earlier run, so a budget there could only be paid for out of throughput.
+
 ## Message format
 
 ### `long_output` on events that have no long output
