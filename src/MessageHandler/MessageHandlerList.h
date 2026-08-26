@@ -200,12 +200,21 @@ namespace statusengine {
                 // Both of these mean work was left behind, which is what the caller
                 // reschedules on. A round without progress does not - retrying that
                 // immediately would just spin.
+                //
+                // Hence the "processed something" condition on both flags. A run that
+                // spends its whole budget without completing a single message is not
+                // behind, it is stuck: an unreachable job server makes libgearman report
+                // GEARMAN_IO_WAIT round after round, each costing a 10ms poll, so the
+                // budget is gone in ten rounds. Reporting that as work left over would
+                // retry a broken connection ten times a second and, worse, blame the
+                // wrong thing in the log - the handlers report a lost connection
+                // themselves, and that is the message an operator needs.
                 if (bounded && Clock::now() >= deadline) {
-                    result.budgetExhausted = true;
+                    result.budgetExhausted = result.processed > 0ul;
                     break;
                 }
                 if (result.processed >= maxMessages) {
-                    result.messageLimitReached = true;
+                    result.messageLimitReached = result.processed > 0ul;
                     break;
                 }
             } while (true);

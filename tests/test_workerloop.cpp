@@ -192,6 +192,24 @@ TEST_CASE("a budget of zero means unbounded") {
     CHECK(FakeClock::readings == 0ul);
 }
 
+TEST_CASE("a run that spends its whole budget without progress is not work remaining") {
+    // What an unreachable job server looks like: libgearman reports GEARMAN_IO_WAIT round
+    // after round, each costing a 10ms poll, so the budget is gone before the no progress
+    // guard is reached. Rescheduling immediately would retry a broken connection ten times
+    // a second, and reporting an overload would blame the queues for a connection problem.
+    FakeClock::Reset(std::chrono::milliseconds(10));
+    HandlerList handlers;
+    auto stuck = Add(handlers, 0, true);
+
+    auto result = MessageHandlerList::RunWorkers<FakeClock>(handlers, 1000000ul, std::chrono::milliseconds(50));
+
+    CHECK(result.processed == 0ul);
+    CHECK_FALSE(result.budgetExhausted);
+    CHECK_FALSE(result.WorkRemaining());
+    // Stopped on the budget, well before the 16 round guard would have ended it.
+    CHECK(stuck->calls == 5);
+}
+
 TEST_CASE("the message limit also counts as work remaining") {
     HandlerList handlers;
     Add(handlers, 100, false);

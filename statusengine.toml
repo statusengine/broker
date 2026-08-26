@@ -110,6 +110,8 @@ StartupScheduleMax = 30
 # Note that this counts messages as they arrive from gearman or rabbitmq, NOT the check
 # results inside them - one bulk message of 200 check results counts as 1. Leave the time
 # budget above as the real bound; this is a second, coarser ceiling.
+# Unlike MaxRuntimeMilliseconds, 0 does not mean unbounded here - it means one message per
+# run. That is not a useful setting; leave it alone and use the time budget.
 #MaxWorkerMessagesPerInterval = 1000000
 
 [Bulk]
