@@ -67,8 +67,9 @@ set of memory errors that could take the monitoring core down with them.
 
 - **`AcknowledgementData` now carries `end_time`**, the point at which an acknowledgement
   expires. Under naemon this is the value from the core, where `0` means it does not
-  expire. Under nagios the field is `null`, because the struct has no such member there -
-  deliberately not `0`, which would be indistinguishable from naemon's "does not expire".
+  expire. Under nagios it is always `0`: nagios has no expiring acknowledgements, so that
+  is not a placeholder but the truth for every acknowledgement it reports. Consumers need
+  no case distinction between the two cores.
 
 ### Added
 

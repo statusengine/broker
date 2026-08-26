@@ -129,32 +129,25 @@ reads it identically. Do not match on the raw payload text.
 ### `end_time` on acknowledgements
 
 The `AcknowledgementData` message carries `end_time`, the unix timestamp at which
-the acknowledgement expires. The key is always present, so a consumer never has
-to handle it being absent - but it has three distinct meanings, and `0` is not
-the same as `null`:
+the acknowledgement expires. The key is always present and always an integer, so
+a consumer never has to handle it being absent or null:
 
 | Core | Acknowledgement | `end_time` | Meaning |
 |---|---|---|---|
 | naemon | set with an expiry | `1787692952` | expires at that timestamp |
-| naemon | set without one | `0` | never expires |
-| nagios | either | `null` | the core cannot tell you |
+| naemon | set without one | `0` | does not expire |
+| nagios | any | `0` | does not expire |
 
-Under naemon `0` is a real value, not a missing one: `ACKNOWLEDGE_SVC_PROBLEM`
-produces `0`, `ACKNOWLEDGE_SVC_PROBLEM_EXPIRE` produces the timestamp. Nagios has
-no `end_time` member in `nebstruct_acknowledgement_data` at all, so reporting `0`
-there would be indistinguishable from naemon's "never expires" and a consumer
-reading it as an expiry time would be wrong either way. `null` says the
-information does not exist.
+`0` means the same thing in both cases, so no distinction between the two cores is
+needed anywhere - in a consumer or in a database schema. Under naemon `0` is a
+real value and not a missing one: `ACKNOWLEDGE_SVC_PROBLEM` produces `0`,
+`ACKNOWLEDGE_SVC_PROBLEM_EXPIRE` produces the timestamp. Nagios has no `end_time`
+member in `nebstruct_acknowledgement_data` because it has no expiring
+acknowledgements at all, so `0` is not a stand-in there either - a nagios
+acknowledgement genuinely never expires.
 
-For a consumer this means:
-
-* `null` - do not infer anything about expiry; the acknowledgement may or may not
-  have one, this core does not report it.
-* `0` - the acknowledgement does not expire.
-* anything else - a unix timestamp, treat it as the expiry.
-
-Note that this is the only field where the two cores differ. Everywhere else both
-produce the same shape.
+For a consumer this means: `0` - does not expire; anything else - a unix
+timestamp, treat it as the expiry.
 
 ### `timestamp` on core restart
 

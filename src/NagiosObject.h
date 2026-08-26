@@ -118,18 +118,6 @@ namespace statusengine {
             SetData(data, name, other);
         }
 
-        /**
-         * Writes a JSON null. Used where a field belongs in the message but the monitoring
-         * core cannot supply it, which is different from the core supplying a zero.
-         */
-        inline void SetNull(const char *name) {
-            SetNull(data, name);
-        }
-
-        inline static void SetNull(json_object *obj, const char *name) {
-            json_object_object_add(obj, name, nullptr);
-        }
-
         inline static void SetData(json_object *obj, const char *name, json_object *other) {
             json_object_object_add(obj, name, other);
         }
@@ -191,10 +179,11 @@ namespace statusengine {
 #ifndef BUILD_NAGIOS
             acknowledgement.SetData("end_time", acknowledgementData->end_time);
 #else
-            // Nagios has no end_time in nebstruct_acknowledgement_data. Reported as null
-            // rather than 0, because under naemon 0 is a real value meaning "never
-            // expires" - a 0 here would be indistinguishable from that.
-            acknowledgement.SetNull("end_time");
+            // Nagios has no end_time in nebstruct_acknowledgement_data, because it has no
+            // expiring acknowledgements at all. 0 is therefore not a placeholder here: it
+            // carries the same meaning it does under naemon, "does not expire", which is
+            // true of every nagios acknowledgement. Consumers need no case distinction.
+            acknowledgement.SetData("end_time", static_cast<time_t>(0));
 #endif
 
             SetData("acknowledgement", &acknowledgement);

@@ -246,8 +246,9 @@ TEST_CASE("acknowledgement carries the end time") {
 #ifndef BUILD_NAGIOS
     CHECK(json_object_get_int64(endTime) == 1785470668);
 #else
-    // Nagios cannot supply it. Null, not 0, because 0 means "never expires" under naemon.
-    CHECK(endTime == nullptr);
+    // Nagios has no expiring acknowledgements, so 0 - "does not expire" - is not a
+    // placeholder here but the truth for every nagios acknowledgement.
+    CHECK(json_object_get_int64(endTime) == 0);
 #endif
 
     json_object_put(parsed);
