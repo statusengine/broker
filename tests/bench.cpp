@@ -50,21 +50,25 @@ namespace {
     /// Builds an OCSP worker payload with `count` service checks, the shape the broker
     /// receives from another instance: {"messages":[{...,"servicecheck":{...}}, ...]}.
     std::string BulkServiceChecks(size_t count) {
-        json_object *fixture = json_tokener_parse(ReadFixture("statusngin_servicechecks.json").c_str());
-        json_object *messages = nullptr;
-        json_object_object_get_ex(fixture, "messages", &messages);
-        json_object *one = json_object_array_get_idx(messages, 0);
+        std::string fixtureText = ReadFixture("statusngin_servicechecks.json");
+        yyjson_doc *fixture = yyjson_read(fixtureText.c_str(), fixtureText.length(), 0);
+        yyjson_val *messages = yyjson_obj_get(yyjson_doc_get_root(fixture), "messages");
+        yyjson_val *one = yyjson_arr_get(messages, 0);
 
-        json_object *arr = json_object_new_array();
+        yyjson_mut_doc *doc = yyjson_mut_doc_new(nullptr);
+        yyjson_mut_val *root = yyjson_mut_obj(doc);
+        yyjson_mut_doc_set_root(doc, root);
+        yyjson_mut_val *arr = yyjson_mut_arr(doc);
         for (size_t i = 0; i < count; ++i) {
-            json_object_array_add(arr, json_object_get(one));
+            yyjson_mut_arr_append(arr, yyjson_val_mut_copy(doc, one));
         }
-        json_object *root = json_object_new_object();
-        json_object_object_add(root, "messages", arr);
+        yyjson_mut_obj_add_val(doc, root, "messages", arr);
 
-        std::string result(json_object_to_json_string(root));
-        json_object_put(root);
-        json_object_put(fixture);
+        char *out = yyjson_mut_write(doc, 0, nullptr);
+        std::string result(out ? out : "");
+        free(out);
+        yyjson_mut_doc_free(doc);
+        yyjson_doc_free(fixture);
         return result;
     }
 
@@ -175,11 +179,11 @@ int main() {
     const std::string bulk100 = BulkServiceChecks(100);
     Bench("ProcessMessage ocsp bulk (100)", 2000,
           [&] { handler.ProcessMessage(WorkerQueue::OCSP, bulk100); });
-    // How much of that is json-c parsing, which we cannot avoid?
-    Bench("  json_tokener_parse only (bulk)", 2000, [&] {
-        json_object *o = json_tokener_parse(bulk100.c_str());
-        sink += json_object_object_length(o);
-        json_object_put(o);
+    // How much of that is parsing, which we cannot avoid?
+    Bench("  yyjson_read only (bulk)", 2000, [&] {
+        yyjson_doc *d = yyjson_read(bulk100.c_str(), bulk100.size(), 0);
+        sink += static_cast<long long>(yyjson_obj_size(yyjson_doc_get_root(d)));
+        yyjson_doc_free(d);
     });
     // And how much is the std::string copy of the payload that step 4 targets?
     Bench("  payload copy only (bulk)", 200000, [&] {
@@ -217,49 +221,8 @@ int main() {
         });
     }
 
-    // Serialisation: what json-c's default SPACED costs against PLAIN.
-    {
-        NagiosServiceCheckData msg(&scd);
-        json_object *raw = msg.GetDataCopy();
-        const char *spaced = json_object_to_json_string_ext(raw, JSON_C_TO_STRING_SPACED);
-        size_t spacedLen = std::strlen(spaced);
-        const char *plain = json_object_to_json_string_ext(raw, JSON_C_TO_STRING_PLAIN);
-        size_t plainLen = std::strlen(plain);
-
-        Bench("ToString SPACED (current)", 200000, [&] {
-            sink += static_cast<long long>(std::strlen(json_object_to_json_string_ext(raw, JSON_C_TO_STRING_SPACED)));
-        });
-        Bench("ToString PLAIN", 200000, [&] {
-            sink += static_cast<long long>(std::strlen(json_object_to_json_string_ext(raw, JSON_C_TO_STRING_PLAIN)));
-        });
-        std::cout << "  serialised size: SPACED " << spacedLen << " B, PLAIN " << plainLen << " B ("
-                  << std::setprecision(1) << (100.0 - 100.0 * static_cast<double>(plainLen) /
-                                                          static_cast<double>(spacedLen))
-                  << "% smaller)" << std::endl;
-        json_object_put(raw);
-    }
-
-    // The same comparison on a realistic bulk payload, which is what actually travels.
-    {
-        json_object *fixture = json_tokener_parse(ReadFixture("statusngin_servicechecks.json").c_str());
-        json_object *messages = nullptr;
-        json_object_object_get_ex(fixture, "messages", &messages);
-        json_object *one = json_object_array_get_idx(messages, 0);
-        json_object *arr = json_object_new_array();
-        for (int i = 0; i < 100; ++i) {
-            json_object_array_add(arr, json_object_get(one));
-        }
-        json_object *root = json_object_new_object();
-        json_object_object_add(root, "messages", arr);
-        size_t sp = std::strlen(json_object_to_json_string_ext(root, JSON_C_TO_STRING_SPACED));
-        size_t pl = std::strlen(json_object_to_json_string_ext(root, JSON_C_TO_STRING_PLAIN));
-        std::cout << "  bulk of 100:     SPACED " << sp << " B, PLAIN " << pl << " B ("
-                  << std::setprecision(1) << (100.0 - 100.0 * static_cast<double>(pl) /
-                                                          static_cast<double>(sp))
-                  << "% smaller, " << (sp - pl) << " B saved)" << std::endl;
-        json_object_put(root);
-        json_object_put(fixture);
-    }
+    // The SPACED vs PLAIN comparison that used to live here measured a json-c
+    // output option. yyjson always writes minified, so there is nothing to compare.
 
     std::cout << "\nbulk payload of 100: " << bulk100.size() << " bytes, "
               << "processed check results: " << processedCheckResults << std::endl;

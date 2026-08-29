@@ -6,7 +6,7 @@ version_h = configure_file(output: 'version.h', configuration: version_conf)
 statusengine_sources = ['Encoding.cpp', 'Nebmodule.cpp', 'Statusengine.cpp', 'MessageHandler/MessageHandlerList.cpp',
                         '../vendor/yyjson.c']
 
-statusengine_deps = [uchardet_dep, jsonc_dep, toml_dep]
+statusengine_deps = [uchardet_dep, toml_dep]
 statusengine_cpp_args = []
 
 if get_option('nagios')

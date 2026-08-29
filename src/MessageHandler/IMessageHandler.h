@@ -1,6 +1,6 @@
 #pragma  once
 
-#include <json.h>
+#include "yyjson.h"
 #include <memory>
 
 #include "Queue.h"
@@ -13,7 +13,7 @@ namespace statusengine {
         virtual ~IMessageHandler() = default;
 
         virtual void ProcessMessage(WorkerQueue workerQueue, const std::string &message) = 0;
-        virtual void ProcessMessage(WorkerQueue workerQueue, json_object *obj) = 0;
+        virtual void ProcessMessage(WorkerQueue workerQueue, yyjson_val *obj) = 0;
 
         virtual bool Connect() = 0;
         virtual bool Worker(unsigned long &counter) = 0;

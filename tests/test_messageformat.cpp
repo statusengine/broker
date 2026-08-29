@@ -14,33 +14,37 @@ using namespace statusengine;
 
 namespace {
 
-    /// Reads a recorded broker message from tests/fixtures.
-    json_object *LoadFixture(const std::string &name) {
+    /// Reads a recorded broker message from tests/fixtures. The document owns the
+    /// values, so it is kept alive by the caller.
+    yyjson_doc *LoadFixture(const std::string &name) {
         std::ifstream in(std::string(STATUSENGINE_FIXTURE_DIR) + "/" + name);
         REQUIRE_MESSAGE(in.good(), "missing fixture: ", name);
         std::stringstream buffer;
         buffer << in.rdbuf();
-        json_object *obj = json_tokener_parse(buffer.str().c_str());
-        REQUIRE_MESSAGE(obj != nullptr, "fixture is not valid json: ", name);
-        return obj;
+        std::string text = buffer.str();
+        yyjson_doc *doc = yyjson_read(text.c_str(), text.length(), 0);
+        REQUIRE_MESSAGE(doc != nullptr, "fixture is not valid json: ", name);
+        return doc;
     }
 
-    std::set<std::string> KeysOf(json_object *obj) {
+    std::set<std::string> KeysOf(yyjson_val *obj) {
         std::set<std::string> keys;
-        REQUIRE(json_object_is_type(obj, json_type_object));
-        json_object_object_foreach(obj, key, value) {
+        REQUIRE(yyjson_is_obj(obj));
+        size_t idx, max;
+        yyjson_val *key, *value;
+        yyjson_obj_foreach(obj, idx, max, key, value) {
             (void)value;
-            keys.insert(key);
+            keys.insert(std::string(yyjson_get_str(key), yyjson_get_len(key)));
         }
         return keys;
     }
 
     /// Unwraps a fixture down to the single recorded message, bulk or not.
-    json_object *FirstMessage(json_object *fixture) {
-        json_object *messages;
-        if (json_object_object_get_ex(fixture, "messages", &messages)) {
-            REQUIRE(json_object_array_length(messages) > 0);
-            return json_object_array_get_idx(messages, 0);
+    yyjson_val *FirstMessage(yyjson_val *fixture) {
+        yyjson_val *messages = yyjson_obj_get(fixture, "messages");
+        if (messages != nullptr) {
+            REQUIRE(yyjson_arr_size(messages) > 0);
+            return yyjson_arr_get(messages, 0);
         }
         return fixture;
     }
@@ -55,24 +59,26 @@ namespace {
      * fixtures were recorded from a different host.
      */
     void CheckShape(NagiosObject &produced, const std::string &fixtureName, const char *subObject) {
-        json_object *fixture = LoadFixture(fixtureName);
-        json_object *expected = FirstMessage(fixture);
+        yyjson_doc *fixture = LoadFixture(fixtureName);
+        yyjson_val *expected = FirstMessage(yyjson_doc_get_root(fixture));
 
-        json_object *actual = json_tokener_parse(Rendered(produced).c_str());
-        REQUIRE(actual != nullptr);
+        std::string renderedText = Rendered(produced);
+        yyjson_doc *actualDoc = yyjson_read(renderedText.c_str(), renderedText.length(), 0);
+        REQUIRE(actualDoc != nullptr);
+        yyjson_val *actual = yyjson_doc_get_root(actualDoc);
 
         CHECK(KeysOf(actual) == KeysOf(expected));
 
         if (subObject != nullptr) {
-            json_object *actualSub = nullptr;
-            json_object *expectedSub = nullptr;
-            REQUIRE(json_object_object_get_ex(actual, subObject, &actualSub));
-            REQUIRE(json_object_object_get_ex(expected, subObject, &expectedSub));
+            yyjson_val *actualSub = yyjson_obj_get(actual, subObject);
+            yyjson_val *expectedSub = yyjson_obj_get(expected, subObject);
+            REQUIRE(actualSub != nullptr);
+            REQUIRE(expectedSub != nullptr);
             CHECK(KeysOf(actualSub) == KeysOf(expectedSub));
         }
 
-        json_object_put(actual);
-        json_object_put(fixture);
+        yyjson_doc_free(actualDoc);
+        yyjson_doc_free(fixture);
     }
 
     /// Fills the fields every nebstruct shares.
@@ -234,24 +240,25 @@ TEST_CASE("acknowledgement carries the end time") {
 #endif
 
     NagiosAcknowledgementData msg(&data);
-    json_object *parsed = json_tokener_parse(Rendered(msg).c_str());
-    REQUIRE(parsed != nullptr);
+    std::string renderedText = Rendered(msg);
+    yyjson_doc *parsedDoc = yyjson_read(renderedText.c_str(), renderedText.length(), 0);
+    REQUIRE(parsedDoc != nullptr);
 
-    json_object *ack = nullptr;
-    REQUIRE(json_object_object_get_ex(parsed, "acknowledgement", &ack));
-    json_object *endTime = nullptr;
+    yyjson_val *ack = yyjson_obj_get(yyjson_doc_get_root(parsedDoc), "acknowledgement");
+    REQUIRE(ack != nullptr);
     // The key is always present, so consumers can rely on it regardless of the core.
-    REQUIRE(json_object_object_get_ex(ack, "end_time", &endTime));
+    yyjson_val *endTime = yyjson_obj_get(ack, "end_time");
+    REQUIRE(endTime != nullptr);
 
 #ifndef BUILD_NAGIOS
-    CHECK(json_object_get_int64(endTime) == 1785470668);
+    CHECK(yyjson_get_sint(endTime) == 1785470668);
 #else
     // Nagios has no expiring acknowledgements, so 0 - "does not expire" - is not a
     // placeholder here but the truth for every nagios acknowledgement.
-    CHECK(json_object_get_int64(endTime) == 0);
+    CHECK(yyjson_get_sint(endTime) == 0);
 #endif
 
-    json_object_put(parsed);
+    yyjson_doc_free(parsedDoc);
 }
 
 TEST_CASE("downtime message keeps its shape") {
@@ -322,18 +329,18 @@ TEST_CASE("non utf8 plugin output is converted in the message") {
     NagiosServiceCheckPerfData msg(&data);
     std::string rendered = Rendered(msg);
 
-    // json-c refuses to build a string from invalid utf8, so a successful round trip
-    // through the parser is what proves the conversion happened.
-    json_object *parsed = json_tokener_parse(rendered.c_str());
-    REQUIRE(parsed != nullptr);
+    // A successful round trip through the parser is what proves the conversion
+    // happened: invalid utf8 would not survive it intact.
+    yyjson_doc *parsedDoc = yyjson_read(rendered.c_str(), rendered.length(), 0);
+    REQUIRE(parsedDoc != nullptr);
 
-    json_object *sub = nullptr;
-    REQUIRE(json_object_object_get_ex(parsed, "servicecheck", &sub));
-    json_object *perf = nullptr;
-    REQUIRE(json_object_object_get_ex(sub, "perf_data", &perf));
-    CHECK(std::string(json_object_get_string(perf)) == "Größe des Puffers überschritten, Dienst läuft nicht");
+    yyjson_val *sub = yyjson_obj_get(yyjson_doc_get_root(parsedDoc), "servicecheck");
+    REQUIRE(sub != nullptr);
+    yyjson_val *perf = yyjson_obj_get(sub, "perf_data");
+    REQUIRE(perf != nullptr);
+    CHECK(std::string(yyjson_get_str(perf)) == "Größe des Puffers überschritten, Dienst läuft nicht");
 
-    json_object_put(parsed);
+    yyjson_doc_free(parsedDoc);
 }
 
 TEST_CASE("core restart message keeps its shape") {
@@ -352,16 +359,19 @@ TEST_CASE("core restart carries naemon's event time") {
     data.timestamp.tv_sec = 1785470668;
 
     NagiosRestartData msg(&data);
-    json_object *parsed = json_tokener_parse(Rendered(msg).c_str());
-    REQUIRE(parsed != nullptr);
+    std::string renderedText = Rendered(msg);
+    yyjson_doc *parsedDoc = yyjson_read(renderedText.c_str(), renderedText.length(), 0);
+    REQUIRE(parsedDoc != nullptr);
+    yyjson_val *parsed = yyjson_doc_get_root(parsedDoc);
 
-    json_object *value = nullptr;
-    REQUIRE(json_object_object_get_ex(parsed, "object_type", &value));
-    CHECK(json_object_get_int(value) == NEBTYPE_PROCESS_RESTART);
+    yyjson_val *value = yyjson_obj_get(parsed, "object_type");
+    REQUIRE(value != nullptr);
+    CHECK(yyjson_get_int(value) == NEBTYPE_PROCESS_RESTART);
 
-    REQUIRE(json_object_object_get_ex(parsed, "timestamp", &value));
+    value = yyjson_obj_get(parsed, "timestamp");
+    REQUIRE(value != nullptr);
     // The worker reads 0 as "not set", so a real restart must never report 0.
-    CHECK(json_object_get_int64(value) == 1785470668);
+    CHECK(yyjson_get_sint(value) == 1785470668);
 
-    json_object_put(parsed);
+    yyjson_doc_free(parsedDoc);
 }

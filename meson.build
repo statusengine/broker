@@ -9,7 +9,6 @@ project('statusengine-broker', ['cpp', 'c'],
 uchardet_dep = dependency('uchardet')
 gearmand_dep = dependency('gearmand', required: get_option('gearman'))
 librabbitmq_dep = dependency('librabbitmq', required: get_option('rabbitmq'))
-jsonc_dep = dependency('json-c')
 
 if get_option('nagios')
     nagios_dep = declare_dependency(include_directories: include_directories(get_option('nagios_include_dir'))).as_system('system')

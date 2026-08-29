@@ -1,6 +1,6 @@
 doctest_dep = dependency('doctest')
 
-test_deps = [doctest_dep, uchardet_dep, jsonc_dep, toml_dep]
+test_deps = [doctest_dep, uchardet_dep, toml_dep]
 test_cpp_args = statusengine_cpp_args + [
     '-DSTATUSENGINE_EXAMPLE_CONFIG="' + meson.project_source_root() / 'statusengine.toml' + '"',
     '-DSTATUSENGINE_DEVENV_CONFIG="' + meson.project_source_root() / 'devtools/buildenv/statusengine.toml' + '"',

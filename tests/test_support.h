@@ -81,7 +81,7 @@ namespace statusengine {
         }
         void SendMessage(Queue, const std::string &) override {}
         void ProcessMessage(WorkerQueue, const std::string &) override {}
-        void ProcessMessage(WorkerQueue, json_object *) override {}
+        void ProcessMessage(WorkerQueue, yyjson_val *) override {}
 
         unsigned long remaining;
         bool keepAsking;
@@ -154,7 +154,7 @@ namespace statusengine {
         }
         void SendMessage(Queue, const std::string &) override {}
         void ProcessMessage(WorkerQueue, const std::string &) override {}
-        void ProcessMessage(WorkerQueue, json_object *) override {}
+        void ProcessMessage(WorkerQueue, yyjson_val *) override {}
 
         unsigned long remaining;
         bool waiting;

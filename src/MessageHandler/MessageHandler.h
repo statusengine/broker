@@ -22,12 +22,12 @@ namespace statusengine {
         /**
          * Copy a json string into a buffer owned by the C++ side. Release it with delete[].
          */
-        inline static char *get_json_string(json_object *obj) {
-            auto jsonChars = json_object_get_string(obj);
+        inline static char *get_json_string(yyjson_val *obj) {
+            auto jsonChars = yyjson_get_str(obj);
             if (jsonChars == nullptr) {
                 return nullptr;
             }
-            auto jsonCharsLen = json_object_get_string_len(obj);
+            auto jsonCharsLen = yyjson_get_len(obj);
             char *chars = new char[jsonCharsLen + 1];
             std::memcpy(chars, jsonChars, jsonCharsLen);
             chars[jsonCharsLen] = 0; // set last byte to zero
@@ -39,44 +39,44 @@ namespace statusengine {
          * is stored in a check_result has to be allocated this way: free_check_result()
          * releases those strings with free(), which must not be paired with new[].
          */
-        inline static char *get_json_string_c(json_object *obj) {
-            auto jsonChars = json_object_get_string(obj);
+        inline static char *get_json_string_c(yyjson_val *obj) {
+            auto jsonChars = yyjson_get_str(obj);
             if (jsonChars == nullptr) {
                 return nullptr;
             }
-            return strndup(jsonChars, json_object_get_string_len(obj));
+            return strndup(jsonChars, yyjson_get_len(obj));
         }
 
         void ProcessMessage(WorkerQueue workerQueue, const std::string &message) override {
-            json_object *obj = json_tokener_parse(message.c_str());
-            if (obj == nullptr) {
+            yyjson_doc *doc = yyjson_read(message.c_str(), message.length(), 0);
+            if (doc == nullptr) {
                 se->Log() << "Received non-json string '" << message
                           << "'. Ignoring..." << LogLevel::Warning;
             }
             else {
-                ProcessMessage(workerQueue, obj);
-                json_object_put(obj);
+                ProcessMessage(workerQueue, yyjson_doc_get_root(doc));
+                yyjson_doc_free(doc);
             }
         }
 
-        void ProcessMessage(WorkerQueue workerQueue, json_object *obj) override {
+        void ProcessMessage(WorkerQueue workerQueue, yyjson_val *obj) override {
             if (workerQueue == WorkerQueue::OCHP) {
-                json_object *messages;
-                if(json_object_object_get_ex(obj, "messages", &messages)) {
-                    if (!json_object_is_type(messages, json_type_array)) {
+                yyjson_val *messages;
+                if((messages = yyjson_obj_get(obj, "messages")) != nullptr) {
+                    if (!yyjson_is_arr(messages)) {
                         se->Log() << "OCHP::messages is not an array. Ignoring..." << LogLevel::Warning;
                     }
                     else {
-                        long unsigned int arrLen = json_object_array_length(messages);
+                        long unsigned int arrLen = yyjson_arr_size(messages);
                         for (long unsigned int i = 0; i < arrLen; i++) {
-                            json_object *arrObj = json_object_array_get_idx(messages, i);
+                            yyjson_val *arrObj = yyjson_arr_get(messages, i);
                             ProcessMessage(WorkerQueue::OCHP, arrObj);
                         }
                     }
                 }
                 else {
-                    json_object *hostcheck;
-                    if(json_object_object_get_ex(obj, "hostcheck", &hostcheck)) {
+                    yyjson_val *hostcheck;
+                    if((hostcheck = yyjson_obj_get(obj, "hostcheck")) != nullptr) {
                         ParseCheckResult(hostcheck);
                     }
                     else {
@@ -86,22 +86,22 @@ namespace statusengine {
                 }
             }
             else if (workerQueue == WorkerQueue::OCSP) {
-                json_object *messages;
-                if(json_object_object_get_ex(obj, "messages", &messages)) {
-                    if (!json_object_is_type(messages, json_type_array)) {
+                yyjson_val *messages;
+                if((messages = yyjson_obj_get(obj, "messages")) != nullptr) {
+                    if (!yyjson_is_arr(messages)) {
                         se->Log() << "OCSP::messages is not an array. Ignoring..." << LogLevel::Warning;
                     }
                     else {
-                        long unsigned int arrLen = json_object_array_length(messages);
+                        long unsigned int arrLen = yyjson_arr_size(messages);
                         for (long unsigned int i = 0; i < arrLen; i++) {
-                            json_object *arrObj = json_object_array_get_idx(messages, i);
+                            yyjson_val *arrObj = yyjson_arr_get(messages, i);
                             ProcessMessage(WorkerQueue::OCSP, arrObj);
                         }
                     }
                 }
                 else {
-                    json_object *servicecheck;
-                    if(json_object_object_get_ex(obj, "servicecheck", &servicecheck)) {
+                    yyjson_val *servicecheck;
+                    if((servicecheck = yyjson_obj_get(obj, "servicecheck")) != nullptr) {
                         ParseCheckResult(servicecheck);
                     }
                     else {
@@ -112,13 +112,15 @@ namespace statusengine {
             }
             else if (workerQueue == WorkerQueue::Command) {
                 std::string command;
-                json_object *data = nullptr;
+                yyjson_val *data = nullptr;
                 bool haveCommand = false, haveData = false, haveList = false;
-                json_object_object_foreach(obj, cKey, jsonValue) {
-                    std::string jsonKey(cKey);
+                size_t objIdx, objMax;
+                yyjson_val *jsonKeyVal, *jsonValue;
+                yyjson_obj_foreach(obj, objIdx, objMax, jsonKeyVal, jsonValue) {
+                    std::string jsonKey(yyjson_get_str(jsonKeyVal), yyjson_get_len(jsonKeyVal));
 
                     if (jsonKey.compare("Command") == 0) {
-                        command = std::string(json_object_get_string(jsonValue), json_object_get_string_len(jsonValue));
+                        command = std::string(yyjson_get_str(jsonValue), yyjson_get_len(jsonValue));
                         haveCommand = true;
                     }
                     else if (jsonKey.compare("Data") == 0) {
@@ -126,13 +128,13 @@ namespace statusengine {
                         haveData = true;
                     }
                     else if (jsonKey.compare("messages") == 0) {
-                        if (!json_object_is_type(jsonValue, json_type_array)) {
+                        if (!yyjson_is_arr(jsonValue)) {
                             se->Log() << "messages doesn't contain an array. Ignoring..." << LogLevel::Warning;
                         }
                         else {
-                            long unsigned int arrLen = json_object_array_length(jsonValue);
+                            long unsigned int arrLen = yyjson_arr_size(jsonValue);
                             for (long unsigned int i = 0; i < arrLen; i++) {
-                                json_object *arrObj = json_object_array_get_idx(jsonValue, i);
+                                yyjson_val *arrObj = yyjson_arr_get(jsonValue, i);
                                 ProcessMessage(WorkerQueue::Command, arrObj);
                             }
                         }
@@ -209,7 +211,7 @@ namespace statusengine {
             return fullOutput;
         }
 
-        void ParseCheckResult(json_object *obj) {
+        void ParseCheckResult(yyjson_val *obj) {
             check_result cr;
             init_check_result(&cr);
             char *output = nullptr;
@@ -225,44 +227,44 @@ namespace statusengine {
             });
 
             // Direct lookups rather than iterating every key and running it down a chain
-            // of string comparisons: json-c keeps the members in a hash table, so this is
-            // one lookup per field instead of comparisons proportional to keys times fields.
-            json_object *value = nullptr;
-            if (json_object_object_get_ex(obj, "host_name", &value)) {
+            // of string comparisons: one lookup per field instead of comparisons
+            // proportional to keys times fields.
+            yyjson_val *value = nullptr;
+            if ((value = yyjson_obj_get(obj, "host_name")) != nullptr) {
                 cr.host_name = get_json_string_c(value);
             }
-            if (json_object_object_get_ex(obj, "service_description", &value)) {
+            if ((value = yyjson_obj_get(obj, "service_description")) != nullptr) {
                 cr.service_description = get_json_string_c(value);
             }
-            if (json_object_object_get_ex(obj, "output", &value)) {
+            if ((value = yyjson_obj_get(obj, "output")) != nullptr) {
                 output = get_json_string_c(value);
             }
-            if (json_object_object_get_ex(obj, "long_output", &value)) {
+            if ((value = yyjson_obj_get(obj, "long_output")) != nullptr) {
                 longOutput = get_json_string_c(value);
             }
-            if (json_object_object_get_ex(obj, "perf_data", &value)) {
+            if ((value = yyjson_obj_get(obj, "perf_data")) != nullptr) {
                 perfData = get_json_string_c(value);
             }
-            if (json_object_object_get_ex(obj, "check_type", &value)) {
-                cr.check_type = json_object_get_int64(value);
+            if ((value = yyjson_obj_get(obj, "check_type")) != nullptr) {
+                cr.check_type = yyjson_get_sint(value);
             }
-            if (json_object_object_get_ex(obj, "return_code", &value)) {
-                cr.return_code = json_object_get_int64(value);
+            if ((value = yyjson_obj_get(obj, "return_code")) != nullptr) {
+                cr.return_code = yyjson_get_sint(value);
             }
-            if (json_object_object_get_ex(obj, "start_time", &value)) {
-                cr.start_time.tv_sec = json_object_get_int64(value);
+            if ((value = yyjson_obj_get(obj, "start_time")) != nullptr) {
+                cr.start_time.tv_sec = yyjson_get_sint(value);
             }
-            if (json_object_object_get_ex(obj, "end_time", &value)) {
-                cr.finish_time.tv_sec = json_object_get_int64(value);
+            if ((value = yyjson_obj_get(obj, "end_time")) != nullptr) {
+                cr.finish_time.tv_sec = yyjson_get_sint(value);
             }
-            if (json_object_object_get_ex(obj, "early_timeout", &value)) {
-                cr.early_timeout = json_object_get_int64(value);
+            if ((value = yyjson_obj_get(obj, "early_timeout")) != nullptr) {
+                cr.early_timeout = yyjson_get_sint(value);
             }
-            if (json_object_object_get_ex(obj, "latency", &value)) {
-                cr.latency = json_object_get_double(value);
+            if ((value = yyjson_obj_get(obj, "latency")) != nullptr) {
+                cr.latency = yyjson_get_real(value);
             }
-            if (json_object_object_get_ex(obj, "exited_ok", &value)) {
-                cr.exited_ok = json_object_get_int64(value);
+            if ((value = yyjson_obj_get(obj, "exited_ok")) != nullptr) {
+                cr.exited_ok = yyjson_get_sint(value);
             }
 
             cr.output = BuildCheckOutput(output, longOutput, perfData);
@@ -297,7 +299,7 @@ namespace statusengine {
             free_check_result(&cr);
         }
 
-        void ParseScheduleCheck(json_object *obj) {
+        void ParseScheduleCheck(yyjson_val *obj) {
             const char *hostname = nullptr;
             const char *service_description = nullptr;
             time_t schedule_time = 0;
@@ -305,8 +307,10 @@ namespace statusengine {
                 delete[] hostname;
                 delete[] service_description;
             });
-            json_object_object_foreach(obj, cKey, jsonValue) {
-                std::string jsonKey(cKey);
+            size_t objIdx, objMax;
+            yyjson_val *jsonKeyVal, *jsonValue;
+            yyjson_obj_foreach(obj, objIdx, objMax, jsonKeyVal, jsonValue) {
+                std::string jsonKey(yyjson_get_str(jsonKeyVal), yyjson_get_len(jsonKeyVal));
                 if (jsonKey.compare("host_name") == 0) {
                     hostname = get_json_string(jsonValue);
                 }
@@ -314,7 +318,7 @@ namespace statusengine {
                     service_description = get_json_string(jsonValue);
                 }
                 else if (jsonKey.compare("schedule_time") == 0) {
-                    schedule_time = json_object_get_int64(jsonValue);
+                    schedule_time = yyjson_get_sint(jsonValue);
                 }
             }
 
@@ -342,7 +346,7 @@ namespace statusengine {
             }
         }
 
-        void ParseDeleteDowntime(json_object *obj) {
+        void ParseDeleteDowntime(yyjson_val *obj) {
             const char *hostname = nullptr;
             const char *service_description = nullptr;
             time_t start_time = 0;
@@ -353,8 +357,10 @@ namespace statusengine {
                 delete[] service_description;
                 delete[] comment;
             });
-            json_object_object_foreach(obj, cKey, jsonValue) {
-                std::string jsonKey(cKey);
+            size_t objIdx, objMax;
+            yyjson_val *jsonKeyVal, *jsonValue;
+            yyjson_obj_foreach(obj, objIdx, objMax, jsonKeyVal, jsonValue) {
+                std::string jsonKey(yyjson_get_str(jsonKeyVal), yyjson_get_len(jsonKeyVal));
                 if (jsonKey.compare("host_name") == 0) {
                     hostname = get_json_string(jsonValue);
                 }
@@ -362,10 +368,10 @@ namespace statusengine {
                     service_description = get_json_string(jsonValue);
                 }
                 else if (jsonKey.compare("start_time") == 0) {
-                    start_time = json_object_get_int64(jsonValue);
+                    start_time = yyjson_get_sint(jsonValue);
                 }
                 else if (jsonKey.compare("end_time") == 0) {
-                    end_time = json_object_get_int64(jsonValue);
+                    end_time = yyjson_get_sint(jsonValue);
                 }
                 else if (jsonKey.compare("comment") == 0) {
                     comment = get_json_string(jsonValue);
@@ -380,7 +386,7 @@ namespace statusengine {
             Nebmodule::Instance().DeleteDowntime(hostname, service_description, start_time, end_time, comment);
         }
 
-        inline static void ParseRaw(json_object *obj) {
+        inline static void ParseRaw(yyjson_val *obj) {
             auto cmd = get_json_string(obj);
             process_external_command1(cmd);
             delete[] cmd;
