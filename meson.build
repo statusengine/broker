@@ -1,4 +1,4 @@
-project('statusengine-broker', 'cpp',
+project('statusengine-broker', ['cpp', 'c'],
     version: '4.0.4',
     default_options: ['warning_level=3', 'cpp_std=c++17',
                       # The module is loaded by an absolute path from naemon.cfg, so it goes

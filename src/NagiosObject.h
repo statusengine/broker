@@ -3,37 +3,41 @@
 #include <string>
 
 #include <json.h>
+#include "yyjson.h"
 
 #include "Nebmodule.h"
 
 
 namespace statusengine {
+    /*
+     * Wire format is unchanged from the json-c version this replaces. The one
+     * difference is that json-c escaped forward slashes ("\\/"), which yyjson
+     * does not; both decode to the same string in any conforming parser.
+     */
     class NagiosObject {
       public:
         explicit NagiosObject() : nebmodule(Nebmodule::Instance()) {
-            data = json_object_new_object();
+            doc = yyjson_mut_doc_new(nullptr);
+            data = yyjson_mut_obj(doc);
+            yyjson_mut_doc_set_root(doc, data);
         }
 
-        /**
-         * This is like a copy constructor, it increments the counter for data
-         * @param data
-         */
-        explicit NagiosObject(json_object *data) : nebmodule(Nebmodule::Instance()), data(json_object_get(data)) {}
-        /**
-         * This is like a copy constructor, it increments the counter for obj->data
-         * @param data
-         */
-        explicit NagiosObject(statusengine::NagiosObject *obj) : nebmodule(Nebmodule::Instance()), data(json_object_get(obj->data)) {}
+        NagiosObject(const NagiosObject &) = delete;
+        NagiosObject &operator=(const NagiosObject &) = delete;
 
-        ~NagiosObject() {
-            json_object_put(data);
+        virtual ~NagiosObject() {
+            yyjson_mut_doc_free(doc);
         }
 
-        std::string ToString() {
-            // PLAIN rather than json_object_to_json_string()'s SPACED default: same JSON,
-            // 8 to 9 percent fewer bytes on every message the broker sends, which is
-            // network, queue memory and parsing work on the consumer side.
-            return std::string(json_object_to_json_string_ext(data, JSON_C_TO_STRING_PLAIN));
+        std::string ToString() const {
+            size_t len = 0;
+            char *out = yyjson_mut_write(doc, 0, &len);
+            if (out == nullptr) {
+                return std::string();
+            }
+            std::string result(out, len);
+            free(out);
+            return result;
         }
 
         /**
@@ -42,89 +46,88 @@ namespace statusengine {
          * @return true if the JSON object is empty, false otherwise
          */
         bool isEmpty() const {
-            return json_object_object_length(data) == 0;
-        }
-
-        /**
-         * Counter will be incremented
-         * @return json_object*
-         */
-        json_object *GetDataCopy() {
-            return json_object_get(data);
+            return yyjson_mut_obj_size(data) == 0;
         }
 
         inline void SetData(const char *name, const std::string &value) {
-            SetData(data, name, value);
+            SetData(doc, data, name, value);
         }
 
-        inline static void SetData(json_object *obj, const char *name, const std::string &value) {
-            json_object_object_add(obj, name, json_object_new_string_len(value.c_str(), value.length()));
+        inline static void SetData(yyjson_mut_doc *d, yyjson_mut_val *obj, const char *name, const std::string &value) {
+            yyjson_mut_obj_add_strncpy(d, obj, name, value.c_str(), value.length());
         }
 
         inline void SetData(const char *name, const char *value) {
-            SetData(data, name, value);
+            SetData(doc, data, name, value);
         }
 
-        inline static void SetData(json_object *obj, const char *name, const char *value) {
+        inline static void SetData(yyjson_mut_doc *d, yyjson_mut_val *obj, const char *name, const char *value) {
             if (value == nullptr) {
-                json_object_object_add(obj, name, nullptr);
+                yyjson_mut_obj_add_null(d, obj, name);
             }
             else {
-                json_object_object_add(obj, name, json_object_new_string(value));
+                yyjson_mut_obj_add_strcpy(d, obj, name, value);
             }
         }
 
         inline void SetData(const char *name, int value) {
-            SetData(data, name, value);
+            SetData(doc, data, name, value);
         }
 
-        inline static void SetData(json_object *obj, const char *name, int value) {
-            json_object_object_add(obj, name, json_object_new_int(value));
+        inline static void SetData(yyjson_mut_doc *d, yyjson_mut_val *obj, const char *name, int value) {
+            yyjson_mut_obj_add_int(d, obj, name, value);
         }
 
-        inline void SetData(const char *name, long int value) {
-            SetData(data, name, value);
+        inline void SetData(const char *name, long value) {
+            SetData(doc, data, name, value);
         }
 
-        inline static void SetData(json_object *obj, const char *name, long int value) {
-            json_object_object_add(obj, name, json_object_new_int64(value));
+        inline static void SetData(yyjson_mut_doc *d, yyjson_mut_val *obj, const char *name, long value) {
+            yyjson_mut_obj_add_sint(d, obj, name, value);
         }
 
         inline void SetData(const char *name, double value) {
-            SetData(data, name, value);
+            SetData(doc, data, name, value);
         }
 
-        inline static void SetData(json_object *obj, const char *name, double value) {
-            json_object_object_add(obj, name, json_object_new_double(value));
+        inline static void SetData(yyjson_mut_doc *d, yyjson_mut_val *obj, const char *name, double value) {
+            yyjson_mut_obj_add_real(d, obj, name, value);
         }
 
-        inline void SetData(const char *name, long unsigned int value) {
-            SetData(data, name, value);
+        inline void SetData(const char *name, unsigned long value) {
+            SetData(doc, data, name, value);
         }
 
-        inline static void SetData(json_object *obj, const char *name, long unsigned int value) {
-            json_object_object_add(obj, name, json_object_new_int64(value));
+        inline static void SetData(yyjson_mut_doc *d, yyjson_mut_val *obj, const char *name, unsigned long value) {
+            yyjson_mut_obj_add_sint(d, obj, name, static_cast<int64_t>(value));
         }
 
+        /* Nested object: yyjson values belong to their own document, so the
+         * subtree is copied across rather than reference counted. */
         inline void SetData(const char *name, NagiosObject *other) {
-            SetData(data, name, other);
+            SetData(doc, data, name, other);
         }
 
-        inline static void SetData(json_object *obj, const char *name, NagiosObject *other) {
-            SetData(obj, name, json_object_get(other->data));
+        inline static void SetData(yyjson_mut_doc *d, yyjson_mut_val *obj, const char *name, NagiosObject *other) {
+            yyjson_mut_obj_add_val(d, obj, name, yyjson_mut_val_mut_copy(d, other->data));
         }
 
-        inline void SetData(const char *name, json_object *other) {
-            SetData(data, name, other);
+        inline void SetData(const char *name, yyjson_mut_val *other) {
+            yyjson_mut_obj_add_val(doc, data, name, other);
         }
 
-        inline static void SetData(json_object *obj, const char *name, json_object *other) {
-            json_object_object_add(obj, name, other);
+        yyjson_mut_doc *GetDoc() const {
+            return doc;
         }
 
-    protected:
+        yyjson_mut_val *GetRoot() const {
+            return data;
+        }
+
+      protected:
         Nebmodule &nebmodule;
-        json_object *data;
+        yyjson_mut_doc *doc;
+        yyjson_mut_val *data;
     };
 
     class NagiosProcessData : public NagiosObject {

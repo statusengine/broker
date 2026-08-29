@@ -403,7 +403,10 @@ namespace statusengine {
         void SendMessage(NagiosObject &obj) override {
             if (bulk) {
                 if(!obj.isEmpty()){
-                    bulkMessages.push_back(std::unique_ptr<NagiosObject>(new NagiosObject(&obj)));
+                    /* Serialise now and keep the text: a yyjson value belongs to
+                     * its own document, so holding the object would mean copying
+                     * the whole tree into a batch document instead. */
+                    bulkMessages.push_back(obj.ToString());
                     if (++(*globalBulkCounter) >= maxBulkSize) {
                         mhlist.FlushBulkQueue();
                     }
@@ -421,17 +424,23 @@ namespace statusengine {
 
         void FlushBulkQueue() override {
             if (!bulkMessages.empty()) {
-                NagiosObject msgObj;
-                json_object *arr = json_object_new_array();
-
-                for (auto &obj : bulkMessages) {
-                    json_object_array_add(arr, obj->GetDataCopy());
+                /* Fixed envelope around the already serialised messages. */
+                std::string msg;
+                size_t total = 32;
+                for (auto &m : bulkMessages) {
+                    total += m.size() + 1;
                 }
-
-                msgObj.SetData("messages", arr);
-                msgObj.SetData("format", "none");
-
-                std::string msg = msgObj.ToString();
+                msg.reserve(total);
+                msg += "{\"messages\":[";
+                bool first = true;
+                for (auto &m : bulkMessages) {
+                    if (!first) {
+                        msg += ',';
+                    }
+                    first = false;
+                    msg += m;
+                }
+                msg += "],\"format\":\"none\"}";
                 for (auto &handler : *handlers) {
                     handler->SendMessage(queue, msg);
                 }
@@ -450,7 +459,7 @@ namespace statusengine {
 
         Queue queue;
         std::shared_ptr<std::vector<std::shared_ptr<IMessageHandler>>> handlers;
-        std::vector<std::unique_ptr<NagiosObject>> bulkMessages;
+        std::vector<std::string> bulkMessages;
 
         unsigned long maxBulkSize;
         unsigned long *globalBulkCounter;

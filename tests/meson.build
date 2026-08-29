@@ -22,7 +22,7 @@ test_incdirs = include_directories('.', '../src')
 
 statusengine_tests = executable('statusengine-tests',
     ['main.cpp', 'naemon_stubs.cpp', 'test_encoding.cpp', 'test_configuration.cpp', 'test_logstream.cpp', 'test_queue.cpp', 'test_messageformat.cpp', 'test_workerloop.cpp',
-     '../src/Encoding.cpp'],
+     '../src/Encoding.cpp', '../vendor/yyjson.c'],
     include_directories: test_incdirs,
     dependencies: test_deps,
     cpp_args: test_cpp_args,
@@ -32,7 +32,7 @@ statusengine_tests = executable('statusengine-tests',
 test('unit', statusengine_tests, protocol: 'exitcode', timeout: 120)
 
 statusengine_bench = executable('statusengine-bench',
-    ['bench.cpp', 'naemon_stubs.cpp', '../src/Encoding.cpp'],
+    ['bench.cpp', 'naemon_stubs.cpp', '../src/Encoding.cpp', '../vendor/yyjson.c'],
     include_directories: test_incdirs,
     dependencies: test_deps,
     cpp_args: test_cpp_args,
