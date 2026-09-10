@@ -33,6 +33,7 @@ struct host {
 	struct servicesmember *services;
 	char    *check_command;
 	int     initial_state;
+	int		check_timeout;
 	double  check_interval;
 	double  retry_interval;
 	int     max_attempts;
@@ -77,6 +78,7 @@ struct host {
 	customvariablesmember *custom_variables;
 	int     problem_has_been_acknowledged;
 	int     acknowledgement_type;
+	time_t  acknowledgement_end_time;
 	int     check_type;
 	int     current_state;
 	int     last_state;
@@ -88,8 +90,10 @@ struct host {
 	int     current_attempt;
 	unsigned long current_event_id;
 	unsigned long last_event_id;
-	unsigned long current_problem_id;
-	unsigned long last_problem_id;
+	char   *current_problem_id;
+	char   *last_problem_id;
+	time_t  problem_start;
+	time_t  problem_end;
 	double  latency;
 	double  execution_time;
 	int     is_executing;
@@ -109,7 +113,7 @@ struct host {
 	int     notified_on;
 	int     current_notification_number;
 	int     no_more_notifications;
-	unsigned long current_notification_id;
+	char   *current_notification_id;
 	int     check_flapping_recovery_notification;
 	int     scheduled_downtime_depth;
 	int     pending_flex_downtime; /* UNUSED */
@@ -118,6 +122,7 @@ struct host {
 	time_t  last_state_history_update;
 	int     is_flapping;
 	unsigned long flapping_comment_id;
+	struct objectlist *comments_list;
 	double  percent_state_change;
 	int     total_services;
 	unsigned long modified_attributes;
@@ -129,7 +134,7 @@ struct host {
 	/* objects we depend upon */
 	struct objectlist *exec_deps, *notify_deps;
 	struct objectlist *escalation_list;
-	time_t  last_update /* timestamp when object has been updated the last time */;
+	struct timeval  last_update /* timestamp when object has been updated the last time */;
 	struct  host *next;
 	struct timed_event *next_check_event;
 };
@@ -149,7 +154,7 @@ void destroy_objects_host(void);
 
 host *create_host(const char *name);
 /** This is an evil legacy function which you should never, ever use */
-int setup_host_variables(host *new_host, const char *display_name, const char *alias, const char *address, const char *check_period, int initial_state, double check_interval, double retry_interval, int max_attempts, int notification_options, double notification_interval, double first_notification_delay, const char *notification_period, int notifications_enabled, const char *check_command, int checks_enabled, int accept_passive_checks, const char *event_handler, int event_handler_enabled, int flap_detection_enabled, double low_flap_threshold, double high_flap_threshold, int flap_detection_options, int stalking_options, int process_perfdata, int check_freshness, int freshness_threshold, const char *notes, const char *notes_url, const char *action_url, const char *icon_image, const char *icon_image_alt, const char *vrml_image, const char *statusmap_image, int x_2d, int y_2d, int have_2d_coords, double x_3d, double y_3d, double z_3d, int have_3d_coords, int retain_status_information, int retain_nonstatus_information, int obsess_over_host, unsigned int hourly_value);
+int setup_host_variables(host *new_host, const char *display_name, const char *alias, const char *address, const char *check_period, int initial_state, int check_timeout, double check_interval, double retry_interval, int max_attempts, int notification_options, double notification_interval, double first_notification_delay, const char *notification_period, int notifications_enabled, const char *check_command, int checks_enabled, int accept_passive_checks, const char *event_handler, int event_handler_enabled, int flap_detection_enabled, double low_flap_threshold, double high_flap_threshold, int flap_detection_options, int stalking_options, int process_perfdata, int check_freshness, int freshness_threshold, const char *notes, const char *notes_url, const char *action_url, const char *icon_image, const char *icon_image_alt, const char *vrml_image, const char *statusmap_image, int x_2d, int y_2d, int have_2d_coords, double x_3d, double y_3d, double z_3d, int have_3d_coords, int retain_status_information, int retain_nonstatus_information, int obsess_over_host, unsigned int hourly_value);
 int register_host(host *new_host);
 void destroy_host(host *this_host);
 

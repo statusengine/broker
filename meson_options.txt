@@ -3,3 +3,5 @@ option('gearman', type: 'boolean', value: true)
 option('rabbitmq', type: 'boolean', value: true)
 option('nagios', type: 'boolean', value: false)
 option('nagios_include_dir', type: 'string', value: '')
+option('tests', type: 'boolean', value: false,
+       description: 'Build the unit tests. Needs the doctest subproject.')

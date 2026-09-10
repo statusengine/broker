@@ -1,0 +1,156 @@
+name: build
+
+on:
+  push:
+    branches: [ master, rabbitmq-4 ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  naemon:
+    name: naemon (${{ matrix.image }}, ${{ matrix.options }})
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ matrix.image }}
+    strategy:
+      fail-fast: false
+      matrix:
+        image:
+          - ubuntu:22.04
+          - ubuntu:24.04
+          - debian:12
+        options:
+          - ''
+        include:
+          # The build options are only exercised on a single image, they are
+          # independent of the distribution.
+          - image: ubuntu:24.04
+            options: '-Dgearman=false'
+          - image: ubuntu:24.04
+            options: '-Drabbitmq=false'
+    steps:
+      - name: Install dependencies
+        run: |
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+            g++ pkg-config meson ninja-build git ca-certificates \
+            libglib2.0-dev libgearman-dev libjson-c-dev libuchardet-dev \
+            librabbitmq-dev libssl-dev uuid-dev
+
+      - uses: actions/checkout@v4
+
+      - name: Provide naemon headers
+        # We only need the headers to build the module, not libnaemon itself, so the
+        # checked in stubs stand in for an installed naemon-dev package.
+        run: |
+          set -e
+          mkdir -p /opt/naemon/include /usr/local/lib/pkgconfig
+          ln -s "$(readlink -f devtools/ci/naemon)" /opt/naemon/include/naemon
+          ln -s "$(readlink -f devtools/ci/naemon.pc)" /usr/local/lib/pkgconfig/naemon.pc
+
+      - name: Build
+        env:
+          PKG_CONFIG_PATH: /usr/local/lib/pkgconfig
+        run: |
+          meson setup --buildtype=release ${{ matrix.options }} build
+          ninja -C build
+
+  nagios:
+    name: nagios (${{ matrix.image }})
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ matrix.image }}
+    strategy:
+      fail-fast: false
+      matrix:
+        image:
+          - ubuntu:24.04
+          - debian:12
+    steps:
+      - name: Install dependencies
+        run: |
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+            g++ pkg-config meson ninja-build git ca-certificates \
+            libglib2.0-dev libgearman-dev libjson-c-dev libuchardet-dev \
+            librabbitmq-dev libssl-dev uuid-dev
+
+      - uses: actions/checkout@v4
+
+      - name: Provide nagios headers
+        # The include dir has to live outside the source tree, meson rejects
+        # include_directories() pointing back into it.
+        run: |
+          set -e
+          mkdir -p /opt/nagios/include
+          ln -s "$(readlink -f devtools/ci/nagios)" /opt/nagios/include/nagios
+
+      - name: Build and test
+        run: |
+          meson setup --buildtype=release -Dtests=true -Dnagios=true \
+            -Dnagios_include_dir=/opt/nagios/include build
+          ninja -C build
+          meson test -C build --print-errorlogs
+
+  tests:
+    name: unit tests (${{ matrix.sanitize && 'sanitized' || 'plain' }})
+    runs-on: ubuntu-latest
+    container:
+      image: ubuntu:24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        sanitize: [false, true]
+    steps:
+      - name: Install dependencies
+        run: |
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+            g++ pkg-config meson ninja-build git ca-certificates \
+            libglib2.0-dev libgearman-dev libjson-c-dev libuchardet-dev \
+            librabbitmq-dev libssl-dev uuid-dev
+
+      - uses: actions/checkout@v4
+
+      - name: Provide naemon headers
+        run: |
+          set -e
+          mkdir -p /opt/naemon/include /usr/local/lib/pkgconfig
+          ln -s "$(readlink -f devtools/ci/naemon)" /opt/naemon/include/naemon
+          ln -s "$(readlink -f devtools/ci/naemon.pc)" /usr/local/lib/pkgconfig/naemon.pc
+
+      - name: Run tests
+        env:
+          PKG_CONFIG_PATH: /usr/local/lib/pkgconfig
+        run: |
+          if [ "${{ matrix.sanitize }}" = "true" ]; then
+            meson setup -Dtests=true -Db_sanitize=address,undefined build
+          else
+            meson setup -Dtests=true build
+          fi
+          meson test -C build --print-errorlogs
+
+      - name: Upload test logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: testlog-${{ matrix.sanitize }}
+          path: build/meson-logs/testlog.txt
+
+  format:
+    name: clang-format (advisory)
+    runs-on: ubuntu-latest
+    # Not blocking: the existing sources predate .clang-format and would need a one off
+    # reformat first. This job shows what would change so new code can converge on it.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install clang-format
+        run: sudo apt-get update && sudo apt-get install -y clang-format
+
+      - name: Show formatting differences
+        run: |
+          find src tests -name '*.cpp' -o -name '*.h' \
+            | grep -v '^src/gsl.h$' \
+            | while read -r f; do clang-format "$f" | diff -u "$f" - || true; done

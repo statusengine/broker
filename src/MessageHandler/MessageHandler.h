@@ -10,7 +10,6 @@
 #include "Configuration.h"
 #include "IStatusengine.h"
 #include "IMessageHandler.h"
-#include "Utility.h"
 #include "gsl.h"
 
 
@@ -20,45 +19,64 @@ namespace statusengine {
 
         explicit MessageHandler(IStatusengine *se) : se(se) {}
 
-        inline static char *get_json_string(json_object *obj) {
-            auto jsonChars = json_object_get_string(obj);
-            auto jsonCharsLen = json_object_get_string_len(obj);
+        /**
+         * Copy a json string into a buffer owned by the C++ side. Release it with delete[].
+         */
+        inline static char *get_json_string(yyjson_val *obj) {
+            auto jsonChars = yyjson_get_str(obj);
+            if (jsonChars == nullptr) {
+                return nullptr;
+            }
+            auto jsonCharsLen = yyjson_get_len(obj);
             char *chars = new char[jsonCharsLen + 1];
-            std::strncpy(chars, jsonChars, jsonCharsLen);
+            std::memcpy(chars, jsonChars, jsonCharsLen);
             chars[jsonCharsLen] = 0; // set last byte to zero
             return chars;
         }
 
+        /**
+         * Copy a json string into a buffer allocated by the malloc family. Everything that
+         * is stored in a check_result has to be allocated this way: free_check_result()
+         * releases those strings with free(), which must not be paired with new[].
+         */
+        inline static char *get_json_string_c(yyjson_val *obj) {
+            auto jsonChars = yyjson_get_str(obj);
+            if (jsonChars == nullptr) {
+                return nullptr;
+            }
+            return strndup(jsonChars, yyjson_get_len(obj));
+        }
+
         void ProcessMessage(WorkerQueue workerQueue, const std::string &message) override {
-            json_object *obj = json_tokener_parse(message.c_str());
-            if (obj == nullptr) {
+            yyjson_doc *doc = yyjson_read(message.c_str(), message.length(), 0);
+            if (doc == nullptr) {
                 se->Log() << "Received non-json string '" << message
                           << "'. Ignoring..." << LogLevel::Warning;
             }
             else {
-                ProcessMessage(workerQueue, obj);
-                json_object_put(obj);
+                ProcessMessage(workerQueue, yyjson_doc_get_root(doc));
+                yyjson_doc_free(doc);
             }
         }
 
-        void ProcessMessage(WorkerQueue workerQueue, json_object *obj) override {
+        void ProcessMessage(WorkerQueue workerQueue, yyjson_val *obj) override {
             if (workerQueue == WorkerQueue::OCHP) {
-                json_object *messages;
-                if(json_object_object_get_ex(obj, "messages", &messages)) {
-                    if (!json_object_is_type(messages, json_type_array)) {
+                yyjson_val *messages;
+                if((messages = yyjson_obj_get(obj, "messages")) != nullptr) {
+                    if (!yyjson_is_arr(messages)) {
                         se->Log() << "OCHP::messages is not an array. Ignoring..." << LogLevel::Warning;
                     }
                     else {
-                        long unsigned int arrLen = json_object_array_length(messages);
+                        long unsigned int arrLen = yyjson_arr_size(messages);
                         for (long unsigned int i = 0; i < arrLen; i++) {
-                            json_object *arrObj = json_object_array_get_idx(messages, i);
+                            yyjson_val *arrObj = yyjson_arr_get(messages, i);
                             ProcessMessage(WorkerQueue::OCHP, arrObj);
                         }
                     }
                 }
                 else {
-                    json_object *hostcheck;
-                    if(json_object_object_get_ex(obj, "hostcheck", &hostcheck)) {
+                    yyjson_val *hostcheck;
+                    if((hostcheck = yyjson_obj_get(obj, "hostcheck")) != nullptr) {
                         ParseCheckResult(hostcheck);
                     }
                     else {
@@ -68,22 +86,22 @@ namespace statusengine {
                 }
             }
             else if (workerQueue == WorkerQueue::OCSP) {
-                json_object *messages;
-                if(json_object_object_get_ex(obj, "messages", &messages)) {
-                    if (!json_object_is_type(messages, json_type_array)) {
+                yyjson_val *messages;
+                if((messages = yyjson_obj_get(obj, "messages")) != nullptr) {
+                    if (!yyjson_is_arr(messages)) {
                         se->Log() << "OCSP::messages is not an array. Ignoring..." << LogLevel::Warning;
                     }
                     else {
-                        long unsigned int arrLen = json_object_array_length(messages);
+                        long unsigned int arrLen = yyjson_arr_size(messages);
                         for (long unsigned int i = 0; i < arrLen; i++) {
-                            json_object *arrObj = json_object_array_get_idx(messages, i);
+                            yyjson_val *arrObj = yyjson_arr_get(messages, i);
                             ProcessMessage(WorkerQueue::OCSP, arrObj);
                         }
                     }
                 }
                 else {
-                    json_object *servicecheck;
-                    if(json_object_object_get_ex(obj, "servicecheck", &servicecheck)) {
+                    yyjson_val *servicecheck;
+                    if((servicecheck = yyjson_obj_get(obj, "servicecheck")) != nullptr) {
                         ParseCheckResult(servicecheck);
                     }
                     else {
@@ -94,13 +112,15 @@ namespace statusengine {
             }
             else if (workerQueue == WorkerQueue::Command) {
                 std::string command;
-                json_object *data = nullptr;
+                yyjson_val *data = nullptr;
                 bool haveCommand = false, haveData = false, haveList = false;
-                json_object_object_foreach(obj, cKey, jsonValue) {
-                    std::string jsonKey(cKey);
+                size_t objIdx, objMax;
+                yyjson_val *jsonKeyVal, *jsonValue;
+                yyjson_obj_foreach(obj, objIdx, objMax, jsonKeyVal, jsonValue) {
+                    std::string jsonKey(yyjson_get_str(jsonKeyVal), yyjson_get_len(jsonKeyVal));
 
                     if (jsonKey.compare("Command") == 0) {
-                        command = std::string(json_object_get_string(jsonValue), json_object_get_string_len(jsonValue));
+                        command = std::string(yyjson_get_str(jsonValue), yyjson_get_len(jsonValue));
                         haveCommand = true;
                     }
                     else if (jsonKey.compare("Data") == 0) {
@@ -108,13 +128,13 @@ namespace statusengine {
                         haveData = true;
                     }
                     else if (jsonKey.compare("messages") == 0) {
-                        if (!json_object_is_type(jsonValue, json_type_array)) {
+                        if (!yyjson_is_arr(jsonValue)) {
                             se->Log() << "messages doesn't contain an array. Ignoring..." << LogLevel::Warning;
                         }
                         else {
-                            long unsigned int arrLen = json_object_array_length(jsonValue);
+                            long unsigned int arrLen = yyjson_arr_size(jsonValue);
                             for (long unsigned int i = 0; i < arrLen; i++) {
-                                json_object *arrObj = json_object_array_get_idx(jsonValue, i);
+                                yyjson_val *arrObj = yyjson_arr_get(jsonValue, i);
                                 ProcessMessage(WorkerQueue::Command, arrObj);
                             }
                         }
@@ -149,82 +169,115 @@ namespace statusengine {
         IStatusengine *se;
 
 
-        void ParseCheckResult(json_object *obj) {
+        /**
+         * Join output, long output and perf data the way naemon expects them in a single
+         * plugin output string. The result is allocated with malloc, so that
+         * free_check_result() can release it. Returns nullptr if there is nothing to join,
+         * i.e. if at most one of the parts is present.
+         */
+        inline static char *BuildCheckOutput(const char *output, const char *longOutput, const char *perfData) {
+            if (output == nullptr || (longOutput == nullptr && perfData == nullptr)) {
+                return nullptr;
+            }
+
+            size_t strLen;
+            if (longOutput == nullptr) {
+                // output + pipe + perfData + newline + zero byte
+                strLen = std::strlen(output) + std::strlen(perfData) + 3;
+            }
+            else if (perfData == nullptr) {
+                // output + newline + longOutput + zero byte
+                strLen = std::strlen(output) + std::strlen(longOutput) + 2;
+            }
+            else {
+                // output + pipe + perfData + newline + longOutput + zero byte
+                strLen = std::strlen(output) + std::strlen(perfData) + std::strlen(longOutput) + 3;
+            }
+
+            char *fullOutput = static_cast<char *>(malloc(strLen));
+            if (fullOutput == nullptr) {
+                return nullptr;
+            }
+
+            if (longOutput == nullptr) {
+                std::snprintf(fullOutput, strLen, "%s|%s\n", output, perfData);
+            }
+            else if (perfData == nullptr) {
+                std::snprintf(fullOutput, strLen, "%s\n%s", output, longOutput);
+            }
+            else {
+                std::snprintf(fullOutput, strLen, "%s|%s\n%s", output, perfData, longOutput);
+            }
+            return fullOutput;
+        }
+
+        void ParseCheckResult(yyjson_val *obj) {
             check_result cr;
             init_check_result(&cr);
             char *output = nullptr;
             char *longOutput = nullptr;
             char *perfData = nullptr;
-            char *fullOutput = nullptr;
+            // These three stay ours unless ownership is explicitly handed to cr.output below,
+            // in which case the local pointer is cleared. Everything still held here at the
+            // end of the function is ours to release; free_check_result() takes care of cr.
+            auto freeParts = gsl::finally([&] {
+                free(output);
+                free(longOutput);
+                free(perfData);
+            });
 
-            json_object_object_foreach(obj, cKey, jsonValue) {
-                std::string jsonKey(cKey);
-                if (jsonKey.compare("host_name") == 0) {
-                    cr.host_name = get_json_string(jsonValue);
-                }
-                else if (jsonKey.compare("service_description") == 0) {
-                    cr.service_description = get_json_string(jsonValue);
-                }
-                else if (jsonKey.compare("output") == 0) {
-                    output = get_json_string(jsonValue);
-                }
-                else if (jsonKey.compare("long_output") == 0) {
-                    longOutput = get_json_string(jsonValue);
-                }
-                else if (jsonKey.compare("perf_data") == 0) {
-                    perfData = get_json_string(jsonValue);
-                }
-                else if (jsonKey.compare("check_type") == 0) {
-                    cr.check_type = json_object_get_int64(jsonValue);
-                }
-                else if (jsonKey.compare("return_code") == 0) {
-                    cr.return_code = json_object_get_int64(jsonValue);
-                }
-                else if (jsonKey.compare("start_time") == 0) {
-                    cr.start_time.tv_sec = json_object_get_int64(jsonValue);
-                }
-                else if (jsonKey.compare("end_time") == 0) {
-                    cr.finish_time.tv_sec = json_object_get_int64(jsonValue);
-                }
-                else if (jsonKey.compare("early_timeout") == 0) {
-                    cr.early_timeout = json_object_get_int64(jsonValue);
-                }
-                else if (jsonKey.compare("latency") == 0) {
-                    cr.latency = json_object_get_double(jsonValue);
-                }
-                else if (jsonKey.compare("exited_ok") == 0) {
-                    cr.exited_ok = json_object_get_int64(jsonValue);
-                }
+            // Direct lookups rather than iterating every key and running it down a chain
+            // of string comparisons: one lookup per field instead of comparisons
+            // proportional to keys times fields.
+            yyjson_val *value = nullptr;
+            if ((value = yyjson_obj_get(obj, "host_name")) != nullptr) {
+                cr.host_name = get_json_string_c(value);
+            }
+            if ((value = yyjson_obj_get(obj, "service_description")) != nullptr) {
+                cr.service_description = get_json_string_c(value);
+            }
+            if ((value = yyjson_obj_get(obj, "output")) != nullptr) {
+                output = get_json_string_c(value);
+            }
+            if ((value = yyjson_obj_get(obj, "long_output")) != nullptr) {
+                longOutput = get_json_string_c(value);
+            }
+            if ((value = yyjson_obj_get(obj, "perf_data")) != nullptr) {
+                perfData = get_json_string_c(value);
+            }
+            if ((value = yyjson_obj_get(obj, "check_type")) != nullptr) {
+                cr.check_type = yyjson_get_sint(value);
+            }
+            if ((value = yyjson_obj_get(obj, "return_code")) != nullptr) {
+                cr.return_code = yyjson_get_sint(value);
+            }
+            if ((value = yyjson_obj_get(obj, "start_time")) != nullptr) {
+                cr.start_time.tv_sec = yyjson_get_sint(value);
+            }
+            if ((value = yyjson_obj_get(obj, "end_time")) != nullptr) {
+                cr.finish_time.tv_sec = yyjson_get_sint(value);
+            }
+            if ((value = yyjson_obj_get(obj, "early_timeout")) != nullptr) {
+                cr.early_timeout = yyjson_get_sint(value);
+            }
+            if ((value = yyjson_obj_get(obj, "latency")) != nullptr) {
+                cr.latency = yyjson_get_real(value);
+            }
+            if ((value = yyjson_obj_get(obj, "exited_ok")) != nullptr) {
+                cr.exited_ok = yyjson_get_sint(value);
             }
 
-            if (output != nullptr && longOutput == nullptr) {
-                if (perfData == nullptr) {
+            cr.output = BuildCheckOutput(output, longOutput, perfData);
+            if (cr.output == nullptr) {
+                // Only a single part was given, hand it over instead of copying it.
+                if (output != nullptr) {
                     cr.output = output;
-                } else {
-                    // we need a new string with size of strings + pipe + newline + zero byte
-                    auto strLen = std::strlen(output) + std::strlen(perfData) + 3;
-                    fullOutput = new char[strLen];
-                    std::snprintf(fullOutput, strLen, "%s|%s\n", output, perfData);
-                    cr.output = fullOutput;
+                    output = nullptr;
                 }
-            }
-            else if (output != nullptr && longOutput != nullptr) {
-                if (perfData == nullptr) {
-                    // we need a new string with size of strings + newline + zero byte
-                    auto strLen = std::strlen(output) + std::strlen(longOutput) + 2;
-                    fullOutput = new char[strLen];
-                    std::snprintf(fullOutput, strLen, "%s\n%s", output, longOutput);
-                    cr.output = fullOutput;
-                } else {
-                    // we need a new string with size of strings + pipe + newline + zero byte
-                    auto strLen = std::strlen(output) + std::strlen(longOutput) + std::strlen(perfData) + 3;
-                    fullOutput = new char[strLen];
-                    std::snprintf(fullOutput, strLen, "%s|%s\n%s", output, perfData, longOutput);
-                    cr.output = fullOutput;
+                else if (longOutput != nullptr) {
+                    cr.output = longOutput;
+                    longOutput = nullptr;
                 }
-            }
-            else if (longOutput != nullptr && output == nullptr) {
-                cr.output = longOutput;
             }
 
             if (cr.host_name == nullptr) {
@@ -242,17 +295,11 @@ namespace statusengine {
                 process_check_result(&cr);
             }
 
-            // deletes hostname, service_description and output
+            // frees host_name, service_description and output
             free_check_result(&cr);
-            if (fullOutput != nullptr) {
-                // free_check_result only frees fulloutput in this case
-                delete output;
-                delete longOutput;
-                delete perfData;
-            }
         }
 
-        void ParseScheduleCheck(json_object *obj) {
+        void ParseScheduleCheck(yyjson_val *obj) {
             const char *hostname = nullptr;
             const char *service_description = nullptr;
             time_t schedule_time = 0;
@@ -260,8 +307,10 @@ namespace statusengine {
                 delete[] hostname;
                 delete[] service_description;
             });
-            json_object_object_foreach(obj, cKey, jsonValue) {
-                std::string jsonKey(cKey);
+            size_t objIdx, objMax;
+            yyjson_val *jsonKeyVal, *jsonValue;
+            yyjson_obj_foreach(obj, objIdx, objMax, jsonKeyVal, jsonValue) {
+                std::string jsonKey(yyjson_get_str(jsonKeyVal), yyjson_get_len(jsonKeyVal));
                 if (jsonKey.compare("host_name") == 0) {
                     hostname = get_json_string(jsonValue);
                 }
@@ -269,7 +318,7 @@ namespace statusengine {
                     service_description = get_json_string(jsonValue);
                 }
                 else if (jsonKey.compare("schedule_time") == 0) {
-                    schedule_time = json_object_get_int64(jsonValue);
+                    schedule_time = yyjson_get_sint(jsonValue);
                 }
             }
 
@@ -297,7 +346,7 @@ namespace statusengine {
             }
         }
 
-        void ParseDeleteDowntime(json_object *obj) {
+        void ParseDeleteDowntime(yyjson_val *obj) {
             const char *hostname = nullptr;
             const char *service_description = nullptr;
             time_t start_time = 0;
@@ -308,8 +357,10 @@ namespace statusengine {
                 delete[] service_description;
                 delete[] comment;
             });
-            json_object_object_foreach(obj, cKey, jsonValue) {
-                std::string jsonKey(cKey);
+            size_t objIdx, objMax;
+            yyjson_val *jsonKeyVal, *jsonValue;
+            yyjson_obj_foreach(obj, objIdx, objMax, jsonKeyVal, jsonValue) {
+                std::string jsonKey(yyjson_get_str(jsonKeyVal), yyjson_get_len(jsonKeyVal));
                 if (jsonKey.compare("host_name") == 0) {
                     hostname = get_json_string(jsonValue);
                 }
@@ -317,10 +368,10 @@ namespace statusengine {
                     service_description = get_json_string(jsonValue);
                 }
                 else if (jsonKey.compare("start_time") == 0) {
-                    start_time = json_object_get_int64(jsonValue);
+                    start_time = yyjson_get_sint(jsonValue);
                 }
                 else if (jsonKey.compare("end_time") == 0) {
-                    end_time = json_object_get_int64(jsonValue);
+                    end_time = yyjson_get_sint(jsonValue);
                 }
                 else if (jsonKey.compare("comment") == 0) {
                     comment = get_json_string(jsonValue);
@@ -328,16 +379,14 @@ namespace statusengine {
             }
 
             if (hostname == nullptr) {
-                if (hostname == nullptr) {
-                    se->Log() << "Received delete_downtime command without hostname " << LogLevel::Warning;
-                    return;
-                }
+                se->Log() << "Received delete_downtime command without hostname " << LogLevel::Warning;
+                return;
             }
 
             Nebmodule::Instance().DeleteDowntime(hostname, service_description, start_time, end_time, comment);
         }
 
-        inline static void ParseRaw(json_object *obj) {
+        inline static void ParseRaw(yyjson_val *obj) {
             auto cmd = get_json_string(obj);
             process_external_command1(cmd);
             delete[] cmd;
@@ -360,7 +409,10 @@ namespace statusengine {
         void SendMessage(NagiosObject &obj) override {
             if (bulk) {
                 if(!obj.isEmpty()){
-                    bulkMessages.push_back(new NagiosObject(&obj));
+                    /* Serialise now and keep the text: a yyjson value belongs to
+                     * its own document, so holding the object would mean copying
+                     * the whole tree into a batch document instead. */
+                    bulkMessages.push_back(obj.ToString());
                     if (++(*globalBulkCounter) >= maxBulkSize) {
                         mhlist.FlushBulkQueue();
                     }
@@ -378,26 +430,32 @@ namespace statusengine {
 
         void FlushBulkQueue() override {
             if (!bulkMessages.empty()) {
-                NagiosObject msgObj;
-                json_object *arr = json_object_new_array();
-
-                for (auto &obj : bulkMessages) {
-                    json_object_array_add(arr, obj->GetDataCopy());
+                /* Fixed envelope around the already serialised messages. */
+                std::string msg;
+                size_t total = 32;
+                for (auto &m : bulkMessages) {
+                    total += m.size() + 1;
                 }
-
-                msgObj.SetData("messages", arr);
-                msgObj.SetData("format", "none");
-
-                std::string msg = msgObj.ToString();
+                msg.reserve(total);
+                msg += "{\"messages\":[";
+                bool first = true;
+                for (auto &m : bulkMessages) {
+                    if (!first) {
+                        msg += ',';
+                    }
+                    first = false;
+                    msg += m;
+                }
+                msg += "],\"format\":\"none\"}";
                 for (auto &handler : *handlers) {
                     handler->SendMessage(queue, msg);
                 }
 
-                auto QueueId = QueueNameHandler::Instance().QueueIds();
+                const auto &QueueId = QueueNameHandler::Instance().QueueIds();
                 se.Log() << "Sent bulk message (" << bulkMessages.size() << ") for queue "
                          << QueueId.at(queue) << LogLevel::Info;
 
-                clearContainer<>(&bulkMessages);
+                bulkMessages.clear();
             }
         }
 
@@ -407,7 +465,7 @@ namespace statusengine {
 
         Queue queue;
         std::shared_ptr<std::vector<std::shared_ptr<IMessageHandler>>> handlers;
-        std::vector<NagiosObject *> bulkMessages;
+        std::vector<std::string> bulkMessages;
 
         unsigned long maxBulkSize;
         unsigned long *globalBulkCounter;

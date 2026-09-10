@@ -2,35 +2,41 @@
 
 #include <string>
 
-#include <json.h>
+#include "yyjson.h"
 
 #include "Nebmodule.h"
 
 
 namespace statusengine {
+    /*
+     * Wire format is unchanged from the json-c version this replaces. The one
+     * difference is that json-c escaped forward slashes ("\\/"), which yyjson
+     * does not; both decode to the same string in any conforming parser.
+     */
     class NagiosObject {
       public:
         explicit NagiosObject() : nebmodule(Nebmodule::Instance()) {
-            data = json_object_new_object();
+            doc = yyjson_mut_doc_new(nullptr);
+            data = yyjson_mut_obj(doc);
+            yyjson_mut_doc_set_root(doc, data);
         }
 
-        /**
-         * This is like a copy constructor, it increments the counter for data
-         * @param data
-         */
-        explicit NagiosObject(json_object *data) : nebmodule(Nebmodule::Instance()), data(json_object_get(data)) {}
-        /**
-         * This is like a copy constructor, it increments the counter for obj->data
-         * @param data
-         */
-        explicit NagiosObject(statusengine::NagiosObject *obj) : nebmodule(Nebmodule::Instance()), data(json_object_get(obj->data)) {}
+        NagiosObject(const NagiosObject &) = delete;
+        NagiosObject &operator=(const NagiosObject &) = delete;
 
-        ~NagiosObject() {
-            json_object_put(data);
+        virtual ~NagiosObject() {
+            yyjson_mut_doc_free(doc);
         }
 
-        std::string ToString() {
-            return std::string(json_object_to_json_string(data));
+        std::string ToString() const {
+            size_t len = 0;
+            char *out = yyjson_mut_write(doc, 0, &len);
+            if (out == nullptr) {
+                return std::string();
+            }
+            std::string result(out, len);
+            free(out);
+            return result;
         }
 
         /**
@@ -39,89 +45,88 @@ namespace statusengine {
          * @return true if the JSON object is empty, false otherwise
          */
         bool isEmpty() const {
-            return json_object_object_length(data) == 0;
-        }
-
-        /**
-         * Counter will be incremented
-         * @return json_object*
-         */
-        json_object *GetDataCopy() {
-            return json_object_get(data);
+            return yyjson_mut_obj_size(data) == 0;
         }
 
         inline void SetData(const char *name, const std::string &value) {
-            SetData(data, name, value);
+            SetData(doc, data, name, value);
         }
 
-        inline static void SetData(json_object *obj, const char *name, const std::string &value) {
-            json_object_object_add(obj, name, json_object_new_string_len(value.c_str(), value.length()));
+        inline static void SetData(yyjson_mut_doc *d, yyjson_mut_val *obj, const char *name, const std::string &value) {
+            yyjson_mut_obj_add_strncpy(d, obj, name, value.c_str(), value.length());
         }
 
         inline void SetData(const char *name, const char *value) {
-            SetData(data, name, value);
+            SetData(doc, data, name, value);
         }
 
-        inline static void SetData(json_object *obj, const char *name, const char *value) {
+        inline static void SetData(yyjson_mut_doc *d, yyjson_mut_val *obj, const char *name, const char *value) {
             if (value == nullptr) {
-                json_object_object_add(obj, name, nullptr);
+                yyjson_mut_obj_add_null(d, obj, name);
             }
             else {
-                json_object_object_add(obj, name, json_object_new_string(value));
+                yyjson_mut_obj_add_strcpy(d, obj, name, value);
             }
         }
 
         inline void SetData(const char *name, int value) {
-            SetData(data, name, value);
+            SetData(doc, data, name, value);
         }
 
-        inline static void SetData(json_object *obj, const char *name, int value) {
-            json_object_object_add(obj, name, json_object_new_int(value));
+        inline static void SetData(yyjson_mut_doc *d, yyjson_mut_val *obj, const char *name, int value) {
+            yyjson_mut_obj_add_int(d, obj, name, value);
         }
 
-        inline void SetData(const char *name, long int value) {
-            SetData(data, name, value);
+        inline void SetData(const char *name, long value) {
+            SetData(doc, data, name, value);
         }
 
-        inline static void SetData(json_object *obj, const char *name, long int value) {
-            json_object_object_add(obj, name, json_object_new_int64(value));
+        inline static void SetData(yyjson_mut_doc *d, yyjson_mut_val *obj, const char *name, long value) {
+            yyjson_mut_obj_add_sint(d, obj, name, value);
         }
 
         inline void SetData(const char *name, double value) {
-            SetData(data, name, value);
+            SetData(doc, data, name, value);
         }
 
-        inline static void SetData(json_object *obj, const char *name, double value) {
-            json_object_object_add(obj, name, json_object_new_double(value));
+        inline static void SetData(yyjson_mut_doc *d, yyjson_mut_val *obj, const char *name, double value) {
+            yyjson_mut_obj_add_real(d, obj, name, value);
         }
 
-        inline void SetData(const char *name, long unsigned int value) {
-            SetData(data, name, value);
+        inline void SetData(const char *name, unsigned long value) {
+            SetData(doc, data, name, value);
         }
 
-        inline static void SetData(json_object *obj, const char *name, long unsigned int value) {
-            json_object_object_add(obj, name, json_object_new_int64(value));
+        inline static void SetData(yyjson_mut_doc *d, yyjson_mut_val *obj, const char *name, unsigned long value) {
+            yyjson_mut_obj_add_sint(d, obj, name, static_cast<int64_t>(value));
         }
 
+        /* Nested object: yyjson values belong to their own document, so the
+         * subtree is copied across rather than reference counted. */
         inline void SetData(const char *name, NagiosObject *other) {
-            SetData(data, name, other);
+            SetData(doc, data, name, other);
         }
 
-        inline static void SetData(json_object *obj, const char *name, NagiosObject *other) {
-            SetData(obj, name, json_object_get(other->data));
+        inline static void SetData(yyjson_mut_doc *d, yyjson_mut_val *obj, const char *name, NagiosObject *other) {
+            yyjson_mut_obj_add_val(d, obj, name, yyjson_mut_val_mut_copy(d, other->data));
         }
 
-        inline void SetData(const char *name, json_object *other) {
-            SetData(data, name, other);
+        inline void SetData(const char *name, yyjson_mut_val *other) {
+            yyjson_mut_obj_add_val(doc, data, name, other);
         }
 
-        inline static void SetData(json_object *obj, const char *name, json_object *other) {
-            json_object_object_add(obj, name, other);
+        yyjson_mut_doc *GetDoc() const {
+            return doc;
         }
 
-    protected:
+        yyjson_mut_val *GetRoot() const {
+            return data;
+        }
+
+      protected:
         Nebmodule &nebmodule;
-        json_object *data;
+        yyjson_mut_doc *doc;
+        yyjson_mut_val *data;
     };
 
     class NagiosProcessData : public NagiosObject {
@@ -140,6 +145,17 @@ namespace statusengine {
             SetData("pid", getpid());
 
             SetData("processdata", &processdata);
+        }
+    };
+
+    class NagiosRestartData : public NagiosObject {
+    public:
+        explicit NagiosRestartData(const nebstruct_process_data *processData) {
+            SetData("object_type", static_cast<int>(NEBTYPE_PROCESS_RESTART));
+            // Unix timestamp of the restart itself. The worker treats a missing value or a
+            // 0 as "not set" and falls back to its own wall clock as the stale row cutoff,
+            // so sending naemon's own event time gives it an accurate one instead.
+            SetData("timestamp", processData->timestamp.tv_sec);
         }
     };
 
@@ -162,6 +178,15 @@ namespace statusengine {
             acknowledgement.SetData("is_sticky", acknowledgementData->is_sticky);
             acknowledgement.SetData("persistent_comment", acknowledgementData->persistent_comment);
             acknowledgement.SetData("notify_contacts", acknowledgementData->notify_contacts);
+#ifndef BUILD_NAGIOS
+            acknowledgement.SetData("end_time", acknowledgementData->end_time);
+#else
+            // Nagios has no end_time in nebstruct_acknowledgement_data, because it has no
+            // expiring acknowledgements at all. 0 is therefore not a placeholder here: it
+            // carries the same meaning it does under naemon, "does not expire", which is
+            // true of every nagios acknowledgement. Consumers need no case distinction.
+            acknowledgement.SetData("end_time", static_cast<time_t>(0));
+#endif
 
             SetData("acknowledgement", &acknowledgement);
         }
@@ -206,6 +231,9 @@ namespace statusengine {
             contactnotificationdata.SetData("host_name", contactNotificationData->host_name);
             contactnotificationdata.SetData("service_description", contactNotificationData->service_description);
             contactnotificationdata.SetData("output", nebmodule.EncodeString(contactNotificationData->output));
+            // Intentional: this nebstruct has no long_output member, only host and service
+            // checks do. long_output repeats output so the message format stays backwards
+            // compatible - see the "Message format" section in README.md. Not a typo.
             contactnotificationdata.SetData("long_output", nebmodule.EncodeString(contactNotificationData->output));
             contactnotificationdata.SetData("ack_author", contactNotificationData->ack_author);
             contactnotificationdata.SetData("ack_data", contactNotificationData->ack_data);
@@ -314,6 +342,9 @@ namespace statusengine {
             eventhandler.SetData("host_name", eventHandlerData->host_name);
             eventhandler.SetData("service_description", eventHandlerData->service_description);
             eventhandler.SetData("output", nebmodule.EncodeString(eventHandlerData->output));
+            // Intentional: this nebstruct has no long_output member, only host and service
+            // checks do. long_output repeats output so the message format stays backwards
+            // compatible - see the "Message format" section in README.md. Not a typo.
             eventhandler.SetData("long_output", nebmodule.EncodeString(eventHandlerData->output));
             eventhandler.SetData("command_name", eventHandlerData->command_name);
             eventhandler.SetData("command_args", eventHandlerData->command_args);
@@ -531,6 +562,9 @@ namespace statusengine {
             notification_data.SetData("host_name", notificationData->host_name);
             notification_data.SetData("service_description", notificationData->service_description);
             notification_data.SetData("output", nebmodule.EncodeString(notificationData->output));
+            // Intentional: this nebstruct has no long_output member, only host and service
+            // checks do. long_output repeats output so the message format stays backwards
+            // compatible - see the "Message format" section in README.md. Not a typo.
             notification_data.SetData("long_output", nebmodule.EncodeString(notificationData->output));
             notification_data.SetData("ack_author", notificationData->ack_author);
             notification_data.SetData("ack_data", notificationData->ack_data);
@@ -742,6 +776,9 @@ namespace statusengine {
             statechange.SetData("host_name", stateChangeData->host_name);
             statechange.SetData("service_description", stateChangeData->service_description);
             statechange.SetData("output", nebmodule.EncodeString(stateChangeData->output));
+            // Intentional: this nebstruct has no long_output member, only host and service
+            // checks do. long_output repeats output so the message format stays backwards
+            // compatible - see the "Message format" section in README.md. Not a typo.
             statechange.SetData("long_output", nebmodule.EncodeString(stateChangeData->output));
             statechange.SetData("statechange_type", stateChangeData->statechange_type);
             statechange.SetData("state", stateChangeData->state);
@@ -768,6 +805,9 @@ namespace statusengine {
 
             systemcommand.SetData("command_line", systemCommandData->command_line);
             systemcommand.SetData("output", nebmodule.EncodeString(systemCommandData->output));
+            // Intentional: this nebstruct has no long_output member, only host and service
+            // checks do. long_output repeats output so the message format stays backwards
+            // compatible - see the "Message format" section in README.md. Not a typo.
             systemcommand.SetData("long_output", nebmodule.EncodeString(systemCommandData->output));
             systemcommand.SetData("start_time", systemCommandData->start_time.tv_sec);
             systemcommand.SetData("end_time", systemCommandData->end_time.tv_sec);

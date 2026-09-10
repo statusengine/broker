@@ -13,7 +13,7 @@
 
 namespace statusengine {
     MessageHandlerList::MessageHandlerList(IStatusengine &se, Configuration &cfg)
-        : se(se), maxBulkSize(0), globalBulkCounter(0), flushInProgress(true) {
+        : se(se), maxBulkSize(0), globalBulkCounter(0), flushInProgress(true), overload(se) {
         // flushInProgress is set to true to ensure no messages are sent until initialization is complete
 
         maxBulkSize = cfg.GetBulkMaximum();
@@ -30,6 +30,7 @@ namespace statusengine {
             queueHandlers->push_back(handler);
         };
         maxWorkerMessagesPerInterval = cfg.GetMaxWorkerMessagesPerInterval();
+        maxWorkerRuntime = cfg.GetMaxWorkerRuntime();
 
 #ifdef WITH_GEARMAN
         auto gearmanConfigs = cfg.GetGearmanConfiguration();

@@ -1,0 +1,44 @@
+{
+    "messages": [
+        {
+            "type": 701,
+            "flags": 0,
+            "attr": 0,
+            "timestamp": 1785470660,
+            "timestamp_usec": 603182,
+            "servicecheck": {
+                "host_name": "localhost",
+                "service_description": "Current Users",
+                "perf_data": "users=0;20;50;0",
+                "start_time": 1785470660
+            }
+        },
+        {
+            "type": 701,
+            "flags": 0,
+            "attr": 0,
+            "timestamp": 1785470666,
+            "timestamp_usec": 600936,
+            "servicecheck": {
+                "host_name": "localhost",
+                "service_description": "Swap Usage",
+                "perf_data": "swap=0MB;0;0;0;0",
+                "start_time": 1785470666
+            }
+        },
+        {
+            "type": 701,
+            "flags": 0,
+            "attr": 0,
+            "timestamp": 1785470668,
+            "timestamp_usec": 700601,
+            "servicecheck": {
+                "host_name": "demo.statusengine.org",
+                "service_description": "PING",
+                "perf_data": "rta=0.084000ms;100.000000;500.000000;0.000000 pl=0%;20;60;0",
+                "start_time": 1785470664
+            }
+        }
+    ],
+    "format": "none"
+}

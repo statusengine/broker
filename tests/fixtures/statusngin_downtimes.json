@@ -1,0 +1,21 @@
+{
+    "type": 1100,
+    "flags": 0,
+    "attr": 0,
+    "timestamp": 1785517315,
+    "timestamp_usec": 224439,
+    "downtime": {
+        "host_name": "efb91fa3-2bd4-47a4-a89b-1ffe9ca719b5",
+        "service_description": "66d42eec-650f-4a98-aeaf-8ee51beaac62",
+        "author_name": "Daniel Z",
+        "comment_data": "In maintenance",
+        "downtime_type": 1,
+        "entry_time": 1785517314,
+        "start_time": 1785517380,
+        "end_time": 1785517500,
+        "triggered_by": 0,
+        "downtime_id": 1,
+        "fixed": 1,
+        "duration": 120
+    }
+}

@@ -1,10 +1,10 @@
-FROM ubuntu:bionic
+FROM ubuntu:24.04
 
 RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y cmake gcc g++ gdb build-essential libglib2.0-dev libgearman-dev uuid-dev libicu-dev libjson-c-dev pkg-config libssl-dev librabbitmq-dev gearman-job-server gearman-tools automake gperf help2man libtool rabbitmq-server wget tar && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y gcc g++ gdb build-essential meson ninja-build libglib2.0-dev libgearman-dev uuid-dev libuchardet-dev libjson-c-dev pkg-config libssl-dev librabbitmq-dev gearman-job-server gearman-tools automake gperf help2man libtool rabbitmq-server wget tar && \
     apt-get clean
 
-ENV NAEMON_VERSION=1.0.10 NAEMON_CHECKSUM=37353dd51a547b9e7f1b7d5e7e0b1716f9ea526d737c797d85431a83874736e5
+ENV NAEMON_VERSION=1.5.2 NAEMON_CHECKSUM=7cc09f25d6350a778fa475f1fe60b4dbb2386a79c6c4e8151446231ece0cd345
 
 RUN useradd -d /opt/naemon -m -s /bin/bash --system naemon && \
     wget -O /v${NAEMON_VERSION}.tar.gz https://github.com/naemon/naemon-core/archive/v${NAEMON_VERSION}.tar.gz  && \
@@ -25,6 +25,8 @@ CMD ["/usr/bin/wait-for-it.sh", "rabbit:5672", "--", "/opt/naemon/bin/naemon", "
 
 COPY . /broker/source/
 
-RUN cd /broker/build && export PKG_CONFIG_PATH=/opt/naemon/lib/pkgconfig && cmake -DCMAKE_INSTALL_PREFIX:PATH=/opt/naemon ../source && make -j2 && make install
+RUN export PKG_CONFIG_PATH=/opt/naemon/lib/pkgconfig && \
+    meson setup --buildtype=release --prefix=/opt/naemon /broker/build /broker/source && \
+    ninja -C /broker/build install
 
 USER naemon

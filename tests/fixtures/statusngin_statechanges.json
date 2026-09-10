@@ -1,0 +1,45 @@
+{
+    "messages": [
+        {
+            "type": 1801,
+            "flags": 0,
+            "attr": 0,
+            "timestamp": 1785470683,
+            "timestamp_usec": 632628,
+            "statechange": {
+                "host_name": "localhost",
+                "service_description": "Flapping",
+                "output": "Your random value is: 158",
+                "long_output": "Your random value is: 158",
+                "statechange_type": 1,
+                "state": 0,
+                "state_type": 1,
+                "current_attempt": 4,
+                "max_attempts": 4,
+                "last_state": 1,
+                "last_hard_state": 1
+            }
+        },
+        {
+            "type": 1801,
+            "flags": 0,
+            "attr": 0,
+            "timestamp": 1785470686,
+            "timestamp_usec": 630353,
+            "statechange": {
+                "host_name": "demo.statusengine.org",
+                "service_description": "Flapping",
+                "output": "Your random value is: 87",
+                "long_output": "Your random value is: 87",
+                "statechange_type": 1,
+                "state": 0,
+                "state_type": 0,
+                "current_attempt": 4,
+                "max_attempts": 4,
+                "last_state": 1,
+                "last_hard_state": 0
+            }
+        }
+    ],
+    "format": "none"
+}

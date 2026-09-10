@@ -8,21 +8,20 @@
 #include "NebmoduleCallback.h"
 #include "NagiosObject.h"
 #include "Nebmodule.h"
-#include "Utility.h"
+#include "version.h"
 
 namespace statusengine {
 
     Statusengine::Statusengine(nebmodule *handle, std::string configurationPath)
-        : nebhandle(handle), configurationPath(std::move(configurationPath)), messageHandler(nullptr), ls(),
-          callbacks(), bulkCallback(nullptr), messageWorkerCallback(nullptr)  {
-        configuration = new Configuration(*this);
-    }
+        : nebhandle(handle), configurationPath(std::move(configurationPath)), ls(),
+          configuration(new Configuration(*this)), messageHandler(), callbacks(), bulkCallback(),
+          messageWorkerCallback() {}
 
     int Statusengine::Init() {
         SetModuleInfo(NEBMODULE_MODINFO_TITLE, "Statusengine - the missing event broker");
         SetModuleInfo(NEBMODULE_MODINFO_AUTHOR, "Johannes Drummer");
-        SetModuleInfo(NEBMODULE_MODINFO_TITLE, "Copyright (c) 2018 - present Johannes Drummer");
-        SetModuleInfo(NEBMODULE_MODINFO_VERSION, "4.0.0");
+        SetModuleInfo(NEBMODULE_MODINFO_COPYRIGHT, "Copyright (c) 2018 - present Johannes Drummer");
+        SetModuleInfo(NEBMODULE_MODINFO_VERSION, STATUSENGINE_VERSION);
         SetModuleInfo(NEBMODULE_MODINFO_LICENSE, "GPL v2");
         SetModuleInfo(NEBMODULE_MODINFO_DESC, "A powerful and flexible event broker");
 
@@ -52,7 +51,7 @@ namespace statusengine {
 
         ls.SetLogLevel(configuration->GetLogLevel());
 
-        messageHandler = new MessageHandlerList(*this, *configuration);
+        messageHandler.reset(new MessageHandlerList(*this, *configuration));
         if (!messageHandler->Connect()) {
             return 1;
         }
@@ -119,21 +118,24 @@ namespace statusengine {
     Statusengine::~Statusengine() {
         Log() << "unloading..." << LogLevel::Info;
         neb_deregister_module_callbacks(nebhandle);
+        // Explicit and ordered: messageHandler flushes and logs while it is torn down, so
+        // it has to go before configuration and while ls is still alive.
         callbacks.clear();
-        delete bulkCallback;
-        delete messageWorkerCallback;
-        delete configuration;
-        delete messageHandler;
+        bulkCallback.reset();
+        messageWorkerCallback.reset();
+        messageHandler.reset();
+        configuration.reset();
 
         Log() << "unloading finished" << LogLevel::Info;
     }
 
     void Statusengine::InitEventCallbacks() {
         Log() << "Initialize event callbacks" << LogLevel::Info;
-        bulkCallback = new BulkMessageCallback(*this, configuration->GetBulkFlushInterval());
-        messageWorkerCallback = new MessageWorkerCallback(*this, 1);
-        RegisterEventCallback(bulkCallback);
-        RegisterEventCallback(messageWorkerCallback);
+        bulkCallback.reset(new BulkMessageCallback(*this, configuration->GetBulkFlushInterval()));
+        messageWorkerCallback.reset(new MessageWorkerCallback(*this, 1));
+        // naemon keeps these pointers across events, they stay owned by this object.
+        RegisterEventCallback(bulkCallback.get());
+        RegisterEventCallback(messageWorkerCallback.get());
     }
 
     LogStream &Statusengine::Log() {
@@ -164,6 +166,6 @@ namespace statusengine {
     }
 
     IMessageHandlerList *Statusengine::GetMessageHandler() const {
-        return messageHandler;
+        return messageHandler.get();
     }
 } // namespace statusengine

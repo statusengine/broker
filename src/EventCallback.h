@@ -11,7 +11,14 @@ namespace statusengine {
         virtual ~EventCallback() = default;
 
         virtual double Interval() = 0;
-        virtual void Callback() = 0;
+
+        /**
+         * Runs the callback.
+         *
+         * @return true if it wants the next run as soon as possible rather than after
+         *         Interval() seconds, because it stopped with work left over.
+         */
+        virtual bool Callback() = 0;
 
       protected:
         IStatusengine &se;
@@ -25,8 +32,8 @@ namespace statusengine {
         double Interval() override {
             return interval;
         }
-        void Callback() override {
-            se.GetMessageHandler()->Worker();
+        bool Callback() override {
+            return se.GetMessageHandler()->Worker();
         }
 
     private:
@@ -41,8 +48,9 @@ namespace statusengine {
         double Interval() override {
             return interval;
         }
-        void Callback() override {
+        bool Callback() override {
             se.FlushBulkQueue();
+            return false;
         }
 
     private:

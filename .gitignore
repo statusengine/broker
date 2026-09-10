@@ -4,7 +4,6 @@
 /.vs
 /libgearman-1.0
 /CppProperties.json
-/.clang-format
 /devtools/headers.zip
 /devtools/include
 /.idea
@@ -13,3 +12,6 @@
 /vendor/iconv
 /vendor/yaml_cpp
 /build
+# meson subprojects: keep the .wrap files, ignore what meson downloads
+/subprojects/*
+!/subprojects/*.wrap

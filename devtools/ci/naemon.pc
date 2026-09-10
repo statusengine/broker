@@ -10,6 +10,6 @@ naemon_group=naemon
 
 Name: Naemon
 Description: Naemon network monitoring
-Version: 1.0.6-source
+Version: 1.5.2
 Libs: -L${libdir} -lnaemon -ldl -lm -lglib-2.0
 Cflags: -I${includedir} -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include

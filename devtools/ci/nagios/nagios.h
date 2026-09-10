@@ -326,6 +326,7 @@ extern struct load_control loadctl;
 #define NOTIFICATION_DOWNTIMEEND        6
 #define NOTIFICATION_DOWNTIMECANCELLED  7
 #define NOTIFICATION_CUSTOM             8
+#define NOTIFICATION_RECOVERY           9
 
 
 
@@ -353,25 +354,27 @@ extern struct load_control loadctl;
 
 	/******************* EVENT TYPES **********************/
 
-#define EVENT_SERVICE_CHECK		0	/* active service check */
-#define EVENT_COMMAND_CHECK		1	/* external command check */
-#define EVENT_LOG_ROTATION		2	/* log file rotation */
-#define EVENT_PROGRAM_SHUTDOWN		3	/* program shutdown */
-#define EVENT_PROGRAM_RESTART		4	/* program restart */
-#define EVENT_CHECK_REAPER              5       /* reaps results from host and service checks */
-#define EVENT_ORPHAN_CHECK		6	/* checks for orphaned hosts and services */
-#define EVENT_RETENTION_SAVE		7	/* save (dump) retention data */
-#define EVENT_STATUS_SAVE		8	/* save (dump) status data */
-#define EVENT_SCHEDULED_DOWNTIME	9	/* scheduled host or service downtime */
-#define EVENT_SFRESHNESS_CHECK          10      /* checks service result "freshness" */
-#define EVENT_EXPIRE_DOWNTIME		11      /* checks for (and removes) expired scheduled downtime */
-#define EVENT_HOST_CHECK                12      /* active host check */
-#define EVENT_HFRESHNESS_CHECK          13      /* checks host result "freshness" */
-#define EVENT_RESCHEDULE_CHECKS		14      /* adjust scheduling of host and service checks */
-#define EVENT_EXPIRE_COMMENT            15      /* removes expired comments */
-#define EVENT_CHECK_PROGRAM_UPDATE      16      /* checks for new version of Nagios */
-#define EVENT_SLEEP                     98      /* asynchronous sleep event that occurs when event queues are empty */
-#define EVENT_USER_FUNCTION             99      /* USER-defined function (modules) */
+#define EVENT_SERVICE_CHECK             0   /* active service check */
+#define EVENT_COMMAND_CHECK             1   /* external command check */
+#define EVENT_LOG_ROTATION              2   /* log file rotation */
+#define EVENT_PROGRAM_SHUTDOWN          3   /* program shutdown */
+#define EVENT_PROGRAM_RESTART           4   /* program restart */
+#define EVENT_CHECK_REAPER              5   /* reaps results from host and service checks */
+#define EVENT_ORPHAN_CHECK              6   /* checks for orphaned hosts and services */
+#define EVENT_RETENTION_SAVE            7   /* save (dump) retention data */
+#define EVENT_STATUS_SAVE               8   /* save (dump) status data */
+#define EVENT_SCHEDULED_DOWNTIME        9   /* scheduled host or service downtime */
+#define EVENT_SFRESHNESS_CHECK          10  /* checks service result "freshness" */
+#define EVENT_EXPIRE_DOWNTIME           11  /* checks for (and removes) expired scheduled downtime */
+#define EVENT_HOST_CHECK                12  /* active host check */
+#define EVENT_HFRESHNESS_CHECK          13  /* checks host result "freshness" */
+#define EVENT_RESCHEDULE_CHECKS         14  /* adjust scheduling of host and service checks */
+#define EVENT_EXPIRE_COMMENT            15  /* removes expired comments */
+#define EVENT_CHECK_PROGRAM_UPDATE      16  /* checks for new version of Nagios */
+#define EVENT_SCHEDULED_DOWNTIME_START  17  /* start scheduled host or service downtime */
+#define EVENT_SCHEDULED_DOWNTIME_END    18  /* end scheduled host or service downtime */
+#define EVENT_SLEEP                     98  /* asynchronous sleep event that occurs when event queues are empty */
+#define EVENT_USER_FUNCTION             99  /* USER-defined function (modules) */
 
 /*
  * VERSIONFIX: Make EVENT_SLEEP and EVENT_USER_FUNCTION appear
@@ -396,6 +399,8 @@ extern struct load_control loadctl;
 	type == EVENT_RESCHEDULE_CHECKS ? "RESCHEDULE_CHECKS" : \
 	type == EVENT_EXPIRE_COMMENT ? "EXPIRE_COMMENT" : \
 	type == EVENT_CHECK_PROGRAM_UPDATE ? "CHECK_PROGRAM_UPDATE" : \
+	type == EVENT_SCHEDULED_DOWNTIME_START ? "SCHEDULED_DOWNTIME_START" : \
+	type == EVENT_SCHEDULED_DOWNTIME_END ? "SCHEDULED_DOWNTIME_END" : \
 	type == EVENT_SLEEP ? "SLEEP" : \
 	type == EVENT_USER_FUNCTION ? "USER_FUNCTION" : \
 	"UNKNOWN" \
@@ -513,10 +518,10 @@ void adjust_timestamp_for_time_change(time_t, time_t, unsigned long, time_t *); 
 
 
 /**** IPC Functions ****/
-int process_check_result_queue(char *);
-int process_check_result_file(char *);
+int process_check_result_queue(const char *);
+int process_check_result_file(const char *);
 int process_check_result(check_result *);
-int delete_check_result_file(char *);
+int delete_check_result_file(const char *);
 int init_check_result(check_result *);
 int free_check_result(check_result *);                  	/* frees memory associated with a host/service check result */
 int parse_check_output(char *, char **, char **, char **, int, int);
@@ -593,9 +598,11 @@ int obsessive_compulsive_host_check_processor(host *);		/* distributed monitorin
 int handle_service_event(service *);				/* top level service event logic */
 int run_service_event_handler(nagios_macros *mac, service *);			/* runs the event handler for a specific service */
 int run_global_service_event_handler(nagios_macros *mac, service *);		/* runs the global service event handler */
+int check_service_event_handler_viability(int, service *);		/* checks if service event handler can be run */
 int handle_host_event(host *);					/* top level host event logic */
 int run_host_event_handler(nagios_macros *mac, host *);				/* runs the event handler for a specific host */
 int run_global_host_event_handler(nagios_macros *mac, host *);			/* runs the global host event handler */
+int check_host_event_handler_viability(int, host *);			/* checks if host event handler can be run */
 
 
 /**** Notification Functions ****/

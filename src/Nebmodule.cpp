@@ -3,9 +3,9 @@
 #include <ctime>
 #include <string>
 #include <cstring>
-#include <iconv.h>
 
 #include "EventCallback.h"
+#include "gsl.h"
 #include "Statusengine.h"
 
 // This is required by naemon
@@ -17,14 +17,17 @@ namespace statusengine {
 
     int Nebmodule::Init(nebmodule *handle, std::string args) {
         se = new Statusengine(handle, std::move(args));
-        uc = uchardet_new();
+        encoder.SetWarnCallback([this](const std::string &message) {
+            se->Log() << message << LogLevel::Warning;
+        });
         return se->Init();
     }
 
     int Nebmodule::Deinit(int) {
+        // The encoder outlives se, so it must not keep logging through it.
+        encoder.SetWarnCallback(nullptr);
         delete se;
-        uchardet_delete(uc);
-        uc = nullptr;
+        se = nullptr;
         return 0;
     }
 
@@ -48,13 +51,24 @@ namespace statusengine {
 
     void Nebmodule::RegisterEventCallback(EventCallback *ecb) {
 #ifndef BUILD_NAGIOS
-        schedule_event(ecb->Interval(), nebmodule_event_callback, ecb);
+        schedule_event(static_cast<time_t>(ecb->Interval()), nebmodule_event_callback, ecb);
 #else
         time_t interval = static_cast<time_t>(ecb->Interval());
         schedule_new_event(EVENT_USER_FUNCTION, 1, std::time(0) + interval, 1, interval, nullptr, 1,
                            reinterpret_cast<void *>(nebmodule_event_callback), reinterpret_cast<void *>(ecb), 0);
 #endif // BUILD_NAGIOS
     }
+
+#ifndef BUILD_NAGIOS
+    void Nebmodule::RegisterEventCallbackNow(EventCallback *ecb) {
+        // A zero delay does not starve the core. naemon's event_poll_full() computes the
+        // time to the next event, clamps it to zero for one that is already due, polls its
+        // own file descriptors with that timeout, and skips running the timed event
+        // altogether if any of them had input. So the next worker slice only happens once
+        // naemon has had a pass of its own, and naemon's own I/O gets priority over ours.
+        schedule_event(0, nebmodule_event_callback, ecb);
+    }
+#endif
 
     void Nebmodule::ScheduleHostCheckDelay(host *temp_host, time_t delay) {
 #ifndef BUILD_NAGIOS
@@ -218,32 +232,8 @@ namespace statusengine {
 #endif // BUILD_NAGIOS
     }
 
-    std::string Nebmodule::EncodeString(char *inputData) {
-        if(inputData == nullptr) {
-            return std::string();
-        }
-        auto lendata = std::strlen(inputData); // we can't use strnlen here, we don't have any idea of the length here...
-        uchardet_handle_data(uc, inputData, lendata); //TODO error handling
-        uchardet_data_end(uc);
-        auto charset = uchardet_get_charset(uc);
-        uchardet_reset(uc);
-
-        if(std::strcmp(charset, "UTF-8")) {
-            // We don't have to convert it, if it is already UTF-8
-            return std::string(inputData, lendata);
-        }
-        auto outputDataLength = lendata*4;
-        char *outputData = new char[outputDataLength]; // utf-8 possibly needs up to 4 bytes for a single character :/
-        
-        auto cd = iconv_open("UTF-8", charset);
-        auto outputLength = iconv(cd, &inputData, &lendata, &outputData, &outputDataLength);
-        std::string result(outputData, outputLength);
-        iconv_close(cd);
-
-        delete [] outputData;
-        delete [] charset;
-
-        return result;
+    std::string Nebmodule::EncodeString(const char *inputData) {
+        return encoder.ToUtf8(inputData);
     }
 } // namespace statusengine
 
@@ -262,13 +252,20 @@ int nebmodule_callback(int event_type, void *data) {
 #ifndef BUILD_NAGIOS
 void nebmodule_event_callback(struct nm_event_execution_properties *properties) {
     auto ecb = reinterpret_cast<statusengine::EventCallback *>(properties->user_data);
-    ecb->Callback();
+    const bool workRemaining = ecb->Callback();
     if (!(sigshutdown || sigrestart)) {
-        statusengine::Nebmodule::Instance().RegisterEventCallback(ecb);
+        if (workRemaining) {
+            statusengine::Nebmodule::Instance().RegisterEventCallbackNow(ecb);
+        }
+        else {
+            statusengine::Nebmodule::Instance().RegisterEventCallback(ecb);
+        }
     }
 }
 #else
 void nebmodule_event_callback(statusengine::EventCallback *ecb) {
-    ecb->Callback();
+    // Nagios reschedules this itself, the event is recurring. There is no way to ask for
+    // an earlier run, so a callback with work left over simply waits for the next one.
+    (void)ecb->Callback();
 }
 #endif

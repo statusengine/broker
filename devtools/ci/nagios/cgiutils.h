@@ -24,6 +24,7 @@
 #include "logging.h"
 #include "objects.h"
 #include "cgiauth.h"
+#include "locations.h"
 
 NAGIOS_BEGIN_DECL
 
@@ -35,12 +36,7 @@ NAGIOS_BEGIN_DECL
 	/******************************* CGI NAMES **********************************/
 
 #define STATUS_CGI		"status.cgi"
-#ifdef LEGACY_GRAPHICAL_CGIS
 #define STATUSMAP_CGI		"statusmap.cgi"
-#else
-#define STATUSMAP_CGI		"../map.php"
-#define LEGACY_STATUSMAP_CGI		"statusmap.cgi"
-#endif
 #define STATUSWORLD_CGI	        "statuswrl.cgi"
 #define COMMAND_CGI		"cmd.cgi"
 #define EXTINFO_CGI		"extinfo.cgi"
@@ -49,22 +45,12 @@ NAGIOS_BEGIN_DECL
 #define HISTORY_CGI		"history.cgi"
 #define CONFIG_CGI              "config.cgi"
 #define OUTAGES_CGI		"outages.cgi"
-#ifdef LEGACY_GRAPHICAL_CGIS
 #define TRENDS_CGI		"trends.cgi"
-#else
-#define TRENDS_CGI		"../trends.html"
-#define LEGACY_TRENDS_CGI		"trends.cgi"
-#endif
 #define AVAIL_CGI		"avail.cgi"
 #define TAC_CGI			"tac.cgi"
 #define STATUSWML_CGI           "statuswml.cgi"
 #define TRACEROUTE_CGI		"traceroute.cgi"
-#ifdef LEGACY_GRAPHICAL_CGIS
 #define HISTOGRAM_CGI		"histogram.cgi"
-#else
-#define HISTOGRAM_CGI		"../histogram.html"
-#define LEGACY_HISTOGRAM_CGI		"histogram.cgi"
-#endif
 #define CHECKSANITY_CGI	   	"checksanity.cgi"
 #define MINISTATUS_CGI          "ministatus.cgi"
 #define SUMMARY_CGI	        "summary.cgi"
@@ -93,7 +79,7 @@ NAGIOS_BEGIN_DECL
 #define NAGFUNCS_CSS       "nag_funcs.css"
 
 	/********************************* JAVASCRIPT INCLUDES **********************/
-#define JQUERY_JS          "jquery-1.12.4.min.js"
+#define JQUERY_JS          "jquery-3.7.1.min.js"
 #define NAGFUNCS_JS        "nag_funcs.js"
 
 	/********************************* ICONS ************************************/
@@ -506,6 +492,8 @@ char *pop_lifo(void);
 struct nagios_extcmd* extcmd_get_command_id(int);
 struct nagios_extcmd* extcmd_get_command_name(const char *);
 const char *extcmd_get_name(int);
+
+void build_subdir_path(char* path, size_t size, const char* prefix, const char* subdir);
 
 NAGIOS_END_DECL
 #endif

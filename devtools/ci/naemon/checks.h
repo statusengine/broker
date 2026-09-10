@@ -6,6 +6,7 @@
 #endif
 
 #include "lib/lnae-utils.h"
+#include "objects_timeperiod.h"
 #include <stdio.h>
 #include <sys/resource.h>
 
@@ -62,6 +63,7 @@ typedef struct check_result {
 	double latency;
 	struct timeval start_time;			/* time the service check was initiated */
 	struct timeval finish_time;			/* time the service check was completed */
+	int timeout;						/* timeout used in this check */
 	int early_timeout;                              /* did the service check timeout? */
 	int exited_ok;					/* did the plugin check return okay? */
 	int return_code;				/* plugin return code */
@@ -88,6 +90,7 @@ int process_check_result(check_result *);
 int delete_check_result_file(char *);
 int init_check_result(check_result *);
 int free_check_result(check_result *);                  	/* frees memory associated with a host/service check result */
+time_t get_random_next_timeperiod_slot(time_t, const timeperiod *);
 
 NAGIOS_END_DECL
 

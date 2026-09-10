@@ -1,0 +1,49 @@
+{
+    "messages": [
+        {
+            "type": 601,
+            "flags": 0,
+            "attr": 0,
+            "timestamp": 1785517089,
+            "timestamp_usec": 927750,
+            "notification_data": {
+                "host_name": "localhost",
+                "service_description": "Swap Usage",
+                "output": "CRITICAL: Agent error: Error response from daemon: client version 1.51 is too new. Maximum supported API version is 1.46",
+                "long_output": "CRITICAL: Agent error: Error response from daemon: client version 1.51 is too new. Maximum supported API version is 1.46",
+                "ack_author": "Daniel Z",
+                "ack_data": "Test notification",
+                "notification_type": 1,
+                "start_time": 1785517089,
+                "end_time": 1785517089,
+                "reason_type": 8,
+                "state": 2,
+                "escalated": 0,
+                "contacts_notified": 1
+            }
+        },
+        {
+            "type": 601,
+            "flags": 0,
+            "attr": 0,
+            "timestamp": 1785776162,
+            "timestamp_usec": 789235,
+            "notification_data": {
+                "host_name": "b19e585b-b439-4150-8d0c-5f3b1ab9faf9",
+                "service_description": null,
+                "output": "OK: Agent version 3.6.1 running on ubuntu (24.04). Last update: 2026-08-03 16:55:20",
+                "long_output": "OK: Agent version 3.6.1 running on ubuntu (24.04). Last update: 2026-08-03 16:55:20",
+                "ack_author": "Daniel Z",
+                "ack_data": "Test notification",
+                "notification_type": 0,
+                "start_time": 1785776162,
+                "end_time": 1785776162,
+                "reason_type": 8,
+                "state": 0,
+                "escalated": 0,
+                "contacts_notified": 1
+            }
+        }
+    ],
+    "format": "none"
+}
