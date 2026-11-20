@@ -53,6 +53,23 @@ namespace {
         return obj.ToString();
     }
 
+    /// Value of a string field in the named sub object of a rendered message.
+    std::string SubObjectString(NagiosObject &obj, const char *subObject, const char *field) {
+        std::string rendered = Rendered(obj);
+        yyjson_doc *doc = yyjson_read(rendered.c_str(), rendered.length(), 0);
+        REQUIRE(doc != nullptr);
+
+        yyjson_val *sub = yyjson_obj_get(yyjson_doc_get_root(doc), subObject);
+        REQUIRE(sub != nullptr);
+        yyjson_val *value = yyjson_obj_get(sub, field);
+        REQUIRE(value != nullptr);
+        REQUIRE(yyjson_is_str(value));
+
+        std::string result(yyjson_get_str(value), yyjson_get_len(value));
+        yyjson_doc_free(doc);
+        return result;
+    }
+
     /**
      * Compares a freshly built message against a recorded one: the outer envelope and the
      * named sub object have to carry exactly the same keys. Values are not compared, the
@@ -182,6 +199,7 @@ TEST_CASE("state change message keeps its shape") {
     std::memset(&nagService, 0, sizeof(nagService));
     nagService.last_state = 1;
     nagService.last_hard_state = 1;
+    nagService.long_plugin_output = Str("Your random value is: 158\nmore details");
 
     nebstruct_statechange_data data;
     FillHeader(data, NEBTYPE_STATECHANGE_END);
@@ -193,6 +211,44 @@ TEST_CASE("state change message keeps its shape") {
 
     NagiosStateChangeData msg(&data);
     CheckShape(msg, "statusngin_statechanges.json", "statechange");
+
+    // The long output comes from the service object, not from the short output.
+    CHECK(SubObjectString(msg, "statechange", "output") == "Your random value is: 158");
+    CHECK(SubObjectString(msg, "statechange", "long_output") ==
+          "Your random value is: 158\nmore details");
+}
+
+TEST_CASE("host state change message uses the host long output") {
+    host nagHost;
+    std::memset(&nagHost, 0, sizeof(nagHost));
+    nagHost.long_plugin_output = Str("host long output");
+
+    nebstruct_statechange_data data;
+    FillHeader(data, NEBTYPE_STATECHANGE_END);
+    data.host_name = Str("localhost");
+    data.statechange_type = HOST_STATECHANGE;
+    data.object_ptr = &nagHost;
+    data.output = Str("host short output");
+
+    NagiosStateChangeData msg(&data);
+    CHECK(SubObjectString(msg, "statechange", "long_output") == "host long output");
+}
+
+TEST_CASE("state change without long output reports an empty string") {
+    service nagService;
+    std::memset(&nagService, 0, sizeof(nagService));
+    nagService.long_plugin_output = nullptr;
+
+    nebstruct_statechange_data data;
+    FillHeader(data, NEBTYPE_STATECHANGE_END);
+    data.host_name = Str("localhost");
+    data.service_description = Str("Flapping");
+    data.statechange_type = SERVICE_STATECHANGE;
+    data.object_ptr = &nagService;
+    data.output = Str("short output only");
+
+    NagiosStateChangeData msg(&data);
+    CHECK(SubObjectString(msg, "statechange", "long_output").empty());
 }
 
 TEST_CASE("log entry message keeps its shape") {

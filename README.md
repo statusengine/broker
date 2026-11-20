@@ -148,13 +148,17 @@ carries no additional information:
 * `ContactNotificationData`
 * `EventHandlerData`
 * `NotificationData`
-* `StateChange`
 * `SystemCommandData`
 
 The reason is that the underlying naemon/nagios `nebstruct_*` structs simply have no
 `long_output` member for these events; only host and service checks have one. The
 duplication is kept for backwards compatibility, so that existing consumers do not break.
-Do not read a separate long plugin output out of these five event types.
+Do not read a separate long plugin output out of these four event types.
+
+`StateChange` is not in that list. Its `long_output` is the real long plugin output of the
+host or service, read from the event's `object_ptr`, so it can differ from `output`. When
+the object has no long output the field is an empty string, just like on host and service
+checks.
 
 ### Compact JSON
 

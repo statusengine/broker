@@ -759,16 +759,19 @@ namespace statusengine {
 
             int last_state;
             int last_hard_state;
+            const char *long_output;
 
             if (stateChangeData->statechange_type == SERVICE_STATECHANGE) {
                 auto tmp_service = reinterpret_cast<service *>(stateChangeData->object_ptr);
                 last_state = tmp_service->last_state;
                 last_hard_state = tmp_service->last_hard_state;
+                long_output = tmp_service->long_plugin_output;
             }
             else {
                 auto tmp_host = reinterpret_cast<host *>(stateChangeData->object_ptr);
                 last_state = tmp_host->last_state;
                 last_hard_state = tmp_host->last_hard_state;
+                long_output = tmp_host->long_plugin_output;
             }
 
             NagiosObject statechange;
@@ -776,10 +779,7 @@ namespace statusengine {
             statechange.SetData("host_name", stateChangeData->host_name);
             statechange.SetData("service_description", stateChangeData->service_description);
             statechange.SetData("output", nebmodule.EncodeString(stateChangeData->output));
-            // Intentional: this nebstruct has no long_output member, only host and service
-            // checks do. long_output repeats output so the message format stays backwards
-            // compatible - see the "Message format" section in README.md. Not a typo.
-            statechange.SetData("long_output", nebmodule.EncodeString(stateChangeData->output));
+            statechange.SetData("long_output", nebmodule.EncodeString(long_output));
             statechange.SetData("statechange_type", stateChangeData->statechange_type);
             statechange.SetData("state", stateChangeData->state);
             statechange.SetData("state_type", stateChangeData->state_type);
